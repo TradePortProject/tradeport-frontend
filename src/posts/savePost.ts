@@ -25,10 +25,7 @@ export async function savePost(newPostData: Product, image: File | null) {
     }
 
     const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        "Content-Type": "multipart/form-data"
-      },
+      method: 'POST',      
       body: formData,
     });
     const body = await response.json();
