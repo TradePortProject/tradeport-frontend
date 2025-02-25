@@ -9,6 +9,8 @@ import Footer from "./components/Footer";
 import Categories from "./pages/Categories";
 import Profile from "./pages/Profile";
 import ShoppingCart from "./pages/ShoppingCart";
+import CatalogGrid from "./components/CatalogGrid";
+
 const App = () => {
   return (
     <BrowserRouter>
@@ -18,6 +20,7 @@ const App = () => {
         <Route path="/product" element={<ProductMaster />} />
         <Route path="/productdetail/:productID" element={<ProductDetail />} />
         <Route path="/categories" element={<Categories />} />
+        <Route path="/catalogGrid" element={<CatalogGrid />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/cart" element={<ShoppingCart />} />
         <Route path="/thank-you" element={<ThankYouPage />} />

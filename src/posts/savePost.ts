@@ -2,37 +2,47 @@ import { Product } from './types';
 
 export async function savePost(newPostData: Product, image: File | null) {
   const apiUrl = 'http://localhost:3016/api/ProductManagement';
-  //const apiUrl = 'http://localhost:3016/ProductManagement';
+
   try {
     const formData = new FormData();
     newPostData.manufacturerId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
     newPostData.shippingCost = 30;
-    formData.append('product', JSON.stringify(newPostData));
+
+	formData.append('manufacturerId', newPostData.manufacturerId);
+	formData.append('shippingCost', newPostData.shippingCost);
+    formData.append('category', newPostData.category);
+    formData.append('description', newPostData.description);
+    formData.append('productName', newPostData.productName);
+	formData.append('retailPrice', newPostData.retailPrice);
+    formData.append('retailCurrency', newPostData.retailCurrency);
+    formData.append('wholesalePrice', newPostData.wholesalePrice);
+	formData.append('wholeSaleCurrency', newPostData.wholeSaleCurrency);
+	formData.append('quantity', newPostData.quantity);
+
+
     if (image) {
-      const reader = new FileReader();
-      reader.readAsDataURL(image);
-      reader.onloadend = () => {
-        //const base64data = reader.result as string;
-        //console.log('base64data:', base64data);
-        newPostData.productimage = image;
-        formData.append('product', JSON.stringify(newPostData));
-        console.log('newPostData:', newPostData);
-      };
-    }
-    else {
-      newPostData.productimage = null;
-      formData.append('product', JSON.stringify(newPostData));
+      formData.append('productImage', image);
+    } else {
+      formData.append('productImage', '');
     }
 
     const response = await fetch(apiUrl, {
+<<<<<<< HEAD
       method: 'POST',      
+=======
+      method: 'POST',
+>>>>>>> origin/main
       body: formData,
     });
+
+    if (!response.ok) {
+      throw new Error('Failed to save post');
+    }
+
     const body = await response.json();
-    return { ...body };
+    return body;
   } catch (error) {
-    console.error('Error in Connecting the endpoint:', error);
-    return { error };
+    console.error('Error in Connecting to the endpoint:', error);
+    return { error: error.message };
   }
 }
-
