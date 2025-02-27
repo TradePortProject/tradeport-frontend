@@ -6,6 +6,7 @@ import { Product } from '../posts/types';
 export function ProductDetail() {
   const { productID } = useParams<{ productID: string }>();
   const [post, setPost] = useState<Product | null>(null);
+  const [quantity, setQuantity] = useState<number>(1);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -19,6 +20,10 @@ export function ProductDetail() {
   if (!post) {
     return <div>No product details available.</div>;
   }
+
+  const handleQuantityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setQuantity(Number(event.target.value));
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-slate-100">
@@ -45,7 +50,19 @@ export function ProductDetail() {
               <p className="text-sm font-bold">Retail ${post.retailPrice}</p>
               <p className="text-sm font-light text-gray-400">
                 {post.description}
-              </p>
+              </p>                            
+            </div>
+            <div className="flex items-center space-x-3">
+              <label htmlFor="quantity" className="text-sm font-bold text-gray-400">Quantity:</label>
+              <input
+                id="quantity"
+                type="number"
+                min="1"
+                max="100"
+                value={quantity}
+                onChange={handleQuantityChange}
+                className="rounded-lg border-2 border-gray-300 p-1"
+              />
             </div>
             <div className="group" id="purchaseButton">
               <button className="w-full transition-all duration-150 bg-blue-700 text-white border-b-8 border-b-blue-700 rounded-lg group-hover:border-t-8 group-hover:border-b-0 group-hover:bg-blue-700 group-hover:border-t-blue-700 group-hover:shadow-lg">

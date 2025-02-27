@@ -9,13 +9,13 @@ export async function savePost(newPostData: Product, image: File | null) {
     newPostData.shippingCost = 30;
 
 	formData.append('manufacturerId', newPostData.manufacturerId);
-	formData.append('shippingCost', newPostData.shippingCost);
-    formData.append('category', newPostData.category);
-    formData.append('description', newPostData.description);
-    formData.append('productName', newPostData.productName);
+  formData.append('shippingCost', newPostData.shippingCost.toString());
+  formData.append('category', newPostData.category);
+  formData.append('description', newPostData.description);
+  formData.append('productName', newPostData.productName);
 	formData.append('retailPrice', newPostData.retailPrice);
-    formData.append('retailCurrency', newPostData.retailCurrency);
-    formData.append('wholesalePrice', newPostData.wholesalePrice);
+  formData.append('retailCurrency', newPostData.retailCurrency);
+  formData.append('wholesalePrice', newPostData.wholesalePrice);
 	formData.append('wholeSaleCurrency', newPostData.wholeSaleCurrency);
 	formData.append('quantity', newPostData.quantity);
 
@@ -27,11 +27,7 @@ export async function savePost(newPostData: Product, image: File | null) {
     }
 
     const response = await fetch(apiUrl, {
-<<<<<<< HEAD
-      method: 'POST',      
-=======
       method: 'POST',
->>>>>>> origin/main
       body: formData,
     });
 
@@ -43,6 +39,10 @@ export async function savePost(newPostData: Product, image: File | null) {
     return body;
   } catch (error) {
     console.error('Error in Connecting to the endpoint:', error);
-    return { error: error.message };
+    if (error instanceof Error) {
+      return { error: error.message };
+    } else {
+      return { error: 'An unknown error occurred' };
+    }
   }
 }
