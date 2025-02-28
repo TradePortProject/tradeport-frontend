@@ -8,12 +8,16 @@ import Footer from "./components/Footer";
 import Categories from "./pages/Categories";
 import Profile from "./pages/Profile";
 import ShoppingCart from "./pages/ShoppingCart";
+import CatalogGrid from "./components/CatalogGrid";
+
+
 const App = () => {
   return (
     <BrowserRouter>
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/catalogGrid" element={<CatalogGrid />} />
         <Route path="/product" element={<ProductMaster />} />
         <Route path="/categories" element={<Categories />} />
         <Route path="/profile" element={<Profile />} />
