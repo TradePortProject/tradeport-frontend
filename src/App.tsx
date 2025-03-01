@@ -11,12 +11,15 @@ import Profile from "./pages/Profile";
 import ShoppingCart from "./pages/ShoppingCart";
 import CatalogGrid from "./components/CatalogGrid";
 
+
+
 const App = () => {
   return (
     <BrowserRouter>
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/catalogGrid" element={<CatalogGrid />} />
         <Route path="/product" element={<ProductMaster />} />
         <Route path="/productdetail/:productID" element={<ProductDetail />} />
         <Route path="/categories" element={<Categories />} />

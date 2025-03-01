@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom'; 
+
+import { useNavigate } from 'react-router-dom';
+
 
 interface Product {
     productID: string;
@@ -19,6 +21,7 @@ interface Product {
     isActive: boolean;
     imageUrl: string;
 }
+
 const categories = [
     "All Categories",
     "Furniture",
@@ -47,7 +50,7 @@ const ProductCard: React.FC<Product> = ({ ...product }) => {
     const navigate = useNavigate();
 
     const handleCardClick = () => {
-        // Navigate to orderPage with productID
+
         navigate(`/productdetail/${product.productID}`);
     };
 
@@ -72,21 +75,27 @@ const CatalogGrid: React.FC = () => {
     const [selectedCategory, setSelectedCategory] = useState<string>("All Categories");
     const [selectedPrice, setSelectedPrice] = useState<string>("All Price");
     const [selectedSort, setSelectedSort] = useState<string>("Price: Low to High");
-    const [isGrid5x5, setIsGrid5x5] = useState<boolean>(false);
+
 
     useEffect(() => {
         fetch('http://localhost:3016/api/productManagement')
             .then(response => response.json())
-            .then(data => setProducts(data.products))
+
+            .then(data => {
+                console.log('Fetched products:', data.product);
+                setProducts(data.product);
+            })
+
             .catch(error => console.error('Error fetching products:', error));
     }, []);
 
     const filteredProducts = products.filter(product => {
-        // Filter by category
-        if (selectedCategory !== "All Categories" && product.productName !== selectedCategory) {
+
+
+        if (selectedCategory !== "All Categories" && product.category !== selectedCategory) {
             return false;
         }
-        // Filter by price
+
         const priceMap = {
             "All Price": [0, Infinity],
             "$0 - $50": [0, 50],
@@ -145,11 +154,11 @@ const CatalogGrid: React.FC = () => {
                         ))}
                     </select>
                 </div>
-                <div className="flex items-center space-x-2 ml-auto">
 
-                </div>
+
             </div>
-            <div className={`grid gap-6 ${isGrid5x5 ? 'grid-cols-5' : 'grid-cols-2'} md:grid-cols-3 lg:grid-cols-4`}>
+            <div className="grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+
                 {sortedProducts.map(product => (
                     <ProductCard key={product.productID} {...product} />
                 ))}
