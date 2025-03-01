@@ -1,11 +1,11 @@
 import { Order } from './types';
 
 export async function orderPost(newPostData: Order) {
-  const apiUrl = 'http://localhost:3016/api/ProductManagement';
+  const apiUrl = 'http://localhost:3017/api/OrderManagement/';
   try {
     console.log("newPostData:", newPostData);
     const payload = {
-      retailerID: newPostData.retailerID,
+      retailerID: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
       manufacturerID: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
       paymentMode: newPostData.paymentMode,
       paymentCurrency: newPostData.paymentCurrency,
