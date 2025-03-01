@@ -1,37 +1,48 @@
 import { Product } from './types';
 
 export async function savePost(newPostData: Product, image: File | null) {
-  //const apiUrl = 'http://localhost:3016/submit';
   const apiUrl = 'http://localhost:3016/api/ProductManagement';
+
   try {
-    const formData = new FormData();
-    newPostData.manufacturerId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
-    newPostData.shippingCost = 30;
-    formData.append('product', JSON.stringify(newPostData));
+  const formData = new FormData();
+  newPostData.manufacturerId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
+  newPostData.shippingCost = 30;
+
+	formData.append('manufacturerId', newPostData.manufacturerId);
+  formData.append('shippingCost', newPostData.shippingCost.toString());
+  formData.append('category', newPostData.category);
+  formData.append('description', newPostData.description);
+  formData.append('productName', newPostData.productName);
+	formData.append('retailPrice', newPostData.retailPrice);
+  formData.append('retailCurrency', newPostData.retailCurrency);
+  formData.append('wholesalePrice', newPostData.wholesalePrice);
+	formData.append('wholeSaleCurrency', newPostData.wholeSaleCurrency);
+	formData.append('quantity', newPostData.quantity.toString());
+
+
     if (image) {
-      const reader = new FileReader();
-      reader.readAsDataURL(image);
-      reader.onloadend = () => {
-        const base64data = reader.result as string;
-        //console.log('base64data:', base64data);
-        newPostData.productimage = base64data;
-        formData.append('product', JSON.stringify(newPostData));
-        console.log('newPostData:', newPostData);
-      };
+      formData.append('productImage', image);
+    } else {
+      formData.append('productImage', '');
     }
 
     const response = await fetch(apiUrl, {
       method: 'POST',
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: formData,
     });
+
+    if (!response.ok) {
+      throw new Error('Failed to save post');
+    }
+
     const body = await response.json();
-    return { ...body };
+    return body;
   } catch (error) {
-    console.error('Error in Connecting the endpoint:', error);
-    return { error };
+    console.error('Error in Connecting to the endpoint:', error);
+    if (error instanceof Error) {
+      return { error: error.message };
+    } else {
+      return { error: 'An unknown error occurred' };
+    }
   }
 }
-

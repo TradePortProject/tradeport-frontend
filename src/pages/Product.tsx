@@ -20,7 +20,7 @@ export function ProductMaster() {
     try {
       const body: SavedPost = await savePost(product, image);
       console.log("response:", body);
-      navigate(`thank-you`);
+      navigate(`/thank-you`);
     } catch (error) {
       console.error("Error saving post:", error);
     }
@@ -110,7 +110,7 @@ export function ProductMaster() {
                 />
               </div>
             )}
-            <ValidationError fieldError={errors.productimage} />
+          
             <div className="flex flex-row gap-x-2 space-y-2 md:flex-row md:space-x-2 md:space-y-0">
               <input
                 id="retailPrice"

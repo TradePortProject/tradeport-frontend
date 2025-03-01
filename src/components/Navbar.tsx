@@ -15,6 +15,7 @@ const Navbar = () => {
     { name: "Home", path: "/" },
     { name: "Categories", path: "/catalogGrid" },
     { name: "Product", path: "/product" },
+    { name: "Product Detail", path: "/productdetail/163dd606-2643-456c-80fe-1d643381be73" },
   ];
 
   return (

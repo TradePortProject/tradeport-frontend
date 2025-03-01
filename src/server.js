@@ -1,18 +1,41 @@
-const express = require("express");
-const cors = require("cors");
+const jsonServer = require("json-server");
+const multer = require("multer");
+const path = require("path");
 
-const app = express();
-app.use(cors()); // Enable CORS for frontend requests
-app.use(express.json()); // Parse JSON request bodies
+const server = jsonServer.create();
+const router = jsonServer.router("db.json");
+const middlewares = jsonServer.defaults();
 
-app.post("/api/submit", (req, res) => {
-  const { field1, field2 } = req.body;
-  console.log("Received Data:", { field1, field2 });
+server.use(middlewares);
+server.use(jsonServer.bodyParser);
 
-  res.json({ message: "Data submitted successfully!" });
+// Set up storage engine for image uploads
+const storage = multer.diskStorage({
+  destination: "./uploads/",
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
 });
 
+const upload = multer({ storage });
+
+// API endpoint to handle image upload
+server.post("/upload", upload.single("image"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
+
+  res.status(201).json({
+    imageUrl: `/uploads/${req.file.filename}`,
+    message: "File uploaded successfully",
+  });
+});
+
+// Use JSON Server for API routes
+server.use(router);
+
+// Start the server
 const PORT = 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+server.listen(PORT, () => {
+  console.log(`JSON Server is running on port ${PORT}`);
 });

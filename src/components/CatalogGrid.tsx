@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
+
 import { useNavigate } from 'react-router-dom';
+
 
 interface Product {
     productID: string;
@@ -44,9 +46,11 @@ const sortOptions = [
 ];
 
 const ProductCard: React.FC<Product> = ({ ...product }) => {
+
     const navigate = useNavigate();
 
     const handleCardClick = () => {
+
         navigate(`/productdetail/${product.productID}`);
     };
 
@@ -72,20 +76,26 @@ const CatalogGrid: React.FC = () => {
     const [selectedPrice, setSelectedPrice] = useState<string>("All Price");
     const [selectedSort, setSelectedSort] = useState<string>("Price: Low to High");
 
+
     useEffect(() => {
         fetch('http://localhost:3016/api/productManagement')
             .then(response => response.json())
+
             .then(data => {
                 console.log('Fetched products:', data.product);
                 setProducts(data.product);
             })
+
             .catch(error => console.error('Error fetching products:', error));
     }, []);
 
     const filteredProducts = products.filter(product => {
+
+
         if (selectedCategory !== "All Categories" && product.category !== selectedCategory) {
             return false;
         }
+
         const priceMap = {
             "All Price": [0, Infinity],
             "$0 - $50": [0, 50],
@@ -144,8 +154,11 @@ const CatalogGrid: React.FC = () => {
                         ))}
                     </select>
                 </div>
+
+
             </div>
             <div className="grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+
                 {sortedProducts.map(product => (
                     <ProductCard key={product.productID} {...product} />
                 ))}

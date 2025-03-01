@@ -12,8 +12,19 @@
     retailCurrency: string;
     wholesalePrice: string;
     wholeSaleCurrency: string;
-    quantity: string;
+    quantity: number;
+    retailerID: string;
     manufacturerId: string;
     shippingCost: number;
-    productimage: string;
+    productimage: File | null;
+    productID: string;
+  };
+
+  export type Order = Product & {
+    paymentMode: number;
+    paymentCurrency: string;
+    shippingCost: number;
+    shippingCurrency: string;
+    shippingAddress: string;
+    orderquantity: string;
   };

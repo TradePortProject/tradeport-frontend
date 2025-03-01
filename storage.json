@@ -1,5 +1,24 @@
 {
     "ProductManagement": [
+        {
+              "productID": "d0c6b9e2-89f4-43ac-2e7d-08dd4c42d367",
+              "productCode": "P001",
+              "manufacturerID": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "productName": "Head Set",
+              "description": "This Head set is good",
+              "category": "1",
+              "wholesalePrice": 100,
+              "retailPrice": 120,
+              "quantity": 30,
+              "retailCurrency": "SGD",
+              "wholeSaleCurrency": "SGD",
+              "shippingCost": 30,
+              "createdOn": "2025-02-13T15:26:45.447",
+              "updatedOn": "2025-02-13T15:26:45.447",
+              "isActive": true,
+              "productimage":"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAgAB/ubpgZsAAAAASUVORK5CYII="
+                    
+        }
     ],
     "submit": [
     ]
