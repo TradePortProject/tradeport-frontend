@@ -1,9 +1,10 @@
 import { Order } from './types';
 
+const apiUrl = process.env.REACT_APP_PRODUCT_API_URL || 'http://localhost:3017/api/OrderManagement/';
+
 export async function orderPost(newPostData: Order) {
-  const apiUrl = 'http://localhost:3017/api/OrderManagement/';
   try {
-    console.log("newPostData:", newPostData);
+    console.log("API URL:", apiUrl);
     const payload = {
       retailerID: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
       manufacturerID: '3fa85f64-5717-4562-b3fc-2c963f66afa6',

@@ -1,7 +1,8 @@
 import { Order } from './types';
 
-export async function getPosts(): Promise<Order[]> {
-  const apiUrl = 'http://localhost:3016/api/ProductManagement';
+export async function getPosts(productID: string): Promise<Order[]> {
+  
+  const apiUrl = `http://localhost:3016/api/ProductManagement/${productID}`;
   const response = await fetch(apiUrl);
   const data = await response.json();
   console.log('Data:', data.product);

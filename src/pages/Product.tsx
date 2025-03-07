@@ -38,7 +38,8 @@ export function ProductMaster() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center overflow-auto bg-blue-400">
+ 
+    <div className="flex items-center justify-center flex-col p-6 m-3 space-y-10 bg-white rounded-2xl shadow-2xl md:flex-row md:space-y-0 md:space-x-10 md:m-0 md:p-16">
       <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-2xl md:p-20">
         <div className="flex flex-col justify-center space-y-5">
           <h2 className="text-center font-serif text-xl font-medium text-black">
@@ -183,5 +184,6 @@ export function ProductMaster() {
         </div>
       </div>
     </div>
+  
   );
 }

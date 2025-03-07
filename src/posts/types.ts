@@ -16,7 +16,7 @@
     retailerID: string;
     manufacturerId: string;
     shippingCost: number;
-    productimage: File | null;
+    productImage: string;
     productID: string;
   };
 

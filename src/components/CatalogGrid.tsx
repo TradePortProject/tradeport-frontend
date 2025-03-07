@@ -104,7 +104,7 @@ const CatalogGrid: React.FC = () => {
             "$201 - $500": [201, 500],
             "$501 and above": [501, Infinity],
         };
-        const [minPrice, maxPrice] = priceMap[selectedPrice];
+        const [minPrice, maxPrice] = priceMap[selectedPrice as keyof typeof priceMap];
         if (product.retailPrice < minPrice || product.retailPrice > maxPrice) {
             return false;
         }
