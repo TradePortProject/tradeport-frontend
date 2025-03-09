@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { getPosts } from "../posts/getPost";
 import { useParams } from "react-router-dom";
 import { Order } from "../posts/types";
-
+import { orderPost } from "../posts/orderPost";
+import { useNavigate } from "react-router-dom";
 
 export function ShoppingPage() {
   const { productID } = useParams<{ productID: string }>();
- 
+  const navigate = useNavigate();
   const [posts, setPosts] = useState<Order[] | null>(null);
   useEffect(() => {
      const fetchPost = async () => {
@@ -19,7 +20,16 @@ export function ShoppingPage() {
      };
      fetchPost();
    }, [productID]);
-
+   const onSubmit = async (posts: Order[]): Promise<void> => {
+         console.log("Submitted details:", posts);
+         try {
+           const body = await orderPost(posts);
+           console.log("response:", body);
+           navigate(`/catalogGrid`);
+         } catch (error) {
+           console.error("Error saving post:", error);
+         }
+       };
 
   return (
     <div className="flex flex-col lg:flex-row items-start justify-center gap-4 lg:gap-10 py-10 lg:py-20 min-h-screen mx-4 lg:mx-10">
@@ -58,10 +68,12 @@ export function ShoppingPage() {
           <div className="text-lg font-normal text-gray-900">Total</div>
           <div className="text-lg font-normal text-right text-gray-900">$77.00</div>
         </div>
-        <div className="flex items-center justify-center w-full lg:w-[300px] p-2.5 bg-gray-900 rounded border border-lime-500">
+        <div className="flex items-center justify-center w-full lg:w-[300px] p-2.5 bg-gray-900 rounded border border-lime-500" onClick={() => posts && onSubmit(posts)}>
           <div className="text-lg font-medium text-center text-white">Checkout</div>
         </div>
       </div>
     </div>
   );
 }
+
+

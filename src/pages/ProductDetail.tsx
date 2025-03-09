@@ -1,24 +1,25 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getPosts } from '../posts/getPost';
-import { Order } from '../posts/types';
+import { ShoppingCart } from '../posts/types';
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { ValidationError } from "../posts/ValidationError";
-import { orderPost } from '../posts/orderPost';
+
+import { ShoppingCartPost } from '../posts/shoppingcartPost';
 
 export function ProductDetail() {
   const {
       handleSubmit,
       setValue,
       formState: {errors},
-    } = useForm<Order>();
+    } = useForm<ShoppingCart>();
   const navigate = useNavigate();
-  const { productID } = useParams<{ productID: string }>();
-  const [post, setPost] = useState<Order | null>(null);
-  const [quantity, setQuantity] = useState<number>(1);
+  const {productID } = useParams<{ productID: string }>();
+  const [post, setPost] = useState<ShoppingCart | null>(null);
+  const [orderquantity, setOrderQuantity] = useState<number>(1);
 
-  const onSubmit = async (order: Order): Promise<void> => {
+  const onSubmit = async (order: ShoppingCart): Promise<void> => {
       order.productID = productID || '';
       order.productName = post?.productName || '';
       order.description = post?.description || '';
@@ -35,11 +36,10 @@ export function ProductDetail() {
       order.paymentCurrency = post?.paymentCurrency || 'SGD';
       order.shippingCurrency = post?.shippingCurrency || 'SGD';
       order.shippingAddress = post?.shippingAddress || '';
-      order.orderquantity = quantity.toString();
-
+      order.orderquantity = orderquantity||0;
       console.log("Submitted details:", order);
       try {
-        const body = await orderPost(order);
+        const body = await ShoppingCartPost(order);
         console.log("response:", body);
         navigate(`/catalogGrid`);
       } catch (error) {
@@ -49,11 +49,15 @@ export function ProductDetail() {
 
   useEffect(() => {
     const fetchPost = async () => {
+      if (!productID) {
+        console.error("Product ID is undefined");
+        return;
+      }
       const postsData = await getPosts(productID);
       const selectedPost = postsData.find((p) => p.productID === productID);
-      setPost(selectedPost || null);
+      setPost(selectedPost ? { ...selectedPost, orderquantity: Number(selectedPost.orderquantity) } : null);
       if (selectedPost) {
-        setValue("orderquantity", selectedPost.orderquantity);
+        setValue("orderquantity", Number(selectedPost.orderquantity));
       }
     };
     fetchPost();
@@ -64,8 +68,8 @@ export function ProductDetail() {
   }
 
   const handleQuantityChange = (change: number) => {
-    setQuantity((prevQuantity) => Math.max(1, prevQuantity + change));
-    setValue("orderquantity", (quantity + change).toString());
+    setOrderQuantity((prevQuantity) => Math.max(1, prevQuantity + change));
+    setValue("orderquantity", (orderquantity + change));
   };
 
   const productImageUrl = post.productImage && post.productImage.length > 0 ? post.productImage[0] : '/images/headphone.png';
@@ -112,7 +116,7 @@ export function ProductDetail() {
                 </button>
                 </div>
                 <div className="flex items-center justify-center w-10 h-10 text-xl font-bold text-gray-700 bg-gray-100 rounded-lg">           
-                {quantity}</div>
+                {orderquantity}</div>
                 <div data-svg-wrapper style={{position: 'relative'}}>
                 <button type="button" onClick={() => handleQuantityChange(1)} className="p-1">
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">

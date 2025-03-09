@@ -28,3 +28,12 @@
     shippingAddress: string;
     orderquantity: string;
   };
+
+  export type ShoppingCart = Product & {
+    paymentMode: number;
+    paymentCurrency: string;
+    shippingCost: number;
+    shippingCurrency: string;
+    shippingAddress: string;
+    orderquantity: number;
+  };
