@@ -6,16 +6,23 @@ import {
   Bars3Icon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { useSelector } from "react-redux";
+import { RootState } from "../store/store";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-
+  const cartItemCount = useSelector((state: RootState) =>
+    state.cart.items.reduce((total, item) => total + item.quantity, 0),
+  );
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Categories", path: "/catalogGrid" },
     { name: "Product", path: "/product" },
-    { name: "Product Detail", path: "/productdetail/163dd606-2643-456c-80fe-1d643381be73" },
+    {
+      name: "Product Detail",
+      path: "/productdetail/163dd606-2643-456c-80fe-1d643381be73",
+    },
   ];
 
   return (
@@ -61,7 +68,7 @@ const Navbar = () => {
             }`}
           />
           <span className="absolute -right-2 -top-2 rounded-full bg-red-500 px-1 text-xs text-white">
-            2
+            {cartItemCount}
           </span>
         </Link>
 
