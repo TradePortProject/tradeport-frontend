@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
-
 import { useNavigate } from 'react-router-dom';
-
+import ProductCard from './ProductCard';
+import CategorySelect from './CategorySelect';
+import PriceRangeSelect from './PriceRangeSelect';
+import SearchBar from './SearchBar';
+import Pagination from './Pagination';
 
 interface Product {
     productID: string;
@@ -9,7 +12,7 @@ interface Product {
     manufacturerID: string;
     productName: string;
     description: string;
-    category: string;
+    category: string; // Updated to match JSON: category as a string
     wholesalePrice: number;
     retailPrice: number;
     retailCurrency: string;
@@ -19,150 +22,136 @@ interface Product {
     createdOn: string;
     updatedOn: string;
     isActive: boolean;
-    imageUrl: string;
+    productImage: { productImageURL: string }[]; // Updated to handle array of image URLs
 }
 
 const categories = [
-    "All Categories",
-    "Furniture",
-    "Fashion",
-    "Home & Garden",
-    "Computer & Office",
+    { id: 0, name: "All Categories" },
+    { id: 1, name: "Furniture" },
+    { id: 2, name: "Fashion" },
+    { id: 3, name: "Home & Garden" },
+    { id: 4, name: "Computer & Office" },
+];
+
+const quantities = [
+    { id: 0, name: "All Quantities" },
+    { id: 25, name: "Min 25" },
+    { id: 50, name: "Min 50" },
+    { id: 100, name: "Min 100" },
+    { id: 500, name: "Min 500" },
+    { id: 1000, name: "Min 1000" },
 ];
 
 const priceRanges = [
-    "All Price",
-    "$0 - $50",
-    "$51 - $100",
-    "$101 - $200",
-    "$201 - $500",
-    "$501 and above",
+    { label: "All Wholesale Price", min: 0, max: 1000000 },
+    { label: "$0 - $50", min: 0, max: 50 },
+    { label: "$51 - $100", min: 51, max: 100 },
+    { label: "$101 - $200", min: 101, max: 200 },
+    { label: "$201 - $500", min: 201, max: 500 },
+    { label: "$501 and above", min: 501, max: 1000000 },
 ];
 
-const sortOptions = [
-    "Price: Low to High",
-    "Price: High to Low",
-    "Rating: High to Low",
+const retailPriceRanges = [
+    { label: "All Retail Price", min: 0, max: 1000000 },
+    { label: "$0 - $50", min: 0, max: 50 },
+    { label: "$51 - $100", min: 51, max: 100 },
+    { label: "$101 - $200", min: 101, max: 200 },
+    { label: "$201 - $500", min: 201, max: 500 },
+    { label: "$501 and above", min: 501, max: 1000000 },
 ];
-
-const ProductCard: React.FC<Product> = ({ ...product }) => {
-
-    const navigate = useNavigate();
-
-    const handleCardClick = () => {
-
-        navigate(`/productdetail/${product.productID}`);
-    };
-
-    return (
-        <div onClick={handleCardClick} className="group relative overflow-hidden rounded-lg shadow-lg product-card cursor-pointer">
-            <img src="/img/headphone.jpg" alt={product.productName} className="product-image w-full h-78 object-cover" style={{ height: '300px' }} />
-            <div className="p-4">
-                <h3 className="text-lg font-semibold">{product.productName}</h3>
-                <p className="text-sm mt-2">{product.description}</p>
-                <div className="mt-4">
-                    <span className="block text-lg font-bold">{product.wholesalePrice.toFixed(2)} {product.wholeSaleCurrency}</span>
-                    <span className="line-through">{product.retailPrice.toFixed(2)} {product.retailCurrency}</span>
-                </div>
-                <div className="mt-2">{product.quantity}</div>
-            </div>
-        </div>
-    );
-};
 
 const CatalogGrid: React.FC = () => {
     const [products, setProducts] = useState<Product[]>([]);
-    const [selectedCategory, setSelectedCategory] = useState<string>("All Categories");
-    const [selectedPrice, setSelectedPrice] = useState<string>("All Price");
-    const [selectedSort, setSelectedSort] = useState<string>("Price: Low to High");
+    const [selectedCategory, setSelectedCategory] = useState<number>(0);
+    const [selectedQuantity, setselectedQuantity] = useState<number>(0);
+    const [selectedPrice, setSelectedPriceRange] = useState<string>("All Wholesale Price");
+    const [selectedRetailPrice, setSelectedRetailPriceRange] = useState<string>("All Retail Price");
+    const [pageNumber, setPageNumber] = useState<number>(1);
+    const [totalPages, setTotalPages] = useState<number>(1);
+    const [searchText, setSearchText] = useState<string>("");
 
+	useEffect(() => {
+		if (searchText.length >= 3 || searchText.length === 0) {
+			fetchProducts(); // Call API only if the searchText condition is satisfied
+		}
+	}, [searchText]);
 
     useEffect(() => {
-        fetch('http://localhost:3016/api/productManagement')
-            .then(response => response.json())
+        fetchProducts();
+    }, [pageNumber, selectedCategory, selectedQuantity, selectedPrice, selectedRetailPrice]);
 
-            .then(data => {
-                console.log('Fetched products:', data.product);
-                setProducts(data.product);
-            })
-
-            .catch(error => console.error('Error fetching products:', error));
-    }, []);
-
-    const filteredProducts = products.filter(product => {
-
-
-        if (selectedCategory !== "All Categories" && product.category !== selectedCategory) {
-            return false;
+    const fetchProducts = async () => {
+        try {
+            const wholesaleRange = getWholesalePriceRange(selectedPrice);
+            const retailRange = getRetailPriceRange(selectedRetailPrice);
+			const categoryQuery = selectedCategory !== 0 ? `&category=${selectedCategory}` : ' ';
+            const response = await fetch(`http://localhost:3016/api/productManagement/GetFilteredProducts?pageNumber=${pageNumber}&searchText=${searchText}${categoryQuery}&quantity=${selectedQuantity}&minWholesalePrice=${wholesaleRange.min}&maxWholesalePrice=${wholesaleRange.max}&minRetailPrice=${retailRange.min}&maxRetailPrice=${retailRange.max}`);
+            const data = await response.json();
+            console.log('Fetched products:', data.product);
+            setProducts(data.product|| []);
+            setTotalPages(data.totalPages || 1);
+        } catch (error) {
+            console.error('Error fetching products:', error);
+            setProducts([]); // Clear products on error
         }
+    };
 
-        const priceMap = {
-            "All Price": [0, Infinity],
-            "$0 - $50": [0, 50],
-            "$51 - $100": [51, 100],
-            "$101 - $200": [101, 200],
-            "$201 - $500": [201, 500],
-            "$501 and above": [501, Infinity],
-        };
-        const [minPrice, maxPrice] = priceMap[selectedPrice];
-        if (product.retailPrice < minPrice || product.retailPrice > maxPrice) {
-            return false;
-        }
-        return true;
-    });
+    const getWholesalePriceRange = (label: string) => {
+        return priceRanges.find(price => price.label === label) || { min: 0, max: 1000000 };
+    };
 
-    const sortedProducts = filteredProducts.sort((a, b) => {
-        switch (selectedSort) {
-            case "Price: Low to High":
-                return a.retailPrice - b.retailPrice;
-            case "Price: High to Low":
-                return b.retailPrice - a.retailPrice;
-            default:
-                return 0;
-        }
-    });
+    const getRetailPriceRange = (label: string) => {
+        return retailPriceRanges.find(price => price.label === label) || { min: 0, max: 1000000 };
+    };
+
+    const handleSearchChange = (newSearchText: string) => {
+        setSearchText(newSearchText);
+    };
+	
+    const handleCategoryChange = (selectedId: number) => {
+        setSelectedCategory(selectedId);
+    };
+
+    const handleQuantityChange = (selectedId: number) => {
+        setselectedQuantity(selectedId);
+    };
+
+    const handleWholesalePriceRangeChange = (selectedLabel: string) => {
+        setSelectedPriceRange(selectedLabel);
+    };
+
+    const handleRetailPriceRangeChange = (selectedLabel: string) => {
+        setSelectedRetailPriceRange(selectedLabel);
+    };
+
+    const handlePageChange = (page: number) => {
+        setPageNumber(page);
+    };
 
     return (
         <div className="mx-auto max-w-7xl px-4 py-12">
             <div className="mb-4 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 md:space-x-4">
+                <SearchBar searchText={searchText} onSearchChange={handleSearchChange} />
                 <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
-                    <select
-                        className="px-4 py-2 border rounded"
-                        value={selectedCategory}
-                        onChange={e => setSelectedCategory(e.target.value)}
-                    >
-                        {categories.map(category => (
-                            <option key={category} value={category}>{category}</option>
-                        ))}
-                    </select>
-                    <select
-                        className="px-4 py-2 border rounded"
-                        value={selectedPrice}
-                        onChange={e => setSelectedPrice(e.target.value)}
-                    >
-                        {priceRanges.map(price => (
-                            <option key={price} value={price}>{price}</option>
-                        ))}
-                    </select>
-                    <select
-                        className="px-4 py-2 border rounded"
-                        value={selectedSort}
-                        onChange={e => setSelectedSort(e.target.value)}
-                    >
-                        {sortOptions.map(option => (
-                            <option key={option} value={option}>{option}</option>
-                        ))}
-                    </select>
+                    <CategorySelect categories={categories} selectedCategory={selectedCategory} onChange={handleCategoryChange} />
+                    <CategorySelect categories={quantities} selectedCategory={selectedQuantity} onChange={handleQuantityChange} />
+                    <PriceRangeSelect priceRanges={priceRanges} selectedPrice={selectedPrice} onChange={handleWholesalePriceRangeChange} />
+                    <PriceRangeSelect priceRanges={retailPriceRanges} selectedPrice={selectedRetailPrice} onChange={handleRetailPriceRangeChange} />
                 </div>
-
-
             </div>
-            <div className="grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-
-                {sortedProducts.map(product => (
-                    <ProductCard key={product.productID} {...product} />
-                ))}
-            </div>
+            {products.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {products.map(product => (
+                        <ProductCard key={product.productID} {...product} />
+                    ))}
+                </div>
+			
+            ) : (
+                <div>No products found. Adjust your filters.</div>
+            )}
+			<div className="mt-4 flex justify-center">
+				<Pagination pageNumber={pageNumber} totalPages={totalPages} onPageChange={handlePageChange} />
+			</div>	
         </div>
     );
 };
