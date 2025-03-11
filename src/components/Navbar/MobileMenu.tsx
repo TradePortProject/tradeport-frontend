@@ -33,24 +33,29 @@ const MobileMenu: React.FC = () => {
           </div>
 
           {/* ✅ Mobile Menu Panel (Closes when selecting a menu item) */}
-          <DisclosurePanel className="absolute left-0 top-16 w-full bg-white shadow-lg sm:hidden">
+          <DisclosurePanel className="absolute left-0 top-16 w-full bg-white shadow-lg transition-transform duration-200 ease-in-out sm:hidden">
             <div className="flex flex-col space-y-2 p-4">
-              {navLinks.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className={`block rounded-md px-3 py-2 text-base font-medium ${
-                    location.pathname === item.path
-                      ? "bg-gray-200 text-black"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-black"
-                  }`}
-                  onClick={() => close()} // ✅ Closes the menu
-                >
-                  {item.name}
-                </Link>
-              ))}
+              {navLinks
+                .filter((item) => !item.protected || isAuthenticated) // ✅ Hide protected routes if not logged in
+                .map(({ name, path }) => {
+                  const isActive = location.pathname === path;
+                  return (
+                    <Link
+                      key={name}
+                      to={path}
+                      className={`block rounded-md px-3 py-2 text-base font-medium ${
+                        isActive
+                          ? "bg-gray-200 text-black"
+                          : "text-gray-600 hover:bg-gray-100 hover:text-black"
+                      }`}
+                      onClick={() => close()} // ✅ Closes the menu
+                    >
+                      {name}
+                    </Link>
+                  );
+                })}
 
-              {/* ✅ Login Button Inside Mobile Menu (Only if Not Authenticated) */}
+              {/* ✅ Show login button only if user is not authenticated */}
               {!isAuthenticated && (
                 <Link
                   to="/login"
