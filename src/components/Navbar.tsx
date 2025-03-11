@@ -1,132 +1,194 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom"; // For React Router
 import {
-  UserCircleIcon,
-  ShoppingCartIcon,
+  Disclosure,
+  DisclosureButton,
+  DisclosurePanel,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+} from "@headlessui/react";
+import {
   Bars3Icon,
+  ShoppingCartIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { useSelector } from "react-redux";
+import { Link, useLocation } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../store/store";
+import { logout } from "../store/features/authSlice";
 
-const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const navigation = [
+  { name: "Home", href: "/" },
+  { name: "Categories", href: "/catalogGrid" },
+  { name: "Product", href: "/product" },
+  { name: "Cart", href: "/cart" },
+];
+
+function classNames(...classes: string[]): string {
+  return classes.filter(Boolean).join(" ");
+}
+
+const Navbar: React.FC = () => {
   const location = useLocation();
+  const dispatch = useDispatch();
+  const { isAuthenticated, user } = useSelector(
+    (state: RootState) => state.auth,
+  );
   const cartItemCount = useSelector((state: RootState) =>
     state.cart.items.reduce((total, item) => total + item.quantity, 0),
   );
-  const navLinks = [
-    { name: "Home", path: "/" },
-    { name: "Categories", path: "/catalogGrid" },
-    { name: "Product", path: "/product" },
-    {
-      name: "Product Detail",
-      path: "/productdetail/163dd606-2643-456c-80fe-1d643381be73",
-    },
-  ];
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+
+  const handleLogout = () => {
+    dispatch(logout());
+  };
 
   return (
-    <nav className="sticky top-0 z-50 flex items-center justify-between border-b-2 bg-white p-4 shadow-lg">
-      {/* Logo */}
-      <Link to="/">
-        <h1 className="text-xl font-bold">TradePort</h1>
-      </Link>
+    <Disclosure
+      as="nav"
+      className="sticky top-0 z-50 w-full bg-white shadow-md"
+    >
+      <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+        <div className="relative flex h-16 items-center justify-between">
+          {/* Mobile Menu Button */}
+          <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
+            <DisclosureButton className="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:text-black focus:outline-none">
+              <Bars3Icon className="block h-6 w-6" />
+              <XMarkIcon className="hidden h-6 w-6" />
+            </DisclosureButton>
+          </div>
 
-      {/* Desktop Navigation */}
-      <div className="hidden space-x-6 md:flex">
-        {navLinks.map((link) => (
-          <Link
-            key={link.name}
-            to={link.path}
-            className={`text-gray-600 hover:text-black ${
-              location.pathname === link.path
-                ? "border-b-2 border-black font-bold text-black"
-                : ""
-            }`}
-          >
-            {link.name}
-          </Link>
-        ))}
-      </div>
-
-      {/* Icons with Navigation */}
-      <div className="flex items-center space-x-4">
-        {/* Profile Link */}
-        <Link to="/profile">
-          <UserCircleIcon
-            className={`h-6 w-6 cursor-pointer ${
-              location.pathname === "/profile" ? "text-black" : "text-gray-600"
-            }`}
-          />
-        </Link>
-
-        {/* Shopping Cart Link */}
-        <Link to="/cart" className="relative">
-          <ShoppingCartIcon
-            className={`h-6 w-6 ${
-              location.pathname === "/cart" ? "text-black" : "text-gray-600"
-            }`}
-          />
-          <span className="absolute -right-2 -top-2 rounded-full bg-red-500 px-1 text-xs text-white">
-            {cartItemCount}
-          </span>
-        </Link>
-
-        {/* Mobile Menu Button */}
-        <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
-          {isOpen ? (
-            <XMarkIcon className="h-6 w-6" />
-          ) : (
-            <Bars3Icon className="h-6 w-6" />
-          )}
-        </button>
-      </div>
-
-      {/* Mobile Menu */}
-      {isOpen && (
-        <div className="absolute left-0 top-16 w-full bg-white shadow-md md:hidden">
-          <div className="flex flex-col items-center space-y-4 py-4">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                className={`text-gray-600 hover:text-black ${
-                  location.pathname === link.path
-                    ? "border-b-2 border-black font-bold text-black"
-                    : ""
-                }`}
-                onClick={() => setIsOpen(false)}
-              >
-                {link.name}
-              </Link>
-            ))}
-
-            {/* Profile & Cart in Mobile Menu */}
-            <Link
-              to="/profile"
-              className={`flex items-center space-x-2 text-gray-600 hover:text-black ${
-                location.pathname === "/profile" ? "font-bold text-black" : ""
-              }`}
-              onClick={() => setIsOpen(false)}
-            >
-              <UserCircleIcon className="h-5 w-5" />
-              <span>Profile</span>
-            </Link>
-
-            <Link
-              to="/cart"
-              className={`flex items-center space-x-2 text-gray-600 hover:text-black ${
-                location.pathname === "/cart" ? "font-bold text-black" : ""
-              }`}
-              onClick={() => setIsOpen(false)}
-            >
-              <ShoppingCartIcon className="h-5 w-5" />
-              <span>Cart</span>
+          {/* Logo */}
+          <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+            <Link to="/" className="text-lg font-bold">
+              TradePort
             </Link>
           </div>
+
+          {/* Desktop Navigation */}
+          <div className="hidden sm:ml-6 sm:block">
+            <div className="flex space-x-4">
+              {navigation.map((item) => {
+                const isActive = location.pathname === item.href;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    aria-current={isActive ? "page" : undefined}
+                    className={classNames(
+                      isActive
+                        ? "border-b-2 border-black font-bold text-black"
+                        : "text-gray-600 hover:text-black",
+                      "rounded-md px-3 py-2 text-sm font-medium",
+                    )}
+                  >
+                    {item.name}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Right Side (Cart, Profile, Auth) */}
+          <div className="absolute inset-y-0 right-0 flex items-center space-x-4 pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+            {/* Cart Link */}
+            <Link to="/cart" className="relative">
+              <ShoppingCartIcon className="h-6 w-6 text-gray-600 hover:text-black" />
+              {cartItemCount > 0 && (
+                <span className="absolute -right-2 -top-2 rounded-full bg-red-500 px-1 text-xs text-white">
+                  {cartItemCount}
+                </span>
+              )}
+            </Link>
+
+            {/* Authenticated User Dropdown */}
+            {isAuthenticated ? (
+              <Menu as="div" className="relative">
+                <div>
+                  <MenuButton className="relative flex rounded-full text-sm focus:outline-none">
+                    {user?.picture ? (
+                      <>
+                        {!isImageLoaded && (
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-400 text-white">
+                            {user?.name?.charAt(0) || "U"}
+                          </div>
+                        )}
+                        <img
+                          src={user.picture}
+                          alt="Profile"
+                          className={`h-10 w-10 rounded-full object-cover ${isImageLoaded ? "block" : "hidden"}`}
+                          onLoad={() => setIsImageLoaded(true)}
+                          onError={(e) => {
+                            e.currentTarget.src = "/images/default-profile.png";
+                            setIsImageLoaded(true);
+                          }}
+                        />
+                      </>
+                    ) : (
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-400 text-white">
+                        {user?.name?.charAt(0) || "U"}
+                      </div>
+                    )}
+                  </MenuButton>
+                </div>
+                <MenuItems className="absolute right-0 z-10 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5">
+                  <MenuItem>
+                    <Link
+                      to="/profile"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Profile
+                    </Link>
+                  </MenuItem>
+                  <MenuItem>
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Sign out
+                    </button>
+                  </MenuItem>
+                </MenuItems>
+              </Menu>
+            ) : (
+              <Link
+                to="/login"
+                className="rounded-md bg-blue-500 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600"
+              >
+                Login
+              </Link>
+            )}
+          </div>
         </div>
-      )}
-    </nav>
+      </div>
+
+      {/* Mobile Menu Panel */}
+      <DisclosurePanel className="sm:hidden">
+        <div className="space-y-1 px-2 pb-3 pt-2">
+          {navigation.map((item) => {
+            const isActive = location.pathname === item.href;
+            return (
+              <DisclosureButton
+                key={item.name}
+                as={Link}
+                to={item.href}
+                aria-current={isActive ? "page" : undefined}
+                className={classNames(
+                  isActive
+                    ? "bg-gray-200 text-black"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-black",
+                  "block rounded-md px-3 py-2 text-base font-medium",
+                )}
+              >
+                {item.name}
+              </DisclosureButton>
+            );
+          })}
+        </div>
+      </DisclosurePanel>
+    </Disclosure>
   );
 };
 

@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProductMaster } from "./pages/Product";
 import { ThankYouPage } from "./pages/ThankYouPage";
-import { ProductDetail } from './pages/ProductDetail';
+import { ProductDetail } from "./pages/ProductDetail";
 import Home from "./pages/Home";
 import Error from "./pages/Error";
 import Navbar from "./components/Navbar";
@@ -10,8 +10,7 @@ import Categories from "./pages/Categories";
 import Profile from "./pages/Profile";
 import ShoppingCart from "./pages/ShoppingCart";
 import CatalogGrid from "./components/CatalogGrid";
-
-
+import Login from "./pages/Login";
 
 const App = () => {
   return (
@@ -24,6 +23,7 @@ const App = () => {
         <Route path="/productdetail/:productID" element={<ProductDetail />} />
         <Route path="/categories" element={<Categories />} />
         <Route path="/catalogGrid" element={<CatalogGrid />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/cart" element={<ShoppingCart />} />
         <Route path="/thank-you" element={<ThankYouPage />} />
