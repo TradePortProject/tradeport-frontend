@@ -22,7 +22,6 @@ const navigation = [
   { name: "Home", href: "/" },
   { name: "Categories", href: "/catalogGrid" },
   { name: "Product", href: "/product" },
-  { name: "Cart", href: "/cart" },
 ];
 
 function classNames(...classes: string[]): string {
@@ -87,20 +86,48 @@ const Navbar: React.FC = () => {
                   </Link>
                 );
               })}
+
+              {/* Show Cart & Profile only if user is authenticated */}
+              {isAuthenticated && (
+                <>
+                  <Link
+                    to="/cart"
+                    className={`text-gray-600 hover:text-black ${
+                      location.pathname === "/cart"
+                        ? "border-b-2 border-black font-bold text-black"
+                        : ""
+                    }`}
+                  >
+                    Cart
+                  </Link>
+                  <Link
+                    to="/profile"
+                    className={`text-gray-600 hover:text-black ${
+                      location.pathname === "/profile"
+                        ? "border-b-2 border-black font-bold text-black"
+                        : ""
+                    }`}
+                  >
+                    Profile
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 
           {/* Right Side (Cart, Profile, Auth) */}
           <div className="absolute inset-y-0 right-0 flex items-center space-x-4 pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-            {/* Cart Link */}
-            <Link to="/cart" className="relative">
-              <ShoppingCartIcon className="h-6 w-6 text-gray-600 hover:text-black" />
-              {cartItemCount > 0 && (
-                <span className="absolute -right-2 -top-2 rounded-full bg-red-500 px-1 text-xs text-white">
-                  {cartItemCount}
-                </span>
-              )}
-            </Link>
+            {/* Cart Link (Only Show if Authenticated) */}
+            {isAuthenticated && (
+              <Link to="/cart" className="relative">
+                <ShoppingCartIcon className="h-6 w-6 text-gray-600 hover:text-black" />
+                {cartItemCount > 0 && (
+                  <span className="absolute -right-2 -top-2 rounded-full bg-red-500 px-1 text-xs text-white">
+                    {cartItemCount}
+                  </span>
+                )}
+              </Link>
+            )}
 
             {/* Authenticated User Dropdown */}
             {isAuthenticated ? (
@@ -117,7 +144,9 @@ const Navbar: React.FC = () => {
                         <img
                           src={user.picture}
                           alt="Profile"
-                          className={`h-10 w-10 rounded-full object-cover ${isImageLoaded ? "block" : "hidden"}`}
+                          className={`h-10 w-10 rounded-full object-cover ${
+                            isImageLoaded ? "block" : "hidden"
+                          }`}
                           onLoad={() => setIsImageLoaded(true)}
                           onError={(e) => {
                             e.currentTarget.src = "/images/default-profile.png";

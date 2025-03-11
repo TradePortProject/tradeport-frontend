@@ -11,6 +11,7 @@ import Profile from "./pages/Profile";
 import ShoppingCart from "./pages/ShoppingCart";
 import CatalogGrid from "./components/CatalogGrid";
 import Login from "./pages/Login";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 const App = () => {
   return (
@@ -18,15 +19,18 @@ const App = () => {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/catalogGrid" element={<CatalogGrid />} />
-        <Route path="/product" element={<ProductMaster />} />
-        <Route path="/productdetail/:productID" element={<ProductDetail />} />
         <Route path="/categories" element={<Categories />} />
         <Route path="/catalogGrid" element={<CatalogGrid />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/cart" element={<ShoppingCart />} />
-        <Route path="/thank-you" element={<ThankYouPage />} />
+
+        <Route element={<ProtectedRoute />}>
+          <Route path="/product" element={<ProductMaster />} />
+          <Route path="/productdetail/:productID" element={<ProductDetail />} />
+          <Route path="/cart" element={<ShoppingCart />} />{" "}
+          <Route path="/profile" element={<Profile />} />{" "}
+          <Route path="/thank-you" element={<ThankYouPage />} />
+        </Route>
+
         <Route path="*" element={<Error />} />
       </Routes>
       <Footer />
