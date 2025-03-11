@@ -8,12 +8,7 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-
-const navigation = [
-  { name: "Home", href: "/" },
-  { name: "Categories", href: "/catalogGrid" },
-  { name: "Product", href: "/product" },
-];
+import navLinks from "../../config/navLinks";
 
 const MobileMenu: React.FC = () => {
   const location = useLocation();
@@ -40,12 +35,12 @@ const MobileMenu: React.FC = () => {
           {/* ✅ Mobile Menu Panel (Closes when selecting a menu item) */}
           <DisclosurePanel className="absolute left-0 top-16 w-full bg-white shadow-lg sm:hidden">
             <div className="flex flex-col space-y-2 p-4">
-              {navigation.map((item) => (
+              {navLinks.map((item) => (
                 <Link
                   key={item.name}
-                  to={item.href}
+                  to={item.path}
                   className={`block rounded-md px-3 py-2 text-base font-medium ${
-                    location.pathname === item.href
+                    location.pathname === item.path
                       ? "bg-gray-200 text-black"
                       : "text-gray-600 hover:bg-gray-100 hover:text-black"
                   }`}

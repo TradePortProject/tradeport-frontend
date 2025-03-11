@@ -1,11 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
+import navLinks from "../../config/navLinks";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-
-const navigation = [
-  { name: "Home", href: "/" },
-  { name: "Categories", href: "/catalogGrid" },
-];
 
 const NavLinks: React.FC = () => {
   const location = useLocation();
@@ -14,44 +10,23 @@ const NavLinks: React.FC = () => {
   );
 
   return (
-    <div className="hidden space-x-4 sm:flex">
-      {navigation.map((item) => (
-        <Link
-          key={item.name}
-          to={item.href}
-          className={`text-gray-600 hover:text-black ${
-            location.pathname === item.href
-              ? "border-b-2 border-black font-bold text-black"
-              : ""
-          }`}
-        >
-          {item.name}
-        </Link>
-      ))}
+    <div className="flex space-x-6">
+      {navLinks.map(({ name, path, protected: isProtected }) => {
+        if (isProtected && !isAuthenticated) return null; // Hide protected links if not logged in
 
-      {/* Show protected links only when logged in */}
-      {isAuthenticated && (
-        <>
+        const isActive = location.pathname === path;
+        return (
           <Link
-            to="/product"
-            className={`text-gray-600 hover:text-black ${location.pathname === "/product" ? "border-b-2 border-black font-bold text-black" : ""}`}
+            key={name}
+            to={path}
+            className={`text-gray-600 hover:text-black ${
+              isActive ? "border-b-2 border-black font-bold text-black" : ""
+            }`}
           >
-            Product
+            {name}
           </Link>
-          <Link
-            to="/cart"
-            className={`text-gray-600 hover:text-black ${location.pathname === "/cart" ? "border-b-2 border-black font-bold text-black" : ""}`}
-          >
-            Cart
-          </Link>
-          <Link
-            to="/profile"
-            className={`text-gray-600 hover:text-black ${location.pathname === "/profile" ? "border-b-2 border-black font-bold text-black" : ""}`}
-          >
-            Profile
-          </Link>
-        </>
-      )}
+        );
+      })}
     </div>
   );
 };
