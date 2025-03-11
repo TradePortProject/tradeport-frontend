@@ -11,6 +11,7 @@ import { RootState } from "../../store/store";
 const navigation = [
   { name: "Home", href: "/" },
   { name: "Categories", href: "/catalogGrid" },
+  { name: "Product", href: "/product" },
 ];
 
 const MobileMenu: React.FC = () => {
@@ -23,6 +24,7 @@ const MobileMenu: React.FC = () => {
     <Disclosure as="nav">
       {({ open }) => (
         <>
+          {/* ✅ Mobile Menu Button */}
           <div className="sm:hidden">
             <DisclosureButton className="relative p-2 text-gray-400 hover:text-black focus:outline-none">
               {open ? (
@@ -33,8 +35,9 @@ const MobileMenu: React.FC = () => {
             </DisclosureButton>
           </div>
 
-          <DisclosurePanel className="sm:hidden">
-            <div className="space-y-1 px-2 pb-3 pt-2">
+          {/* ✅ Mobile Menu Panel (White Background) */}
+          <DisclosurePanel className="absolute left-0 top-16 w-full bg-white shadow-lg sm:hidden">
+            <div className="flex flex-col space-y-2 p-4">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
@@ -49,28 +52,14 @@ const MobileMenu: React.FC = () => {
                 </Link>
               ))}
 
-              {/* Show protected links only if logged in */}
-              {isAuthenticated && (
-                <>
-                  <Link
-                    to="/product"
-                    className="block rounded-md px-3 py-2 text-base font-medium text-gray-600 hover:bg-gray-100 hover:text-black"
-                  >
-                    Product
-                  </Link>
-                  <Link
-                    to="/cart"
-                    className="block rounded-md px-3 py-2 text-base font-medium text-gray-600 hover:bg-gray-100 hover:text-black"
-                  >
-                    Cart
-                  </Link>
-                  <Link
-                    to="/profile"
-                    className="block rounded-md px-3 py-2 text-base font-medium text-gray-600 hover:bg-gray-100 hover:text-black"
-                  >
-                    Profile
-                  </Link>
-                </>
+              {/* ✅ Login Button Inside Mobile Menu (Only if Not Authenticated) */}
+              {!isAuthenticated && (
+                <Link
+                  to="/login"
+                  className="block rounded-md px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-200 hover:text-black"
+                >
+                  Login
+                </Link>
               )}
             </div>
           </DisclosurePanel>
