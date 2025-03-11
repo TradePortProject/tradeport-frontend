@@ -4,7 +4,7 @@ type User = {
   email: string;
   name?: string;
   picture?: string;
-  role: "retailer" | "wholeseller" | "admin" | null; // RBAC
+  role: "retailer" | "wholesaler" | "admin" | null; // RBAC
 };
 
 interface AuthState {
@@ -29,10 +29,10 @@ const authSlice = createSlice({
       state,
       action: PayloadAction<{
         email: string;
-        role: "retailer" | "wholeseller";
+        role: "retailer" | "wholesaler";
       }>,
     ) => {
-      // Register the user but don't log them in
+      // ✅ Store user details but don't log them in
       state.isRegistered = true;
       state.user = {
         email: action.payload.email,
@@ -41,12 +41,18 @@ const authSlice = createSlice({
     },
 
     login: (state, action: PayloadAction<{ token: string; user: User }>) => {
+      // ✅ Ensure role is assigned before logging in
+      if (!action.payload.user.role) {
+        console.error("Error: User must have a role before login.");
+        return;
+      }
       state.isAuthenticated = true;
       state.token = action.payload.token;
       state.user = action.payload.user;
     },
 
     logout: (state) => {
+      // ✅ Clear all authentication state
       state.isAuthenticated = false;
       state.isRegistered = false;
       state.token = null;

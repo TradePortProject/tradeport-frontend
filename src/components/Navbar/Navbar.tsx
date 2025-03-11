@@ -37,7 +37,7 @@ const Navbar: React.FC = () => {
                 to="/login"
                 className="hidden rounded-md px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-200 hover:text-black sm:block"
               >
-                Login
+                Log in →
               </Link>
             )}
           </div>
