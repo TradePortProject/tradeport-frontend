@@ -1,14 +1,14 @@
 import {ShoppingCart } from './types';
 
-export async function getPosts(productID: string): Promise<ShoppingCart[]> {
+export async function getShoppingPosts(productID: string): Promise<ShoppingCart[]> {
   
-  const apiUrl = `http://localhost:3016/api/ProductManagement/${productID}`;
+  const apiUrl = `http://localhost:3017/api/OrderManagement/GetShoppingCart/${productID}`;
   const response = await fetch(apiUrl);
   const data = await response.json();
-  console.log('Data:', data.product);
-  assertIsPosts(data.product);
+  console.log('Data:', data.cartDetails);
+  assertIsPosts(data.cartDetails);
   
-  return data.product;
+  return data.cartDetails;
 }
 
 export function assertIsPosts(postsData: ShoppingCart[]) {
@@ -20,7 +20,7 @@ export function assertIsPosts(postsData: ShoppingCart[]) {
   }
  
   postsData.forEach(post => {
-    if (!post.productID) {
+    if (!post.productId) {
       throw new Error("post is missing an id");
     }
   });

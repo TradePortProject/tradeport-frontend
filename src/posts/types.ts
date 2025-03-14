@@ -21,6 +21,7 @@
   };
 
   export type Order = Product & {
+    
     paymentMode: number;
     paymentCurrency: string;
     shippingCost: number;
@@ -30,10 +31,14 @@
   };
 
   export type ShoppingCart = Product & {
+    productId: string;
     paymentMode: number;
     paymentCurrency: string;
     shippingCost: number;
     shippingCurrency: string;
     shippingAddress: string;
-    orderquantity: number;
+    orderQuantity: number;
+    productPrice: number;
+    totalPrice: number;
+    productImage: { productImageURL: string }[];
   };

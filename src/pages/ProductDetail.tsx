@@ -5,8 +5,7 @@ import { ShoppingCart } from '../posts/types';
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { ValidationError } from "../posts/ValidationError";
-
-import { ShoppingCartPost } from '../posts/shoppingcartPost';
+import { ShoppingCartPost } from '../posts/shoppingCartPost';
 
 export function ProductDetail() {
   const {
@@ -36,7 +35,7 @@ export function ProductDetail() {
       order.paymentCurrency = post?.paymentCurrency || 'SGD';
       order.shippingCurrency = post?.shippingCurrency || 'SGD';
       order.shippingAddress = post?.shippingAddress || '';
-      order.orderquantity = orderquantity||0;
+      order.orderQuantity = orderquantity||0;
       console.log("Submitted details:", order);
       try {
         const body = await ShoppingCartPost(order);
@@ -55,9 +54,9 @@ export function ProductDetail() {
       }
       const postsData = await getPosts(productID);
       const selectedPost = postsData.find((p) => p.productID === productID);
-      setPost(selectedPost ? { ...selectedPost, orderquantity: Number(selectedPost.orderquantity) } : null);
+      setPost(selectedPost ? { ...selectedPost, orderQuantity: Number(selectedPost.orderQuantity)} : null);
       if (selectedPost) {
-        setValue("orderquantity", Number(selectedPost.orderquantity));
+        setValue("orderQuantity", Number(selectedPost.orderQuantity));
       }
     };
     fetchPost();
@@ -69,10 +68,10 @@ export function ProductDetail() {
 
   const handleQuantityChange = (change: number) => {
     setOrderQuantity((prevQuantity) => Math.max(1, prevQuantity + change));
-    setValue("orderquantity", (orderquantity + change));
+    setValue("orderQuantity", (orderquantity + change));
   };
 
-  const productImageUrl = post.productImage && post.productImage.length > 0 ? post.productImage[0] : '/images/headphone.png';
+  const productImageUrl = post.productImage && post.productImage.length > 0 ? post.productImage[0].productImageURL : '/images/headphone.png';
 
   return (
     <form 
@@ -84,7 +83,7 @@ export function ProductDetail() {
       <div className="flex flex-col p-6 m-3 space-y-10 bg-white rounded-2xl shadow-2xl md:flex-row md:space-y-0 md:space-x-10 md:m-0 md:p-16">
         <div>
           <img
-            src={productImageUrl}
+            src={`http://localhost:3016${productImageUrl}`}
             alt={post.productName}
             className="mx-auto duration-200 w-60 hover:scale-105"
           />
@@ -126,7 +125,7 @@ export function ProductDetail() {
               </div>
             </div>
           </div>
-            <ValidationError fieldError={errors.orderquantity} />
+            <ValidationError fieldError={errors.orderQuantity} />
             <div className="group" id="purchaseButton">
               <button className="w-full transition-all duration-150 bg-blue-700 text-white border-b-8 border-b-blue-700 rounded-lg group-hover:border-t-8 group-hover:border-b-0 group-hover:bg-blue-700 group-hover:border-t-blue-700 group-hover:shadow-lg">
                 <div className="px-8 py-4 duration-150 bg-blue-500 rounded-lg group-hover:bg-blue-700">

@@ -1,5 +1,5 @@
 import { Product } from './types';
-const apiUrl = process.env.REACT_APP_PRODUCT_API_URL || 'ProductManagement';
+const apiUrl = 'http://localhost:3016/api/ProductManagement';
 
 export async function savePost(newPostData: Product, image: File | null) {
   
