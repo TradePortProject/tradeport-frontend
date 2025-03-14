@@ -10,6 +10,13 @@ import Categories from "./pages/Categories";
 import Profile from "./pages/Profile";
 
 import CatalogGrid from "./components/CatalogGrid";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import Login from "./pages/Login";
+
+import RoleBasedRoute from "./routes/RoleBasedRoute";
+import RetailerDashboard from "./pages/RetailerDashboard";
+import WholesalerDashboard from "./pages/WholesalerDashboard";
+import { ShoppingPage } from "./pages/ShoppingPage";
 
 
 
@@ -28,7 +35,7 @@ const App = () => {
         <Route element={<ProtectedRoute />}>
           <Route path="/product" element={<ProductMaster />} />
           <Route path="/productdetail/:productID" element={<ProductDetail />} />
-          <Route path="/cart" element={<ShoppingCart />} />
+          <Route path="/cart/:retailerID" element={<ShoppingPage/>} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/thank-you" element={<ThankYouPage />} />
         </Route>
