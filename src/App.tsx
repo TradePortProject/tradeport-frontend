@@ -1,16 +1,15 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProductMaster } from "./pages/Product";
 import { ThankYouPage } from "./pages/ThankYouPage";
-import { ProductDetail } from './pages/ProductDetail';
+import { ProductDetail } from "./pages/ProductDetail";
 import Home from "./pages/Home";
 import Error from "./pages/Error";
-import Navbar from "./components/Navbar";
+import Navbar from "./components/Navbar/Navbar";
 import Footer from "./components/Footer";
 import Categories from "./pages/Categories";
 import Profile from "./pages/Profile";
 
 import CatalogGrid from "./components/CatalogGrid";
-import { ShoppingPage } from "./pages/ShoppingPage";
 
 
 
@@ -19,15 +18,34 @@ const App = () => {
     <BrowserRouter>
       <Navbar />
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<Home />} />
-        <Route path="/catalogGrid" element={<CatalogGrid />} />
-        <Route path="/product" element={<ProductMaster />} />
-        <Route path="/productdetail/:productID" element={<ProductDetail />} />
         <Route path="/categories" element={<Categories />} />
         <Route path="/catalogGrid" element={<CatalogGrid />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/cart/:productID" element={<ShoppingPage/>} />
-        <Route path="/thank-you" element={<ThankYouPage />} />
+        <Route path="/login" element={<Login />} />
+
+        {/* Protected Routes (Only Authenticated Users) */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/product" element={<ProductMaster />} />
+          <Route path="/productdetail/:productID" element={<ProductDetail />} />
+          <Route path="/cart" element={<ShoppingCart />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/thank-you" element={<ThankYouPage />} />
+        </Route>
+
+        {/* Role-Based Routes */}
+        <Route element={<RoleBasedRoute allowedRoles={["retailer"]} />}>
+          <Route path="/retailer-dashboard" element={<RetailerDashboard />} />
+        </Route>
+
+        <Route element={<RoleBasedRoute allowedRoles={["wholesaler"]} />}>
+          <Route
+            path="/wholesaler-dashboard"
+            element={<WholesalerDashboard />}
+          />
+        </Route>
+
+        {/* Catch-All Route */}
         <Route path="*" element={<Error />} />
       </Routes>
       <Footer />
