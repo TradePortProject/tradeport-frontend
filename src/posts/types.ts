@@ -16,15 +16,29 @@
     retailerID: string;
     manufacturerId: string;
     shippingCost: number;
-    productimage: File | null;
+    productImage: string;
     productID: string;
   };
 
   export type Order = Product & {
+    
     paymentMode: number;
     paymentCurrency: string;
     shippingCost: number;
     shippingCurrency: string;
     shippingAddress: string;
     orderquantity: string;
+  };
+
+  export type ShoppingCart = Product & {
+    productId: string;
+    paymentMode: number;
+    paymentCurrency: string;
+    shippingCost: number;
+    shippingCurrency: string;
+    shippingAddress: string;
+    orderQuantity: number;
+    productPrice: number;
+    totalPrice: number;
+    productImage: { productImageURL: string }[];
   };

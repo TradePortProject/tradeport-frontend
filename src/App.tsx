@@ -8,13 +8,17 @@ import Navbar from "./components/Navbar/Navbar";
 import Footer from "./components/Footer";
 import Categories from "./pages/Categories";
 import Profile from "./pages/Profile";
-import ShoppingCart from "./pages/ShoppingCart";
+
 import CatalogGrid from "./components/CatalogGrid";
+import ProtectedRoute from "./routes/ProtectedRoute";
 import Login from "./pages/Login";
+
+import RoleBasedRoute from "./routes/RoleBasedRoute";
 import RetailerDashboard from "./pages/RetailerDashboard";
 import WholesalerDashboard from "./pages/WholesalerDashboard";
-import ProtectedRoute from "./routes/ProtectedRoute";
-import RoleBasedRoute from "./routes/RoleBasedRoute"; // New Role-Based Route Component
+import { ShoppingPage } from "./pages/ShoppingPage";
+
+
 
 const App = () => {
   return (
@@ -31,7 +35,7 @@ const App = () => {
         <Route element={<ProtectedRoute />}>
           <Route path="/product" element={<ProductMaster />} />
           <Route path="/productdetail/:productID" element={<ProductDetail />} />
-          <Route path="/cart" element={<ShoppingCart />} />
+          <Route path="/cart/:retailerID" element={<ShoppingPage/>} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/thank-you" element={<ThankYouPage />} />
         </Route>

@@ -1,22 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getPosts } from '../posts/getPost';
-import { Order } from '../posts/types';
+import { ShoppingCart } from '../posts/types';
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { ValidationError } from "../posts/ValidationError";
-import { orderPost } from '../posts/orderPost';
+import { ShoppingCartPost } from '../posts/shoppingCartPost';
 
 export function ProductDetail() {
   const {
-      register,
       handleSubmit,
+      setValue,
       formState: {errors},
-    } = useForm<Order>();
+    } = useForm<ShoppingCart>();
   const navigate = useNavigate();
-  const { productID } = useParams<{ productID: string }>();
-  const [post, setPost] = useState<Order | null>(null);
-  const onSubmit = async (order: Order): Promise<void> => {
+  const {productID } = useParams<{ productID: string }>();
+  const [post, setPost] = useState<ShoppingCart | null>(null);
+  const [orderquantity, setOrderQuantity] = useState<number>(1);
+
+  const onSubmit = async (order: ShoppingCart): Promise<void> => {
       order.productID = productID || '';
       order.productName = post?.productName || '';
       order.description = post?.description || '';
@@ -33,12 +35,12 @@ export function ProductDetail() {
       order.paymentCurrency = post?.paymentCurrency || 'SGD';
       order.shippingCurrency = post?.shippingCurrency || 'SGD';
       order.shippingAddress = post?.shippingAddress || '';
-
+      order.orderQuantity = orderquantity||0;
       console.log("Submitted details:", order);
       try {
-        const body = await orderPost(order);
+        const body = await ShoppingCartPost(order);
         console.log("response:", body);
-        navigate(`/thank-you`);
+        navigate(`/catalogGrid`);
       } catch (error) {
         console.error("Error saving post:", error);
       }
@@ -46,18 +48,30 @@ export function ProductDetail() {
 
   useEffect(() => {
     const fetchPost = async () => {
-      const postsData = await getPosts();
+      if (!productID) {
+        console.error("Product ID is undefined");
+        return;
+      }
+      const postsData = await getPosts(productID);
       const selectedPost = postsData.find((p) => p.productID === productID);
-      setPost(selectedPost || null);
+      setPost(selectedPost ? { ...selectedPost, orderQuantity: Number(selectedPost.orderQuantity)} : null);
+      if (selectedPost) {
+        setValue("orderQuantity", Number(selectedPost.orderQuantity));
+      }
     };
     fetchPost();
-  }, [productID]);
+  }, [productID, setValue]);
 
   if (!post) {
     return <div>No product details available.</div>;
   }
 
-  
+  const handleQuantityChange = (change: number) => {
+    setOrderQuantity((prevQuantity) => Math.max(1, prevQuantity + change));
+    setValue("orderQuantity", (orderquantity + change));
+  };
+
+  const productImageUrl = post.productImage && post.productImage.length > 0 ? post.productImage[0].productImageURL : '/images/headphone.png';
 
   return (
     <form 
@@ -69,7 +83,7 @@ export function ProductDetail() {
       <div className="flex flex-col p-6 m-3 space-y-10 bg-white rounded-2xl shadow-2xl md:flex-row md:space-y-0 md:space-x-10 md:m-0 md:p-16">
         <div>
           <img
-            src={`/images/headphone.png`}
+            src={`http://localhost:3016${productImageUrl}`}
             alt={post.productName}
             className="mx-auto duration-200 w-60 hover:scale-105"
           />
@@ -91,19 +105,27 @@ export function ProductDetail() {
                 {post.description}
               </p>                            
             </div>
-            <div className="flex items-center space-x-3">
-              <label htmlFor="quantity" className="text-sm font-bold text-gray-400">Quantity:</label>
-              <input
-                id="orderquantity"
-                type="number"
-                min="1"
-                max="100"
-                value={post.orderquantity}                
-                className="rounded-lg border-2 border-gray-300 p-1"
-                {...register("orderquantity", { required: "You must enter quantity" })}
-              />
+            <div className="flex flex-col mb-4 space-y-3 text-center md:text-left">
+              <div className="flex items-center justify-center space-x-3">
+                <div data-svg-wrapper style={{position: 'relative'}}>
+                <button type="button" onClick={() => handleQuantityChange(-1)} className="p-1">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4.03662 10H15.7033" stroke="#121212" stroke-width="0.9375" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+                </div>
+                <div className="flex items-center justify-center w-10 h-10 text-xl font-bold text-gray-700 bg-gray-100 rounded-lg">           
+                {orderquantity}</div>
+                <div data-svg-wrapper style={{position: 'relative'}}>
+                <button type="button" onClick={() => handleQuantityChange(1)} className="p-1">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10.4686 4.16669C10.4686 3.9078 10.2587 3.69794 9.99984 3.69794C9.74096 3.69794 9.53109 3.9078 9.53109 4.16669V9.53127H4.1665C3.90762 9.53127 3.69775 9.74114 3.69775 10C3.69775 10.2589 3.90762 10.4688 4.1665 10.4688H9.53109V15.8334C9.53109 16.0922 9.74096 16.3021 9.99984 16.3021C10.2587 16.3021 10.4686 16.0922 10.4686 15.8334V10.4688H15.8332C16.0921 10.4688 16.3019 10.2589 16.3019 10C16.3019 9.74114 16.0921 9.53127 15.8332 9.53127H10.4686V4.16669Z" fill="#121212"/>
+                  </svg>
+                </button>
+              </div>
             </div>
-            <ValidationError fieldError={errors.orderquantity} />
+          </div>
+            <ValidationError fieldError={errors.orderQuantity} />
             <div className="group" id="purchaseButton">
               <button className="w-full transition-all duration-150 bg-blue-700 text-white border-b-8 border-b-blue-700 rounded-lg group-hover:border-t-8 group-hover:border-b-0 group-hover:bg-blue-700 group-hover:border-t-blue-700 group-hover:shadow-lg">
                 <div className="px-8 py-4 duration-150 bg-blue-500 rounded-lg group-hover:bg-blue-700">
