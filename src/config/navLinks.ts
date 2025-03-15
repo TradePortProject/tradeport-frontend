@@ -7,9 +7,11 @@ export interface NavLinkType {
 const navLinks: NavLinkType[] = [
   { name: "Home", path: "/" },
   { name: "Catalog", path: "/catalogGrid" },
-  { name: "Categories", path: "/categories" },
+  // { name: "Categories", path: "/categories" },
   { name: "Product", path: "/product", protected: true },
   { name: "Cart", path: "/cart", protected: true },
+  { name: "Orders", path: "/orders", protected: true },
+  
   //   { name: "Profile", path: "/profile", protected: true },
 ];
 

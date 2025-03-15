@@ -17,6 +17,7 @@ import RoleBasedRoute from "./routes/RoleBasedRoute";
 import RetailerDashboard from "./pages/RetailerDashboard";
 import WholesalerDashboard from "./pages/WholesalerDashboard";
 import { ShoppingPage } from "./pages/ShoppingPage";
+import Orders from "./pages/Orders";  
 
 
 
@@ -38,6 +39,7 @@ const App = () => {
           <Route path="/cart/:retailerID" element={<ShoppingPage/>} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/thank-you" element={<ThankYouPage />} />
+		  <Route path="/orders" element={<Orders />} />
         </Route>
 
         {/* Role-Based Routes */}
