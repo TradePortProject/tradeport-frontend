@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 const OrderGrid = ({ orders }: { orders: any[] }) => {
-  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null); 
   const [orderStates, setOrderStates] = useState(
     orders.map(() => ({ approved: false, rejected: false }))
   );

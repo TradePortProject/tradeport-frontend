@@ -12,7 +12,7 @@ const Orders: React.FC = () => {
   const [searchText, setSearchText] = useState<string>("");
 
   const handlePageChange = (page: number) => {
-    setPageNumber(page);
+    setPageNumber(page); 
   };
 
   const handleSearchChange = (newSearchText: string) => {

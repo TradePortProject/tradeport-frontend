@@ -18,7 +18,7 @@ import RetailerDashboard from "./pages/RetailerDashboard";
 import WholesalerDashboard from "./pages/WholesalerDashboard";
 import { ShoppingPage } from "./pages/ShoppingPage";
 import Orders from "./pages/Orders";  
-
+ 
 
 
 const App = () => {

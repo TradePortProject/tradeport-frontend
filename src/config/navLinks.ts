@@ -2,7 +2,7 @@ export interface NavLinkType {
   name: string;
   path: string;
   protected?: boolean;
-}
+} 
 
 const navLinks: NavLinkType[] = [
   { name: "Home", path: "/" },
