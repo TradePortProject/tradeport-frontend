@@ -1,32 +1,42 @@
 import React, { useState } from 'react';
 
-const OrderGrid = ({ orders }: { orders: any[] }) => {
-  const [expandedOrder, setExpandedOrder] = useState<string | null>(null); 
-  const [orderStates, setOrderStates] = useState(
-    orders.map(() => ({ approved: false, rejected: false }))
+const OrderGrid = ({
+  orders,
+  handleAction,
+}: {
+  orders: any[];
+  handleAction: (orderID: string, orderDetailID: string, action: boolean) => void;
+}) => {
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [orderDetailsStates, setOrderDetailsStates] = useState(
+    orders.reduce((acc: any, order: any) => {
+      order.orderDetails.forEach((detail: any) => {
+        acc[detail.orderDetailID] = { approved: false, rejected: false };
+      });
+      return acc;
+    }, {})
   );
 
   const toggleOrderDetails = (orderID: string) => {
     setExpandedOrder((prev) => (prev === orderID ? null : orderID));
   };
 
-  const handleAction = (orderIndex: number, action: string) => {
-    setOrderStates((prev) =>
-      prev.map((state, index) =>
-        index === orderIndex
-          ? {
-              ...state,
-              approved: action === 'approve',
-              rejected: action === 'reject',
-            }
-          : state
-      )
-    );
+  const handleLocalAction = (orderID: string, orderDetailID: string, action: boolean) => {
+    handleAction(orderID, orderDetailID, action); // Call parent function
+
+    // Update local state for UI changes
+    setOrderDetailsStates((prev: any) => ({
+      ...prev,
+      [orderDetailID]: {
+        approved: action === true,
+        rejected: action === false,
+      },
+    }));
   };
 
   return (
     <div className="grid grid-cols-1 gap-4 p-4">
-      {orders.map((order, orderIndex) => (
+      {orders.map((order) => (
         <div
           key={order.orderID}
           className="bg-white shadow-md rounded-lg p-4 border border-gray-200"
@@ -35,11 +45,8 @@ const OrderGrid = ({ orders }: { orders: any[] }) => {
             <div>
               <h2 className="text-lg font-semibold">Order ID: {order.orderID}</h2>
               <p>Retailer: {order.retailerName}</p>
-              <p>Total Price:  {order.totalPrice} {order.paymentCurrency}</p>
-              <p>Order Status: {order.deliveryPersonnelID}</p>
-              <p>Total Price: {order.totalPrice} {order.paymentCurrency} </p>
-              <p>paymentMode: {order.paymentMode}</p>
-              <p>Order Status: {order.shippingCost} {order.shippingCurrency}</p>
+              <p>Total Price: {order.totalPrice} {order.paymentCurrency}</p>
+              <p>Payment Mode: {order.paymentMode}</p>
               <p>Shipping Address: {order.shippingAddress}</p>
               <p>Order Status: {order.orderStatus}</p>
             </div>
@@ -54,34 +61,53 @@ const OrderGrid = ({ orders }: { orders: any[] }) => {
             <div className="mt-4 bg-gray-100 p-4 rounded">
               <h3 className="text-md font-bold mb-2">Order Details</h3>
               <div className="space-y-4">
-                {order.orderDetails.map((detail: any, detailIndex: number) => (
+                {order.orderDetails.map((detail: any) => (
                   <div
                     key={detail.orderDetailID}
-                    className="flex justify-between items-center bg-white shadow-sm rounded p-2"
+                    className={`flex justify-between items-center bg-white shadow-sm rounded p-2 ${
+                      orderDetailsStates[detail.orderDetailID].approved ||
+                      orderDetailsStates[detail.orderDetailID].rejected
+                        ? 'opacity-50'
+                        : ''
+                    }`}
                   >
                     <div>
-					  <p>Product Name: {detail.productName}</p>
-					  <p>ManufacturerName: {detail.manufacturerName}</p>
-					  <p>Quantity: {detail.quantity}</p>
-					  <p>ProductPrice: {detail.productPrice}</p>
-					  <p>Order Status: {detail.orderItemStatus}</p>
-
+                      <p>Product Name: {detail.productName}</p>
+                      <p>Quantity: {detail.quantity}</p>
+                      <p>
+                        Price: {detail.productPrice} {detail.currency}
+                      </p>
+                      <p>Status: {detail.orderItemStatus}</p>
                     </div>
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => handleAction(orderIndex, 'approve')}
-                        disabled={orderStates[orderIndex].approved || orderStates[orderIndex].rejected}
+                        onClick={() =>
+                          handleLocalAction(order.orderID, detail.orderDetailID, true)
+                        }
+                        disabled={
+                          orderDetailsStates[detail.orderDetailID].approved ||
+                          orderDetailsStates[detail.orderDetailID].rejected
+                        }
                         className={`px-4 py-2 ${
-                          orderStates[orderIndex].approved ? 'bg-gray-300' : 'bg-green-500'
+                          orderDetailsStates[detail.orderDetailID].approved
+                            ? 'bg-gray-300'
+                            : 'bg-green-500'
                         } text-white rounded`}
                       >
                         Approve
                       </button>
                       <button
-                        onClick={() => handleAction(orderIndex, 'reject')}
-                        disabled={orderStates[orderIndex].approved || orderStates[orderIndex].rejected}
+                        onClick={() =>
+                          handleLocalAction(order.orderID, detail.orderDetailID, false)
+                        }
+                        disabled={
+                          orderDetailsStates[detail.orderDetailID].approved ||
+                          orderDetailsStates[detail.orderDetailID].rejected
+                        }
                         className={`px-4 py-2 ${
-                          orderStates[orderIndex].rejected ? 'bg-gray-300' : 'bg-red-500'
+                          orderDetailsStates[detail.orderDetailID].rejected
+                            ? 'bg-gray-300'
+                            : 'bg-red-500'
                         } text-white rounded`}
                       >
                         Reject
@@ -97,6 +123,5 @@ const OrderGrid = ({ orders }: { orders: any[] }) => {
     </div>
   );
 };
-
 
 export default OrderGrid;
