@@ -3,7 +3,6 @@ import OrderGrid from '../components/OrderGrid';
 import Pagination from '../components/Pagination';
 import SearchBar from '../components/SearchBar';
 
-
 const Orders: React.FC = () => {
   const [data, setData] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -12,7 +11,7 @@ const Orders: React.FC = () => {
   const [searchText, setSearchText] = useState<string>("");
 
   const handlePageChange = (page: number) => {
-    setPageNumber(page); 
+    setPageNumber(page);
   };
 
   const handleSearchChange = (newSearchText: string) => {
@@ -39,6 +38,32 @@ const Orders: React.FC = () => {
     }
   };
 
+  const handleAction = async (orderID: string, orderDetailID: string, action: boolean) => {
+    try {
+      const response = await fetch(`http://localhost:3017/api/OrderManagement/AcceptRejectOrder`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderID: orderID,
+          orderItems: [{ orderDetailID: orderDetailID, isAccepted: action }],
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update order status');
+      }
+
+      //alert(`Order detail ${action ? 'approved' : 'rejected'} successfully!`);
+
+      // Optionally, refresh orders after action
+      fetchOrders();
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      alert('Failed to update order. Please try again.');
+    }
+  };
 
   useEffect(() => {
     setLoading(true); // Reset loading whenever a fetch is triggered
@@ -48,24 +73,23 @@ const Orders: React.FC = () => {
   }, [searchText, pageNumber]);
 
   return (
-  
-	<div className="mx-auto max-w-7xl px-1 py-1">
-	  <div className="mx-auto mt-1 flex justify-center">
-		<SearchBar searchText={searchText} onSearchChange={handleSearchChange} />
-	  </div>
-	  {data.length > 0 ? (
-		<div className="mt-1 flex justify-center">
-		  <OrderGrid orders={data} />
-		</div>
-	  ) : (
-		<div>No Orders found. Adjust your filters.</div>
-	  )}
-	  <div className="mt-1 flex justify-center">
-		<Pagination pageNumber={pageNumber} totalPages={totalPages} onPageChange={handlePageChange} />
-	  </div>
-	</div>
-
-
+    <div className="mx-auto max-w-7xl px-1 py-1">
+      <div className="mx-auto mt-1 flex justify-center">
+        <SearchBar searchText={searchText} onSearchChange={handleSearchChange} />
+      </div>
+      {loading ? (
+        <div>Loading orders...</div>
+      ) : data.length > 0 ? (
+        <div className="mt-1 flex justify-center">
+          <OrderGrid orders={data} handleAction={handleAction} />
+        </div>
+      ) : (
+        <div>No Orders found. Adjust your filters.</div>
+      )}
+      <div className="mt-1 flex justify-center">
+        <Pagination pageNumber={pageNumber} totalPages={totalPages} onPageChange={handlePageChange} />
+      </div>
+    </div>
   );
 };
 
