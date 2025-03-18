@@ -3,6 +3,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 type User = {
   email: string;
   name?: string;
+  userID?: string;
   picture?: string;
   role?: "retailer" | "wholesaler" | "admin" | null;
   phoneNo?: string;
@@ -64,6 +65,7 @@ const authSlice = createSlice({
         token: string;
         user: {
           loginID: string;
+          userID: string;
           userName: string;
           role: number;
           phoneNo?: string;
@@ -79,7 +81,9 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       state.token = action.payload.token;
       state.user = {
+        ...state.user, // Preserve existing details (email, name, picture)
         email: apiUser.loginID, // Map `loginID` → `email`
+        userID: apiUser.userID, // Map `userName` → `name`
         name: apiUser.userName, // Map `userName` → `name`
         role:
           apiUser.role === 0

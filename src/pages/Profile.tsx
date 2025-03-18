@@ -4,6 +4,9 @@ import { RootState } from "../store/store";
 const Profile: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
 
+  const capitalizeFirstLetter = (str: string) =>
+    str.charAt(0).toUpperCase() + str.slice(1);
+
   // Profile Data from Redux
   const profile = {
     firstName: "", // Not available in Redux (optional)
@@ -11,7 +14,7 @@ const Profile: React.FC = () => {
     displayName: user?.name || "N/A",
     email: user?.email || "N/A",
     companyName: "", // Not available in Redux (optional)
-    businessType: user?.role || "N/A",
+    businessType: user?.role ? capitalizeFirstLetter(user.role) : "N/A",
     phoneNumber: user?.phoneNo || "N/A",
     address: user?.address || "N/A",
     remarks: user?.remarks || "N/A",
