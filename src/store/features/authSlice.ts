@@ -4,7 +4,7 @@ type User = {
   email: string;
   name?: string;
   picture?: string;
-  role: "retailer" | "wholesaler" | "admin" | null; // RBAC
+  role?: "retailer" | "wholesaler" | "admin" | null; // RBAC
 };
 
 interface AuthState {
@@ -25,6 +25,19 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    setUserDetails: (
+      state,
+      action: PayloadAction<{ email: string; name?: string; picture?: string }>,
+    ) => {
+      // ✅ Store user details but DON'T authenticate or authorize
+      state.user = {
+        ...state.user, // Preserve existing role if already set
+        email: action.payload.email,
+        name: action.payload.name,
+        picture: action.payload.picture,
+      };
+    },
+
     register: (
       state,
       action: PayloadAction<{
@@ -35,6 +48,7 @@ const authSlice = createSlice({
       // ✅ Store user details but don't log them in
       state.isRegistered = true;
       state.user = {
+        ...state.user, // Preserve existing details (email, name, picture)
         email: action.payload.email,
         role: action.payload.role,
       };
@@ -61,5 +75,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { register, login, logout } = authSlice.actions;
+export const { setUserDetails, register, login, logout } = authSlice.actions;
 export default authSlice.reducer;

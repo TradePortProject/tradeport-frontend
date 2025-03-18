@@ -1,8 +1,9 @@
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
-import { login } from "../store/features/authSlice";
+import { login, setUserDetails } from "../store/features/authSlice";
 import { useDispatch } from "react-redux";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 const GoogleAuthButton: React.FC = () => {
   const dispatch = useDispatch();
@@ -18,6 +19,14 @@ const GoogleAuthButton: React.FC = () => {
     console.log("Received fresh Google Token:", credentialResponse.credential); // Debugging
 
     try {
+      const { email, name, picture } = jwtDecode<{
+        email: string;
+        name?: string;
+        picture?: string;
+      }>(credentialResponse.credential);
+
+      dispatch(setUserDetails({ email, name, picture }));
+
       // Send only the token as raw text/plain
       const response = await axios.post(
         "http://localhost:7237/api/User/validategoogleuser",

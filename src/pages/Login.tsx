@@ -1,9 +1,16 @@
 import { useState } from "react";
-// import GoogleAuthButton from "../GoogleAuthButton";
+import { useDispatch } from "react-redux";
+import { register as registerUser } from "../store/features/authSlice";
 import GoogleAuthButton from "../components/GoogleAuthButton";
 
 const Login: React.FC = () => {
   const [role, setRole] = useState<"retailer" | "wholesaler" | null>(null);
+  const dispatch = useDispatch();
+
+  const handleRoleSelection = (selectedRole: "retailer" | "wholesaler") => {
+    setRole(selectedRole);
+    dispatch(registerUser({ email: "", role: selectedRole })); // Store initial role in Redux
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
@@ -20,7 +27,7 @@ const Login: React.FC = () => {
           </h3>
           <div className="mt-4 flex justify-center space-x-4">
             <button
-              onClick={() => setRole("retailer")}
+              onClick={() => handleRoleSelection("retailer")}
               className={`w-1/2 rounded-md px-6 py-3 font-medium transition ${
                 role === "retailer" ? "bg-blue-600 text-white" : "bg-gray-100"
               }`}
@@ -28,7 +35,7 @@ const Login: React.FC = () => {
               Retailer
             </button>
             <button
-              onClick={() => setRole("wholesaler")}
+              onClick={() => handleRoleSelection("wholesaler")}
               className={`w-1/2 rounded-md px-6 py-3 font-medium transition ${
                 role === "wholesaler"
                   ? "bg-green-600 text-white"
