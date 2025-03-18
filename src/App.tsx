@@ -8,7 +8,7 @@ import Navbar from "./components/Navbar/Navbar";
 import Footer from "./components/Footer";
 import Categories from "./pages/Categories";
 import Profile from "./pages/Profile";
-import Register from "./pages/Register";
+import RegisterForm from "./pages/RegisterForm";
 import CatalogGrid from "./components/CatalogGrid";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import Login from "./pages/Login";
@@ -29,7 +29,7 @@ const App = () => {
         <Route path="/categories" element={<Categories />} />
         <Route path="/catalogGrid" element={<CatalogGrid />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/register" element={<RegisterForm />} />
 
         {/* Protected Routes (Only Authenticated Users) */}
         <Route element={<ProtectedRoute />}>
