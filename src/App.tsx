@@ -29,6 +29,7 @@ const App = () => {
         <Route path="/categories" element={<Categories />} />
         <Route path="/catalogGrid" element={<CatalogGrid />} />
         <Route path="/login" element={<Login />} />
+
         <Route path="/register" element={<RegisterForm />} />
 
         {/* Protected Routes (Only Authenticated Users) */}
@@ -36,6 +37,7 @@ const App = () => {
           <Route path="/product" element={<ProductMaster />} />
           <Route path="/productdetail/:productID" element={<ProductDetail />} />
           <Route path="/cart/:retailerID" element={<ShoppingPage />} />
+
           <Route path="/profile" element={<Profile />} />
           <Route path="/thank-you" element={<ThankYouPage />} />
           <Route path="/orders" element={<Orders />} />
