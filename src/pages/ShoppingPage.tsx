@@ -7,24 +7,24 @@ import { useNavigate } from "react-router-dom";
 import { getShoppingPosts } from "../posts/getShoppingPosts";
 
 export function ShoppingPage() {
-  let { productID } = useParams<{ productID: string }>();
-  productID =  "3fa85f64-5717-4562-b3fc-2c963f66afa6";
+  let { retailerID } = useParams<{ retailerID: string }>();
+  retailerID =  "3fa85f64-5717-4562-b3fc-2c963f66afa6";
   const navigate = useNavigate();
   const [posts, setPosts] = useState<ShoppingCart[] | null>(null);
   const [totalPrice, setTotalPrice] = useState<number>(0);
 
   useEffect(() => {
      const fetchPost = async () => {
-       if (!productID) {
-         console.error("Product ID is undefined");
+       if (!retailerID) {
+         console.error("retailer ID is undefined");
          return;
        }
-       const postsData = await getShoppingPosts(productID);
+       const postsData = await getShoppingPosts(retailerID);
        setPosts(postsData);
        calculateTotal(postsData);
      };
      fetchPost();
-   }, [productID]);
+   }, [retailerID]);
 
    const calculateTotal = (posts: ShoppingCart[]) => {
     const total = posts.reduce((sum, post) => sum + (Number(post.productPrice) * Number(post.orderQuantity)), 0);

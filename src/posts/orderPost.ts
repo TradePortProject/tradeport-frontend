@@ -6,13 +6,13 @@ export async function orderPost(newPostData: ShoppingCart[]) {
   try {
     console.log("API URL:", apiUrl);
     const payload = {
-      retailerID: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+      retailerID: newPostData[0].retailerID,
       paymentMode: newPostData[0].paymentMode,
       paymentCurrency: newPostData[0].paymentCurrency|| 'SGD',
       shippingCost: newPostData[0].shippingCost || 10,
       shippingCurrency: newPostData[0].shippingCurrency || 'SGD',
       shippingAddress: newPostData[0].shippingAddress|| 'AMK', 
-      createdBy:'3fa85f64-5717-4562-b3fc-2c963f66afa6',
+      createdBy:newPostData[0].retailerID,
       orderDetails: createOrderDetails(newPostData),
     };
 
