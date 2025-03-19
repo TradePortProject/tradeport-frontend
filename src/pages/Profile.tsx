@@ -1,42 +1,25 @@
-import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
-import axios from "axios";
 
 const Profile: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
 
-  // Store fetched profile data
-  const [profile, setProfile] = useState({
-    firstName: "",
-    lastName: "",
-    displayName: user?.name || "",
-    email: user?.email || "",
-    companyName: "",
-    businessType: user?.role || "",
-    phoneNumber: "",
-    address: "",
-  });
+  const capitalizeFirstLetter = (str: string) =>
+    str.charAt(0).toUpperCase() + str.slice(1);
 
-  // Fetch Profile Data from Backend
-  useEffect(() => {
-    if (!user?.email) return;
-
-    const fetchProfile = async () => {
-      try {
-        const response = await axios.get(
-          `/api/user/profile?email=${user.email}`,
-        );
-        if (typeof response.data === "object") {
-          setProfile(response.data);
-        }
-      } catch (error) {
-        console.error("Error fetching profile:", error);
-      }
-    };
-
-    fetchProfile();
-  }, [user?.email]);
+  // Profile Data from Redux
+  const profile = {
+    firstName: "", // Not available in Redux (optional)
+    lastName: "", // Not available in Redux (optional)
+    displayName: user?.name || "N/A",
+    email: user?.email || "N/A",
+    companyName: "", // Not available in Redux (optional)
+    businessType: user?.role ? capitalizeFirstLetter(user.role) : "N/A",
+    phoneNumber: user?.phoneNo || "N/A",
+    address: user?.address || "N/A",
+    remarks: user?.remarks || "N/A",
+    isActive: user?.isActive ? "Active" : "Inactive",
+  };
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-gray-100 px-4 py-10">
@@ -57,7 +40,9 @@ const Profile: React.FC = () => {
                   <td className="w-1/3 bg-gray-50 px-4 py-3 font-medium capitalize text-gray-700">
                     {key.replace(/([A-Z])/g, " $1").trim()}
                   </td>
-                  <td className="px-4 py-3 text-gray-900">{value || "N/A"}</td>
+                  <td className="px-4 py-3 text-gray-900">
+                    {value.toString() || "N/A"}
+                  </td>
                 </tr>
               ))}
             </tbody>
