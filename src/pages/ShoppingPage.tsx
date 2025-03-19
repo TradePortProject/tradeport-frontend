@@ -7,7 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { getShoppingPosts } from "../posts/getShoppingPosts";
 
 export function ShoppingPage() {
-  const { productID } = useParams<{ productID: string }>();
+  let { productID } = useParams<{ productID: string }>();
+  productID =  "3fa85f64-5717-4562-b3fc-2c963f66afa6";
   const navigate = useNavigate();
   const [posts, setPosts] = useState<ShoppingCart[] | null>(null);
   const [totalPrice, setTotalPrice] = useState<number>(0);
