@@ -43,7 +43,9 @@ export function createOrderDetails(newPostData: ShoppingCart[]): OrderDetails[] 
     productId: post.productId,
     orderQuantity: post.orderQuantity,
     productPrice: post.productPrice,
-    subtotal: Number(post.productPrice) * Number(post.orderQuantity)
+    subtotal: Number(post.productPrice) * Number(post.orderQuantity),
+    manufacturerID: post.manufacturerID,
+    cartID: post.cartID,
   }));
 }
 

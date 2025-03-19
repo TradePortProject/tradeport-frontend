@@ -41,4 +41,5 @@
     productPrice: number;
     totalPrice: number;
     productImage: { productImageURL: string }[];
+    cartID: string;
   };
