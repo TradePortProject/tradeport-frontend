@@ -27,11 +27,7 @@ const Orders: React.FC = () => {
   const fetchOrders = async () => {
     try {
       const response = await fetch(
-<<<<<<< HEAD
-        `http://localhost:3017/api/OrderManagement/GetOrdersAndOrderDetails?page=${pageNumber}&search=${searchText}`,
-=======
-        `http://localhost:3017/api/OrderManagement/GetOrdersAndOrderDetails?page=${pageNumber}&productName=${searchText}`
->>>>>>> 9db45ea7a57b6250102809106770e2285ef9aa69
+        `http://localhost:3017/api/OrderManagement/GetOrdersAndOrderDetails?page=${pageNumber}&productName=${searchText}`,
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -82,35 +78,34 @@ const Orders: React.FC = () => {
     }
   };
 
-	useEffect(() => {
-		if (searchText.length >= 3 || searchText.length === 0) {
-			fetchOrders(); // Call API only if the searchText condition is satisfied
-		}
-	}, [searchText]);
-	
   useEffect(() => {
-      fetchOrders();
-  }, [ pageNumber]);
+    if (searchText.length >= 3 || searchText.length === 0) {
+      fetchOrders(); // Call API only if the searchText condition is satisfied
+    }
+  }, [searchText]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [pageNumber]);
 
   return (
-<<<<<<< HEAD
-    <div className="mx-auto max-w-7xl px-1 py-1">
-      <div className="mx-auto mt-1 flex justify-center">
+    <div className="mx-auto max-w-7xl px-1 py-12">
+      <div className="mb-4 flex flex-col items-center justify-between space-y-1 md:flex-row md:space-x-1 md:space-y-0">
         <SearchBar
           searchText={searchText}
           onSearchChange={handleSearchChange}
         />
       </div>
-      {loading ? (
-        <div>Loading orders...</div>
-      ) : data.length > 0 ? (
-        <div className="mt-1 flex justify-center">
-          <OrderGrid orders={data} handleAction={handleAction} />
+      {data.length > 0 ? (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1">
+          {data.map((product) => (
+            <OrderGrid orders={data} handleAction={handleAction} />
+          ))}
         </div>
       ) : (
-        <div>No Orders found. Adjust your filters.</div>
+        <div>No products found. Adjust your filters.</div>
       )}
-      <div className="mt-1 flex justify-center">
+      <div className="mt-4 flex justify-center">
         <Pagination
           pageNumber={pageNumber}
           totalPages={totalPages}
@@ -118,30 +113,6 @@ const Orders: React.FC = () => {
         />
       </div>
     </div>
-=======
-  
-        <div className="mx-auto max-w-7xl px-1 py-12">
-            <div className="mb-4 flex flex-col md:flex-row justify-between items-center space-y-1 md:space-y-0 md:space-x-1">
-                <SearchBar searchText={searchText} onSearchChange={handleSearchChange} />
-            </div>
-            {data.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-6">
-                    {data.map(product => (
-                         <OrderGrid orders={data} handleAction={handleAction} />
-                    ))}
-                </div>
-			
-            ) : (
-                <div>No products found. Adjust your filters.</div>
-            )}
-			<div className="mt-4 flex justify-center">
-				<Pagination pageNumber={pageNumber} totalPages={totalPages} onPageChange={handlePageChange} />
-			</div>	
-        </div>
-		
-
-
->>>>>>> 9db45ea7a57b6250102809106770e2285ef9aa69
   );
 };
 
