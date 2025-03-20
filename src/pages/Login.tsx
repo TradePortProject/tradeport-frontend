@@ -49,7 +49,7 @@ const Login: React.FC = () => {
 
         {/* ✅ Google Login Button (Only shows when role is selected) */}
         <div className="mt-6 flex justify-center">
-          {role && <GoogleAuthButton role={role} />}
+          {role && <GoogleAuthButton />}
         </div>
       </div>
     </div>
