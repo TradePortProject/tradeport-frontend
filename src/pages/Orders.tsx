@@ -1,7 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import OrderGrid from '../components/OrderGrid';
-import Pagination from '../components/Pagination';
-import SearchBar from '../components/SearchBar';
+import React, { useEffect, useState } from "react";
+import OrderGrid from "../components/OrderGrid";
+import Pagination from "../components/Pagination";
+import SearchBar from "../components/SearchBar";
+
+// Define the Order type
+interface Order {
+  id: string;
+  // Add other properties of Order as needed
+}
 
 const Orders: React.FC = () => {
   const [data, setData] = useState<Order[]>([]);
@@ -21,38 +27,45 @@ const Orders: React.FC = () => {
   const fetchOrders = async () => {
     try {
       const response = await fetch(
-        `http://localhost:3017/api/OrderManagement/GetOrdersAndOrderDetails?page=${pageNumber}&search=${searchText}`
+        `http://localhost:3017/api/OrderManagement/GetOrdersAndOrderDetails?page=${pageNumber}&search=${searchText}`,
       );
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error("Network response was not ok");
       }
       const result = await response.json();
 
       setData(result.orders);
       setTotalPages(result.totalPages || 1);
     } catch (error) {
-      console.error('Error fetching orders:', error);
-      alert('Failed to fetch orders. Please try again later.');
+      console.error("Error fetching orders:", error);
+      alert("Failed to fetch orders. Please try again later.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAction = async (orderID: string, orderDetailID: string, action: boolean) => {
+  const handleAction = async (
+    orderID: string,
+    orderDetailID: string,
+    action: boolean,
+  ) => {
     try {
-      const response = await fetch(`http://localhost:3017/api/OrderManagement/AcceptRejectOrder`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `http://localhost:3017/api/OrderManagement/AcceptRejectOrder`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            orderID: orderID,
+            orderItems: [{ orderDetailID: orderDetailID, isAccepted: action }],
+          }),
         },
-        body: JSON.stringify({
-          orderID: orderID,
-          orderItems: [{ orderDetailID: orderDetailID, isAccepted: action }],
-        }),
-      });
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to update order status');
+        throw new Error("Failed to update order status");
       }
 
       //alert(`Order detail ${action ? 'approved' : 'rejected'} successfully!`);
@@ -60,8 +73,8 @@ const Orders: React.FC = () => {
       // Optionally, refresh orders after action
       fetchOrders();
     } catch (error) {
-      console.error('Error updating order status:', error);
-      alert('Failed to update order. Please try again.');
+      console.error("Error updating order status:", error);
+      alert("Failed to update order. Please try again.");
     }
   };
 
@@ -75,7 +88,10 @@ const Orders: React.FC = () => {
   return (
     <div className="mx-auto max-w-7xl px-1 py-1">
       <div className="mx-auto mt-1 flex justify-center">
-        <SearchBar searchText={searchText} onSearchChange={handleSearchChange} />
+        <SearchBar
+          searchText={searchText}
+          onSearchChange={handleSearchChange}
+        />
       </div>
       {loading ? (
         <div>Loading orders...</div>
@@ -87,7 +103,11 @@ const Orders: React.FC = () => {
         <div>No Orders found. Adjust your filters.</div>
       )}
       <div className="mt-1 flex justify-center">
-        <Pagination pageNumber={pageNumber} totalPages={totalPages} onPageChange={handlePageChange} />
+        <Pagination
+          pageNumber={pageNumber}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
     </div>
   );
