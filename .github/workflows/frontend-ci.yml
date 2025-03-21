@@ -34,11 +34,7 @@ jobs:
         run: |
           npm run test
 
-      # Build the frontend
-      - name: Build Frontend
-        run: npm run build
-
-      # Run Tests with Coverage
+                # Run Tests with Coverage
       - name: Run Unit Tests with Coverage
         run: npm run test:coverage
 
@@ -48,3 +44,7 @@ jobs:
         with:
           name: coverage-report
           path: coverage/
+
+      # Build the frontend
+      - name: Build Frontend
+        run: npm run build
