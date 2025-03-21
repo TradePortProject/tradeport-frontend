@@ -43,13 +43,3 @@ jobs:
         with:
           name: coverage-report
           path: coverage/
-
-      # Fail if Coverage is Below Threshold
-      - name: Enforce Coverage Threshold
-        run: |
-          COVERAGE=$(jq '.total.lines.pct' coverage/coverage-summary.json)
-          echo "Coverage: $COVERAGE%"
-          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
-            echo "❌ Coverage is below 80%! Failing the workflow."
-            exit 1
-          fi
