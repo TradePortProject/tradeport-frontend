@@ -5,21 +5,18 @@ on:
     branches:
       - main
       - "feature/**" # This will trigger the workflow for all branches that start with feature/-
-    # paths:
-    #   - frontend/** # This will trigger the workflow for all changes in the frontend directory
   pull_request:
     branches:
       - main
       - "feature/**" # This will trigger the workflow for all branches that start with feature/-
-    # paths:
-    #   - frontend/** # This will trigger the workflow for all changes in the frontend directory
 
 jobs:
   frontend-tests:
     runs-on: ubuntu-latest
+
     steps:
       # Checkout the code
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
       # Setup Node.js
@@ -29,11 +26,30 @@ jobs:
           node-version: "20"
 
       # Install dependencies
-      - name: Install dependencies
-        run: |
-          npm install
+      - name: Install Dependencies
+        run: npm install
 
       # Build the frontend
-      - name: Build frontend
+      - name: Build Frontend
+        run: npm run build
+
+      # Run Tests with Coverage
+      - name: Run Unit Tests with Coverage
+        run: npm run test:coverage
+
+      # Upload Coverage Report as Artifact
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage/
+
+      # Fail if Coverage is Below Threshold
+      - name: Enforce Coverage Threshold
         run: |
-          npm run build
+          COVERAGE=$(jq '.total.lines.pct' coverage/coverage-summary.json)
+          echo "Coverage: $COVERAGE%"
+          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+            echo "❌ Coverage is below 80%! Failing the workflow."
+            exit 1
+          fi
