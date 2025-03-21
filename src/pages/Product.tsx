@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { savePost } from "../posts/savePost";
 import { ValidationError } from "../posts/ValidationError";
 import { useState } from "react";
+import { RootState } from '../store/store';
+import { useSelector } from "react-redux";
 
 export function ProductMaster() {
   const {
@@ -14,10 +16,12 @@ export function ProductMaster() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [image, setImage] = useState<File | null>(null);
   const navigate = useNavigate();
-
+  const userID = useSelector((state: RootState) => state.auth.user?.userID); // Access userID from the Redux store
+  
   const onSubmit = async (product: Product): Promise<void> => {
     console.log("Submitted details:", product);
     try {
+      product.manufacturerID = userID || '3fa85f64-5717-4562-b3fc-2c963f66afa6';
       const body: SavedPost = await savePost(product, image);
       console.log("response:", body);
       navigate(`/thank-you`);

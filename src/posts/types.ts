@@ -14,7 +14,7 @@
     wholeSaleCurrency: string;
     quantity: number;
     retailerID: string;
-    manufacturerId: string;
+    manufacturerID: string;
     shippingCost: number;
     productImage: string;
     productID: string;

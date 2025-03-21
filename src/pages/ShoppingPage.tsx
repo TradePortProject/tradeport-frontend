@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
 
-import { useParams } from "react-router-dom";
+
 import { ShoppingCart } from "../posts/types";
 import { orderPost } from "../posts/orderPost";
 import { useNavigate } from "react-router-dom";
 import { getShoppingPosts } from "../posts/getShoppingPosts";
+import { useSelector } from 'react-redux'; // Import useSelector for Redux
+import { RootState } from '../store/store';
 
 export function ShoppingPage() {
-  let { retailerID } = useParams<{ retailerID: string }>();
-  retailerID =  "3fa85f64-5717-4562-b3fc-2c963f66afa6";
+  
   const navigate = useNavigate();
   const [posts, setPosts] = useState<ShoppingCart[] | null>(null);
   const [totalPrice, setTotalPrice] = useState<number>(0);
-
+  const retailerID = useSelector((state: RootState) => state.auth.user?.userID); // Access userID from the Redux store
+  console.log('userID:', retailerID);
   useEffect(() => {
      const fetchPost = async () => {
        if (!retailerID) {

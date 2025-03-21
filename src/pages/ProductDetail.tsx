@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { ValidationError } from "../posts/ValidationError";
 import { ShoppingCartPost } from '../posts/shoppingCartPost';
+import { useSelector } from 'react-redux'; // Import useSelector for Redux
+import { RootState } from '../store/store';
 
 export function ProductDetail() {
   const {
@@ -17,7 +19,10 @@ export function ProductDetail() {
   const {productID } = useParams<{ productID: string }>();
   const [post, setPost] = useState<ShoppingCart | null>(null);
   const [orderquantity, setOrderQuantity] = useState<number>(1);
+ 
 
+  const userID = useSelector((state: RootState) => state.auth.user?.userID); // Access userID from the Redux store
+  console.log('userID:', userID);
   const onSubmit = async (order: ShoppingCart): Promise<void> => {
       order.productID = productID || '';
       order.productName = post?.productName || '';
@@ -28,14 +33,15 @@ export function ProductDetail() {
       order.wholesalePrice = post?.wholesalePrice || '';
       order.wholeSaleCurrency = post?.wholeSaleCurrency || '';
       order.quantity = post?.quantity || 0;
-      order.retailerID = post?.retailerID || '';
-      order.manufacturerId = post?.manufacturerId || '';
+      order.retailerID = userID || '';
+      order.manufacturerID = post?.manufacturerID || '';
       order.shippingCost = post?.shippingCost || 0;
       order.paymentMode = post?.paymentMode || 1;
       order.paymentCurrency = post?.paymentCurrency || 'SGD';
       order.shippingCurrency = post?.shippingCurrency || 'SGD';
       order.shippingAddress = post?.shippingAddress || '';
       order.orderQuantity = orderquantity||0;
+      
       console.log("Submitted details:", order);
       try {
         const body = await ShoppingCartPost(order);
@@ -96,7 +102,7 @@ export function ProductDetail() {
               </div>
             </div>
             <div className="max-w-sm text-2xl font-medium">
-              {post.productName}
+              {post.productName} {post.manufacturerID}{post.retailerID}
             </div>
             <div className="flex flex-col mb-4 space-y-3 text-center md:text-left" id='productDetails'>
               <p className="text-xl font-bold">WholeSale ${post.wholesalePrice}</p>
