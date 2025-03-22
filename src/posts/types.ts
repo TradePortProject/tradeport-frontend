@@ -31,7 +31,7 @@
   };
 
   export type ShoppingCart = Product & {
-    productId: string;
+
     paymentMode: number;
     paymentCurrency: string;
     shippingCost: number;

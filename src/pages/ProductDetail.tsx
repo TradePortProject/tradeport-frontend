@@ -102,7 +102,7 @@ export function ProductDetail() {
               </div>
             </div>
             <div className="max-w-sm text-2xl font-medium">
-              {post.productName} {post.manufacturerID}{post.retailerID}
+              {post.productName} 
             </div>
             <div className="flex flex-col mb-4 space-y-3 text-center md:text-left" id='productDetails'>
               <p className="text-xl font-bold">WholeSale ${post.wholesalePrice}</p>
