@@ -1,6 +1,6 @@
 # TradePort Frontend
 
-The **TradePort Frontend** is a web application developed using **React**, **TypeScript**, and **Tailwind CSS**. It serves as the user interface for the TradePort platform, providing seamless and secure access to trading functionalities. Authentication is managed using **Auth0**, ensuring robust user identity management.
+The **TradePort Frontend** is a web application developed using **React**, **TypeScript**, and **Tailwind CSS**. It serves as the user interface for the TradePort platform, providing seamless and secure access to trading functionalities. Authentication is managed using **Google Authentication**, ensuring robust user identity management.
 
 ## 🚀 Features
 - ⚡ **Modern UI/UX** with React and Tailwind CSS
@@ -54,7 +54,7 @@ npm run dev
 # or
 yarn dev
 ```
-The app will be available at [http://localhost:5173](http://localhost:5173).
+The app will be available at [http://localhost:3001](http://localhost:3001).
 
 ## 🧪 Testing
 
