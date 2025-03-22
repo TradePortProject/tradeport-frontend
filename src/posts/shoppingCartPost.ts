@@ -6,10 +6,10 @@ export async function ShoppingCartPost(newPostData: ShoppingCart) {
   try {
     console.log("API URL:", apiUrl);
     const payload = {      
-           
+          
           productID: newPostData.productID,
-          retailerID: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-          manufacturerID: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+          retailerID: newPostData.retailerID,
+          manufacturerID: newPostData.manufacturerID,
           orderQuantity: newPostData.orderQuantity,
           productPrice: newPostData.wholesalePrice,                
       
