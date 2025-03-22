@@ -48,7 +48,7 @@ const ProductCard: React.FC<Product> = ({
   const imageUrl =
     productImage.length > 0
       ? "http://localhost:3016" + productImage[0].productImageURL
-      : "http://localhost:3016/uploads/images/image-missing.jpg";
+      : "http://localhost:3001/img/image-missing.jpg";
 
   return (
     <div
