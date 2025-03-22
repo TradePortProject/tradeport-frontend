@@ -40,7 +40,7 @@ export async function orderPost(newPostData: ShoppingCart[]) {
 
 export function createOrderDetails(newPostData: ShoppingCart[]): OrderDetails[] {
   return newPostData.map(post => ({
-    productId: post.productId,
+    productID: post.productID,
     orderQuantity: post.orderQuantity,
     productPrice: post.productPrice,
     subtotal: Number(post.productPrice) * Number(post.orderQuantity),
@@ -51,7 +51,7 @@ export function createOrderDetails(newPostData: ShoppingCart[]): OrderDetails[] 
 
 // Define the OrderDetails type
 interface OrderDetails {
-  productId: string;
+  productID: string;
   orderQuantity: number;
   productPrice: number;
   subtotal: number;
