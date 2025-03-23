@@ -5,21 +5,18 @@ on:
     branches:
       - main
       - "feature/**" # This will trigger the workflow for all branches that start with feature/-
-    # paths:
-    #   - frontend/** # This will trigger the workflow for all changes in the frontend directory
   pull_request:
     branches:
       - main
       - "feature/**" # This will trigger the workflow for all branches that start with feature/-
-    # paths:
-    #   - frontend/** # This will trigger the workflow for all changes in the frontend directory
 
 jobs:
   frontend-tests:
     runs-on: ubuntu-latest
+
     steps:
       # Checkout the code
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
       # Setup Node.js
@@ -29,11 +26,25 @@ jobs:
           node-version: "20"
 
       # Install dependencies
-      - name: Install dependencies
+      - name: Install Dependencies
+        run: npm install
+
+      # Run Unit Tests with Vitest
+      - name: Run Unit Tests
         run: |
-          npm install
+          npm run test
+
+                # Run Tests with Coverage
+      - name: Run Unit Tests with Coverage
+        run: npm run test:coverage
+
+      # Upload Coverage Report as Artifact
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
 
       # Build the frontend
-      - name: Build frontend
-        run: |
-          npm run build
+      - name: Build Frontend
+        run: npm run build

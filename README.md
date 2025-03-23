@@ -1,6 +1,6 @@
 # TradePort Frontend
 
-The **TradePort Frontend** is a web application developed using **React**, **TypeScript**, and **Tailwind CSS**. It serves as the user interface for the TradePort platform, providing seamless and secure access to trading functionalities. Authentication is managed using **Auth0**, ensuring robust user identity management.
+The **TradePort Frontend** is a web application developed using **React**, **TypeScript**, and **Tailwind CSS**. It serves as the user interface for the TradePort platform, providing seamless and secure access to trading functionalities. Authentication is managed using **Google Authentication**, ensuring robust user identity management.
 
 ## 🚀 Features
 - ⚡ **Modern UI/UX** with React and Tailwind CSS
@@ -47,20 +47,14 @@ npm install
 # or
 yarn install
 ```
-3. **Configure Auth0:**
-Create a `.env` file in the root directory and add the following:
-```ini
-VITE_AUTH0_DOMAIN=your-auth0-domain
-VITE_AUTH0_CLIENT_ID=your-auth0-client-id
-VITE_AUTH0_AUDIENCE=your-auth0-audience
-```
+
 ### Running the Application
 ```bash
 npm run dev
 # or
 yarn dev
 ```
-The app will be available at [http://localhost:5173](http://localhost:5173).
+The app will be available at [http://localhost:3001](http://localhost:3001).
 
 ## 🧪 Testing
 
@@ -73,8 +67,8 @@ npm run test
 # or
 yarn test
 ```
-## 🛡️ Authentication (Auth0)
-The app uses **Auth0** for authentication. The configuration is managed through environment variables. The `services/auth.ts` file handles Auth0 initialization and provides hooks for authentication logic.
+## 🛡️ Authentication (Google authentication)
+The app uses **Google Authentication** for authentication. The configuration is managed through environment variables
 ## 🏗️ Backend Integration
 The frontend communicates with C# backend services through REST APIs. Ensure the backend is running and accessible at the correct endpoints defined in the `services/` directory.
 ## 📦 Deployment

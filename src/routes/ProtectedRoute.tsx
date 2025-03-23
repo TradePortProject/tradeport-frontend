@@ -9,7 +9,7 @@ const ProtectedRoute: React.FC = () => {
   const location = useLocation(); // Get current location
 
   if (!isLoggedIn) {
-    return <Navigate to="/login" state={{ from: location }} replace />; // 🔹 Store previous location
+    return <Navigate to="/login" state={{ from: location }} replace />; // Store previous location
   }
 
   return <Outlet />;

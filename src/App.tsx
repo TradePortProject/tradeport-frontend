@@ -30,12 +30,11 @@ const App = () => {
         <Route path="/catalogGrid" element={<CatalogGrid />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<RegisterForm />} />
-
+        <Route path="/cart" element={<ShoppingPage />} />
+        <Route path="/product" element={<ProductMaster />} />
+        <Route path="/productdetail/:productID" element={<ProductDetail />} />
         {/* Protected Routes (Only Authenticated Users) */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/product" element={<ProductMaster />} />
-          <Route path="/productdetail/:productID" element={<ProductDetail />} />
-          <Route path="/cart/:retailerID" element={<ShoppingPage />} />
+          <Route element={<ProtectedRoute />}>   
           <Route path="/profile" element={<Profile />} />
           <Route path="/thank-you" element={<ThankYouPage />} />
           <Route path="/orders" element={<Orders />} />

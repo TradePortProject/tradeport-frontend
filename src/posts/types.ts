@@ -14,7 +14,7 @@
     wholeSaleCurrency: string;
     quantity: number;
     retailerID: string;
-    manufacturerId: string;
+    manufacturerID: string;
     shippingCost: number;
     productImage: string;
     productID: string;
@@ -31,7 +31,7 @@
   };
 
   export type ShoppingCart = Product & {
-    productId: string;
+
     paymentMode: number;
     paymentCurrency: string;
     shippingCost: number;
@@ -41,4 +41,5 @@
     productPrice: number;
     totalPrice: number;
     productImage: { productImageURL: string }[];
+    cartID: string;
   };

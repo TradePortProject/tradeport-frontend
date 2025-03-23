@@ -1,32 +1,36 @@
 import { useEffect, useState } from "react";
 
-import { useParams } from "react-router-dom";
+
 import { ShoppingCart } from "../posts/types";
 import { orderPost } from "../posts/orderPost";
 import { useNavigate } from "react-router-dom";
 import { getShoppingPosts } from "../posts/getShoppingPosts";
+import { useSelector } from 'react-redux'; // Import useSelector for Redux
+import { RootState } from '../store/store';
 
 export function ShoppingPage() {
-  const { productID } = useParams<{ productID: string }>();
+  
   const navigate = useNavigate();
   const [posts, setPosts] = useState<ShoppingCart[] | null>(null);
   const [totalPrice, setTotalPrice] = useState<number>(0);
-
+  const retailerID = useSelector((state: RootState) => state.auth.user?.userID); // Access userID from the Redux store
+  console.log('userID:', retailerID);
   useEffect(() => {
      const fetchPost = async () => {
-       if (!productID) {
-         console.error("Product ID is undefined");
+       if (!retailerID) {
+         console.error("retailer ID is undefined");
          return;
        }
-       const postsData = await getShoppingPosts(productID);
+       const postsData = await getShoppingPosts(retailerID);
        setPosts(postsData);
        calculateTotal(postsData);
      };
      fetchPost();
-   }, [productID]);
+   }, [retailerID]);
 
    const calculateTotal = (posts: ShoppingCart[]) => {
     const total = posts.reduce((sum, post) => sum + (Number(post.productPrice) * Number(post.orderQuantity)), 0);
+  
     setTotalPrice(total);
   };
 
@@ -44,27 +48,31 @@ export function ShoppingPage() {
   return (
     <div className="flex flex-col lg:flex-row items-start justify-center gap-4 lg:gap-10 py-10 lg:py-20 min-h-screen mx-4 lg:mx-10">
       <div className="flex flex-col items-start justify-start w-full lg:w-auto">
-        <div className="grid grid-cols-4 lg:grid-cols-[3fr_1fr_1fr_1fr] gap-2 lg:gap-4 w-full pb-6 border-b border-gray-400">
+        <div className="grid grid-cols-5 lg:grid-cols-[3fr_1fr_1fr_1fr_1fr] gap-2 lg:gap-4 w-full pb-6 border-b border-gray-400">
           <div className="text-lg font-semibold text-gray-900 pr-4 lg:pr-12">Product</div>
           <div className="text-lg font-semibold text-gray-900">Quantity</div>
           <div className="text-lg font-semibold text-gray-900">Price</div>
           <div className="text-lg font-semibold text-gray-900">Subtotal</div>
+          <div className="text-lg font-semibold text-gray-900">Remove</div>
         </div>
         {/* Grid Layout */}
-        <div className="grid grid-cols-4 lg:grid-cols-[3fr_1fr_1fr_1fr] gap-2 lg:gap-4 w-full py-6 border-b border-gray-200">
+        <div className="grid grid-cols-5 lg:grid-cols-[3fr_1fr_1fr_1fr] gap-2 lg:gap-4 w-full py-6 border-b border-gray-200">
         { posts && posts.length > 0 && posts.map((post,index) => (
           console.log('post:', post),
           <><div className="flex items-center text-base font-normal text-gray-900 pr-4 lg:pr-12" key={index}>
-                {post.productId}
+                {post.productName}
             </div><div className="text-base font-normal text-gray-900">{post.orderQuantity}</div>
             <div className="text-base font-normal text-gray-900">${post.productPrice}</div>
             <div className="text-base font-normal text-gray-900">${Number(post.productPrice) * Number(post.orderQuantity)}
-                    <button className="ml-2 text-red-500 hover:text-red-700">
+                      
+                    
+            </div>
+            <button className="ml-2 text-red-500 hover:text-red-700">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H3a1 1 0 100 2h1v10a2 2 0 002 2h8a2 2 0 002-2V6h1a1 1 0 100-2h-2V3a1 1 0 00-1-1H6zm3 3a1 1 0 112 0v1h2a1 1 0 110 2h-1v7a1 1 0 11-2 0V8H9a1 1 0 110-2h1V5z" clipRule="evenodd" />
                         </svg>
-                    </button>
-            </div></>
+            </button>
+          </>
         ))}
         </div>        
       </div>

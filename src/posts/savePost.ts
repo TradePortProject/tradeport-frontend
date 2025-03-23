@@ -7,10 +7,10 @@ export async function savePost(newPostData: Product, image: File | null) {
   try {
   const formData = new FormData();
   console.log("Environment Variable URL:", process.env.REACT_APP_PRODUCT_API_URL);
-  newPostData.manufacturerId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
+  
   newPostData.shippingCost = 30;
 
-	formData.append('manufacturerId', newPostData.manufacturerId);
+	formData.append('manufacturerId', newPostData.manufacturerID);
   formData.append('shippingCost', newPostData.shippingCost.toString());
   formData.append('category', newPostData.category);
   formData.append('description', newPostData.description);
