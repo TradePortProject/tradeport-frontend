@@ -41,7 +41,7 @@ export async function orderPost(newPostData: ShoppingCart[]) {
 export function createOrderDetails(newPostData: ShoppingCart[]): OrderDetails[] {
   return newPostData.map(post => ({
     productID: post.productID,
-    orderQuantity: post.orderQuantity,
+    Quantity: post.orderQuantity,
     productPrice: post.productPrice,
     subtotal: Number(post.productPrice) * Number(post.orderQuantity),
     manufacturerID: post.manufacturerID,
