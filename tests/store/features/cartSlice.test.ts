@@ -1,9 +1,11 @@
+import { describe, it, expect } from "vitest";
 import cartReducer, {
   addToCart,
   removeFromCart,
   increaseQuantity,
   updateQuantity,
   clearCart,
+  CartState,
 } from "../../../src/store/features/cartSlice";
 
 /**
@@ -252,7 +254,7 @@ describe("cart reducer", () => {
    */
   it("should handle sequence of cart operations", () => {
     // Start with empty cart
-    let state = initialState;
+    let state: CartState = initialState as CartState;
 
     // Add first product
     state = cartReducer(state, addToCart(testProduct1));
