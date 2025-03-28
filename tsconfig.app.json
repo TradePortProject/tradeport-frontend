@@ -22,5 +22,9 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "tests/store/features/authSlice.test.ts"]
+  "include": [
+    "src",
+    "tests/store/features/authSlice.test.ts",
+    "tests/components/Hero.test.tsx"
+  ]
 }
