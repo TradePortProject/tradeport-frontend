@@ -72,4 +72,8 @@ export const {
   increaseQuantity,
 } = cartSlice.actions;
 
+export const selectCartState = (state: { cart: CartState }) => state.cart;
+
+export type { CartState };
+
 export default cartSlice.reducer;
