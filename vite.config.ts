@@ -23,6 +23,9 @@ export default defineConfig({
         "src/routes/**",
         "src/pages/static/**",
         "src/posts/static/**",
+        "**/components/logo/**", // Skip static components
+        "**/*.config.ts", // Skip config files
+        "**/*.d.ts", // Skip type definition file
       ], // Exclude unnecessary files
     },
   },
