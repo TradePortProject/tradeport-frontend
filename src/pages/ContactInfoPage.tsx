@@ -1,0 +1,140 @@
+import { useNavigate } from "react-router-dom";
+import ShoppingCartIcon from "../assets/icons/shopping-cart.svg";
+import ContactInfo from "../assets/icons/contactinfo.svg";
+
+export function ContactInfoPage() {
+  const navigate = useNavigate();
+
+  return (
+    <form className="space-y-4">
+      <div className="flex items-center border-10 justify-center min-h-screen bg-slate-100 px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col mb-4 bg-slate-100 space-y-3 text-center md:text-left p-10 md:px-24">
+          <div className="flex flex-col mb-4 border-black bg-slate-100 space-y-3 text-center md:text-left p-10 md:px-24">
+            <div className="max-w-sm text-xl text-center sm:text-2xl font-medium">
+              Check Out
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-2  gap-4">
+              <div className="text-sm sm:text-base  text-gray-400 font-bold flex items-center justify-center cursor-pointer"
+              onClick={() => navigate("/cart")}>
+                <img src={ShoppingCartIcon} alt="Shopping Cart" className="h-5 w-5 mr-2" />
+                Shopping Cart
+              </div>
+              <div className="text-sm sm:text-base  text-green-400 font-bold flex items-center justify-center border-b" >
+              <img src={ContactInfo} alt="Contact" className="h-5 w-5 mr-2" />
+                Checkout Summary
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col mb-4 border-black bg-slate-100 border-2 space-y-3 text-center md:text-left p-10 md:px-24">
+            <div className="max-w-sm text-xl sm:text-2xl font-medium">
+              Contact Information
+            </div>
+            <div
+              className="flex flex-col mb-4 space-y-3 text-center md:text-left"
+              id="productDetails"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm sm:text-base font-bold">First Name</p>
+                  <input
+                    type="text"
+                    id="FirstName"
+                    placeholder="First Name"
+                    className="rounded-lg border-2 border-gray-300 p-2 px-4 text-center placeholder:text-xs md:placeholder:text-sm"
+                  />
+                </div>
+                <div>
+                  <p className="text-sm sm:text-base font-bold">Last Name</p>
+                  <input
+                    type="text"
+                    id="LastName"
+                    placeholder="Last Name"
+                    className="rounded-lg border-2 border-gray-300 p-2 px-4 text-center placeholder:text-xs md:placeholder:text-sm"
+                  />
+                </div>
+              </div>
+              <p className="text-xs sm:text-sm font-bold">
+                Phone Number
+              </p>
+              <input
+                type="text"
+                id="Phone Number"
+                placeholder="Phone Number"
+                className="rounded-lg border-2 border-gray-300 p-2 px-4 text-center placeholder:text-xs md:placeholder:text-sm"
+              />
+              <p className="text-xs sm:text-sm font-bold">
+                Email Address
+              </p>
+              <input
+                type="text"
+                id="Email Address"
+                placeholder="Email Address"
+                className="rounded-lg border-2 border-gray-300 p-2 px-4 text-center placeholder:text-xs md:placeholder:text-sm"
+              />
+            </div>
+          </div>
+          <div className="flex flex-col mb-4 border-black border-2 space-y-3 text-center md:text-left p-10 md:px-24">
+            <div className="max-w-sm text-xl sm:text-2xl font-medium">
+              Shipping Information
+            </div>
+            <div
+              className="flex flex-col mb-4 space-y-3 text-center md:text-left"
+              id="Shipping Information"
+            >
+             
+              <p className="text-xs sm:text-sm font-bold">
+                Address
+              </p>
+              <input
+                type="text"
+                id="Address"
+                placeholder="Address"
+                className="rounded-lg border-2 border-gray-300 p-2 px-4 text-center placeholder:text-xs md:placeholder:text-sm"
+              />
+              <p className="text-xs sm:text-sm font-bold">
+                PinCode
+              </p>
+              <input
+                type="text"
+                id="PinCode"
+                placeholder="PinCode"
+                className="rounded-lg border-2 border-gray-300 p-2 px-4 text-center placeholder:text-xs md:placeholder:text-sm"
+              />
+            </div>
+          </div>
+          <div className="flex flex-col mb-4 border-black border-2 space-y-3 text-center md:text-left p-10 md:px-24">
+            <div className="max-w-sm text-xl sm:text-2xl font-medium">
+              Payment Information
+            </div>
+            <p className="text-xs sm:text-sm font-bold">
+              Card Number
+            </p>
+            <input
+              type="text"
+              id="Card Number"
+              placeholder="Card Number"
+              className="rounded-lg border-2 border-gray-300 p-2 px-4 text-center placeholder:text-xs md:placeholder:text-sm"
+            />
+            <p className="text-xs sm:text-sm font-bold">
+              Cart Holder name
+            </p>
+            <input
+              type="text"
+              id="Card Holder Name"
+              placeholder="Card Holder Name"
+              className="rounded-lg border-2 border-gray-300 p-2 px-4 text-center placeholder:text-xs md:placeholder:text-sm"
+            />
+          </div>
+          <div className="flex flex-col mb-4 border-black border-2 space-y-3 text-center md:text-left">
+            <div className="flex items-center justify-center w-full lg:w-[300px] p-2.5 bg-gray-900 rounded border border-lime-500">
+              <div className="text-lg font-medium text-center text-white">
+                Checkout
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  );
+}

@@ -1,14 +1,11 @@
 // src/store/features/cartSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { ShoppingCart } from "../../posts/types";
 
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-}
+
 
 interface CartItem {
-  product: Product;
+  product: ShoppingCart;
   quantity: number;
 }
 
@@ -24,9 +21,9 @@ const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    addToCart: (state, action: PayloadAction<Product>) => {
+    addToCart: (state, action: PayloadAction<ShoppingCart[]>) => {
       const existingItem = state.items.find(
-        (item) => item.product.id === action.payload.id,
+        (item) => item.product.cartID === action.payload.cartID,
       );
       if (existingItem) {
         existingItem.quantity += 1;
@@ -34,14 +31,14 @@ const cartSlice = createSlice({
         state.items.push({ product: action.payload, quantity: 1 });
       }
     },
-    removeFromCart: (state, action: PayloadAction<number>) => {
+    removeFromCart: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter(
-        (item) => item.product.id !== action.payload,
+        (item) => item.product.cartID !== action.payload,
       );
     },
-    increaseQuantity: (state, action: PayloadAction<number>) => {
+    increaseQuantity: (state, action: PayloadAction<string>) => {
       const existingItem = state.items.find(
-        (item) => item.product.id === action.payload,
+        (item) => item.product.cartID === action.payload,
       );
       if (existingItem) {
         existingItem.quantity += 1;
@@ -49,10 +46,10 @@ const cartSlice = createSlice({
     },
     updateQuantity: (
       state,
-      action: PayloadAction<{ productId: number; quantity: number }>,
+      action: PayloadAction<{ productId: string; quantity: number }>,
     ) => {
       const existingItem = state.items.find(
-        (item) => item.product.id === action.payload.productId,
+        (item) => item.product.cartID === action.payload.productId,
       );
       if (existingItem) {
         existingItem.quantity = action.payload.quantity;

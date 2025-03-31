@@ -18,6 +18,7 @@ import RetailerDashboard from "./pages/RetailerDashboard";
 import WholesalerDashboard from "./pages/WholesalerDashboard";
 import { ShoppingPage } from "./pages/ShoppingPage";
 import Orders from "./pages/Orders";
+import { ContactInfoPage } from "./pages/ContactInfoPage";
 
 const App = () => {
   return (
@@ -33,6 +34,8 @@ const App = () => {
         <Route path="/cart" element={<ShoppingPage />} />
         <Route path="/product" element={<ProductMaster />} />
         <Route path="/productdetail/:productID" element={<ProductDetail />} />
+        <Route path="/Contact" element={<ContactInfoPage />} />
+
         {/* Protected Routes (Only Authenticated Users) */}
           <Route element={<ProtectedRoute />}>   
           <Route path="/profile" element={<Profile />} />
