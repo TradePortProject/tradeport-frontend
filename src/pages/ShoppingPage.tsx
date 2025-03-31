@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from 'react-redux'; // Import useDispatch
-import { addToCart } from '../store/features/cartSlice.ts'; // Import the action
+import { addToCart, removeFromCart } from '../store/features/cartSlice.ts'; // Import the action
 
 import { ShoppingCart } from "../posts/types";
 import { orderPost } from "../posts/orderPost";
@@ -49,10 +49,9 @@ export function ShoppingPage() {
   const onSubmit = async (posts: ShoppingCart[]): Promise<void> => {
     console.log("Submitted details:", posts);
     try {
-      
-      const body = await orderPost(posts);
-      console.log("response:", body);
-      navigate(`/catalogGrid`);
+       //const body = await orderPost(posts);
+      //console.log("response:", body);
+      navigate(`/Contact`);
     } catch (error) {
       console.error("Error saving post:", error);
     }
@@ -66,6 +65,8 @@ export function ShoppingPage() {
       const updatedPosts = posts.filter(post => post.cartID !== cartID);
       setPosts(updatedPosts);
       calculateTotal(updatedPosts);
+      dispatch(removeFromCart(cartID)); // Dispatch the action to remove from Redux store
+      console.log("Removed posts:", removedPosts);
     } catch (error) {
       console.error("Error removing Cart:", error);
     }

@@ -42,4 +42,7 @@
     totalPrice: number;
     productImage: { productImageURL: string }[];
     cartID: string;
+    cartQuantity: number;
   };
+
+  
