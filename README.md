@@ -48,6 +48,7 @@ npm install
 yarn install
 ```
 
+
 ### Running the Application
 ```bash
 npm run dev
