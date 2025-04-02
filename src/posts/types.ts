@@ -33,6 +33,7 @@
   export type ShoppingCart = Product & {
 
     paymentMode: number;
+    CardNumber: string;
     paymentCurrency: string;
     shippingCost: number;
     shippingCurrency: string;

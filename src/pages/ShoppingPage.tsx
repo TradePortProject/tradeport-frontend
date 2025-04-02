@@ -80,12 +80,14 @@ export function ShoppingPage() {
         <div className="grid grid-cols-2 gap-4 ">
           <div
             className="text-sm sm:text-base text-green-400 font-bold flex items-center justify-center cursor-pointer border-b"
-            onClick={() => navigate("/Contact")}
-          >
-            <img src={ShoppingCartIcon} alt="Shopping Cart" className="h-5 w-5 mr-2" />
+            
+          > 
+          <img src={ShoppingCartIcon} alt="Shopping Cart" className="h-5 w-5 mr-2" />
             Shopping Cart
           </div>
-          <div className="text-sm sm:text-base  text-gray-400 font-bold flex items-center justify-center">
+          <div className="text-sm sm:text-base  text-gray-400 font-bold flex items-center justify-center cursor-pointer"
+           onClick={() => navigate("/Contact")}
+          >
             <img src={ContactInfo} alt="Contact" className="h-5 w-5 mr-2" />
             Checkout Summary
           </div>

@@ -18,7 +18,9 @@ export function ContactInfoPage() {
   const retailerAdd = useSelector((state: RootState) => state.auth.user?.address);
   const retailerPhone = useSelector((state: RootState) => state.auth.user?.phoneNo);
   const retailerEmail = useSelector((state: RootState) => state.auth.user?.email);
-  
+  const [shippingAddress, setShippingAddress] = useState(retailerAdd || "");
+  const [cardNumber, setCardNumber] = useState("");
+
   useEffect(() => {
       // Fetch shopping posts when retailerID changes
       const fetchPost = async () => { 
@@ -26,16 +28,30 @@ export function ContactInfoPage() {
       };
       fetchPost();
     }, [postsData]);
+    
+  const handleAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setShippingAddress(event.target.value);
+  };
+
+  // Handle card number change
+  const handleCardNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCardNumber(event.target.value);
+  };
+
    // Handle checkout submission
     const onSubmit = async (posts: ShoppingCart[]): Promise<void> => {
     console.log("Submitted details:", posts);
       try {
-        
-        const body = await orderPost(posts);
-        console.log("response:", body);
-        // Clear the cart after successful order
-        dispatch(clearCart()); // Uncomment if you have a clearCart action
-        navigate(`/catalogGrid`);
+            const updatedPosts = posts.map((post) => ({
+              ...post,
+              shippingAddress,
+              paymentInfo: { cardNumber },
+            }));
+            const body = await orderPost(updatedPosts);
+            console.log("response:", body);
+            // Clear the cart after successful order
+            dispatch(clearCart()); // Uncomment if you have a clearCart action
+            navigate(`/catalogGrid`);
       } catch (error) {
         console.error("Error saving post:", error);
       }
@@ -81,6 +97,7 @@ export function ContactInfoPage() {
                     type="text"
                     id="FirstName"
                     placeholder={retailerName}
+                    readOnly
                     className="rounded-lg border-2 border-gray-300 p-2 px-4 text-center placeholder:text-xs md:placeholder:text-sm"
                   />
                 </div>
@@ -89,7 +106,8 @@ export function ContactInfoPage() {
                   <input
                     type="text"
                     id="LastName"
-                    placeholder={retailerName}
+                    placeholder="Last Name"
+                    readOnly
                     className="rounded-lg border-2 border-gray-300 p-2 px-4 text-center placeholder:text-xs md:placeholder:text-sm"
                   />
                 </div>
@@ -101,6 +119,7 @@ export function ContactInfoPage() {
                 type="text"
                 id="Phone Number"
                 placeholder={retailerPhone}
+                readOnly
                 className="rounded-lg border-2 border-gray-300 p-2 px-4 text-center placeholder:text-xs md:placeholder:text-sm"
               />
               <p className="text-xs sm:text-sm font-bold">
@@ -110,6 +129,7 @@ export function ContactInfoPage() {
                 type="text"
                 id="Email Address"
                 placeholder={retailerEmail}
+                readOnly
                 className="rounded-lg border-2 border-gray-300 p-2 px-4 text-center placeholder:text-xs md:placeholder:text-sm"
               />
             </div>
@@ -130,6 +150,8 @@ export function ContactInfoPage() {
                 type="text"
                 id="Address"
                 placeholder={retailerAdd}
+                value={shippingAddress}
+                onChange={handleAddressChange}
                 className="rounded-lg border-2 border-gray-300 p-2 px-4 text-center placeholder:text-xs md:placeholder:text-sm"
               />
               <p className="text-xs sm:text-sm font-bold">
@@ -154,6 +176,8 @@ export function ContactInfoPage() {
               type="text"
               id="Card Number"
               placeholder="Card Number"
+              value={cardNumber}
+              onChange={handleCardNumberChange}
               className="rounded-lg border-2 border-gray-300 p-2 px-4 text-center placeholder:text-xs md:placeholder:text-sm"
             />
             <p className="text-xs sm:text-sm font-bold">
