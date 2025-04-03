@@ -1,19 +1,10 @@
 // src/store/features/cartSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { ShoppingCart } from "../../posts/types";
 
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-}
-
-interface CartItem {
-  product: Product;
-  quantity: number;
-}
 
 interface CartState {
-  items: CartItem[];
+  items: ShoppingCart[];
 }
 
 const initialState: CartState = {
@@ -24,38 +15,42 @@ const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    addToCart: (state, action: PayloadAction<Product>) => {
+    addToCart: (state, action: PayloadAction<ShoppingCart>) => {
       const existingItem = state.items.find(
-        (item) => item.product.id === action.payload.id,
+        (item) => item.cartID === action.payload.cartID,
       );
+      console.log("existingItem:", existingItem);
+      console.log("action.payload:", action.payload);
+      console.log("state.items:", state.items);
       if (existingItem) {
-        existingItem.quantity += 1;
+        //existingItem.quantity += 1;
       } else {
-        state.items.push({ product: action.payload, quantity: 1 });
+        state.items.push({ ...action.payload, cartQuantity: 1 });
+        console.log("state.items after push:", state.items);
       }
     },
-    removeFromCart: (state, action: PayloadAction<number>) => {
+    removeFromCart: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter(
-        (item) => item.product.id !== action.payload,
+        (item) => item.cartID !== action.payload,
       );
     },
-    increaseQuantity: (state, action: PayloadAction<number>) => {
+    increaseQuantity: (state, action: PayloadAction<string>) => {
       const existingItem = state.items.find(
-        (item) => item.product.id === action.payload,
+        (item) => item.cartID === action.payload,
       );
       if (existingItem) {
-        existingItem.quantity += 1;
+        existingItem.cartQuantity += 1;
       }
     },
     updateQuantity: (
       state,
-      action: PayloadAction<{ productId: number; quantity: number }>,
+      action: PayloadAction<{ productId: string; quantity: number }>,
     ) => {
       const existingItem = state.items.find(
-        (item) => item.product.id === action.payload.productId,
+        (item) => item.cartID === action.payload.productId,
       );
       if (existingItem) {
-        existingItem.quantity = action.payload.quantity;
+        existingItem.cartQuantity = action.payload.quantity;
       }
     },
     clearCart: (state) => {

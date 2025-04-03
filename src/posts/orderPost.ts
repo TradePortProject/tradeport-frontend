@@ -52,7 +52,7 @@ export function createOrderDetails(newPostData: ShoppingCart[]): OrderDetails[] 
 // Define the OrderDetails type
 interface OrderDetails {
   productID: string;
-  orderQuantity: number;
+  Quantity: number;
   productPrice: number;
   subtotal: number;
 }

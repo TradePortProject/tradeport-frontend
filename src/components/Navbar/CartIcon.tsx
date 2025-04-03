@@ -4,9 +4,8 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 
 const CartIcon: React.FC = () => {
-  const cartItemCount = useSelector(
-    (state: RootState) =>
-      state.cart?.items?.reduce((total, item) => total + item.quantity, 0) || 0,
+  const cartItemCount = useSelector((state: RootState) =>
+    state.cart.items.reduce((total, item) => total + item.cartQuantity, 0),
   );
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated,

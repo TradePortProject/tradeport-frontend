@@ -33,6 +33,7 @@
   export type ShoppingCart = Product & {
 
     paymentMode: number;
+    CardNumber: string;
     paymentCurrency: string;
     shippingCost: number;
     shippingCurrency: string;
@@ -42,4 +43,7 @@
     totalPrice: number;
     productImage: { productImageURL: string }[];
     cartID: string;
+    cartQuantity: number;
   };
+
+  
