@@ -4,10 +4,10 @@ import { register as registerUser } from "../store/features/authSlice";
 import GoogleAuthButton from "../components/GoogleAuthButton";
 
 const Login: React.FC = () => {
-  const [role, setRole] = useState<"retailer" | "wholesaler" | null>(null);
+  const [role, setRole] = useState<"retailer" | "manufacturer" | null>(null);
   const dispatch = useDispatch();
 
-  const handleRoleSelection = (selectedRole: "retailer" | "wholesaler") => {
+  const handleRoleSelection = (selectedRole: "retailer" | "manufacturer") => {
     setRole(selectedRole);
     dispatch(registerUser({ email: "", role: selectedRole })); // Store initial role in Redux
   };
@@ -35,14 +35,14 @@ const Login: React.FC = () => {
               Retailer
             </button>
             <button
-              onClick={() => handleRoleSelection("wholesaler")}
+              onClick={() => handleRoleSelection("manufacturer")}
               className={`w-1/2 rounded-md px-6 py-3 font-medium transition ${
-                role === "wholesaler"
+                role === "manufacturer"
                   ? "bg-green-600 text-white"
                   : "bg-gray-100"
               }`}
             >
-              Wholesaler
+              Manufacturer
             </button>
           </div>
         </div>

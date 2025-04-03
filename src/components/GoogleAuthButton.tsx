@@ -39,11 +39,40 @@ const GoogleAuthButton: React.FC = () => {
 
       if (response.status === 200) {
         console.log("Backend validation successful:", response.data);
-        const userData = response.data;
 
-        // Dispatch to Redux **after backend validation**
+        // Check if response has nested user object
+        const userData = response.data.user
+          ? response.data.user
+          : response.data;
+        const token = response.data.token || credentialResponse.credential;
+
+        console.log("Backend user data:", userData);
+        console.log("Type of role:", typeof userData.role);
+        console.log("Role value:", userData.role);
+
+        // Create formatted user data from correct location
+        const formattedUserData = {
+          loginID: userData.email || userData.loginID || "",
+          userID: userData.userID || "",
+          userName: userData.userName || "",
+          role:
+            typeof userData.role === "string"
+              ? parseInt(userData.role, 10)
+              : userData.role,
+          phoneNo: userData.phoneNo || "",
+          address: userData.address || "",
+          remarks: userData.remarks || "",
+          isActive: userData.isActive !== undefined ? userData.isActive : true,
+        };
+
+        console.log("Formatted user data:", formattedUserData);
+
+        // Dispatch with proper data
         dispatch(
-          login({ token: credentialResponse.credential, user: userData }),
+          login({
+            token: token,
+            user: formattedUserData,
+          }),
         );
 
         // Redirect to profile page
