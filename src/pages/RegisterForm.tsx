@@ -18,7 +18,35 @@ interface RegisterFormData {
 
 const RegisterForm: React.FC = () => {
   const navigate = useNavigate();
-  const user = useSelector((state: RootState) => state.auth.user); // Get stored user details
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  // Add debug logging to see what's coming from Redux
+  console.log("User from Redux:", user);
+  console.log("Role from Redux:", user?.role);
+
+  // Brute force mapping function
+  const getRoleNumber = (role: string | number | undefined | null): number => {
+    // If it's already a number, return it
+    if (typeof role === "number") return role;
+
+    // If it's a string, map it
+    if (typeof role === "string") {
+      if (role === "admin") return 1;
+      if (role === "retailer") return 2;
+      if (role === "manufacturer") return 3;
+      if (role === "delivery") return 4;
+
+      // Try to parse it as a number
+      const parsed = parseInt(role, 10);
+      if (!isNaN(parsed)) return parsed;
+    }
+
+    // Default to retailer
+    return 2;
+  };
+
+  const userRole = getRoleNumber(user?.role);
+  console.log("Mapped role number:", userRole);
 
   const {
     register,
@@ -26,11 +54,11 @@ const RegisterForm: React.FC = () => {
     formState: { errors },
   } = useForm<RegisterFormData>({
     defaultValues: {
-      loginID: user?.email || "", // Prefill email from Redux (Non-editable)
-      strPassword: "cGFzc3dvcmQxMjM=", // Dummy password (hidden)
-      role: 1, // Default to Wholesaler (hidden)
-      createdOn: new Date().toISOString(), // Auto-generate timestamp
-      isActive: true, // Default active
+      loginID: user?.email || "",
+      strPassword: "cGFzc3dvcmQxMjM=",
+      role: userRole, // Use our mapped role
+      createdOn: new Date().toISOString(),
+      isActive: true,
     },
   });
 

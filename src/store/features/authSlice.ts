@@ -5,7 +5,7 @@ type User = {
   name?: string;
   userID?: string;
   picture?: string;
-  role?: "retailer" | "wholesaler" | "admin" | null;
+  role?: "admin" | "retailer" | "manufacturer" | "delivery" | number | null;
   phoneNo?: string;
   address?: string;
   remarks?: string;
@@ -47,7 +47,15 @@ const authSlice = createSlice({
       state,
       action: PayloadAction<{
         email: string;
-        role: "retailer" | "wholesaler";
+        role?:
+          | "admin"
+          | "retailer"
+          | "manufacturer"
+          | "delivery"
+          | number
+          | null;
+
+        // role: "retailer" | "manufacturer";
       }>,
     ) => {
       // Store user details but don't log them in
@@ -84,13 +92,18 @@ const authSlice = createSlice({
         ...state.user, // Preserve existing details (email, name, picture)
         email: apiUser.loginID, // Map `loginID` → `email`
         userID: apiUser.userID, // Map `userName` → `name`
-        name: apiUser.userName, // Map `userName` → `name`
-        role:
-          apiUser.role === 0
-            ? "retailer"
-            : apiUser.role === 1
-              ? "wholesaler"
-              : "admin", // Convert role number to string
+        role: (() => {
+          const roleMap: Record<
+            number,
+            "admin" | "retailer" | "manufacturer" | "delivery" | null
+          > = {
+            1: "admin",
+            2: "retailer",
+            3: "manufacturer",
+            4: "delivery",
+          };
+          return roleMap[apiUser.role] || null; // Default to null if role is not mapped
+        })(),
         phoneNo: apiUser.phoneNo,
         address: apiUser.address,
         remarks: apiUser.remarks,
