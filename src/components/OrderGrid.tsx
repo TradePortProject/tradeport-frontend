@@ -96,6 +96,7 @@ const OrderGrid = ({
 					  <p class="text-lg font-bold text-gray-800">Product Name: <span class="font-normal">{detail.productName}</span></p>
 					  <p class="text-lg font-bold text-gray-800">Manufacturer Name: <span class="font-normal">{detail.manufacturerName}</span></p>
 					  <p class="text-lg font-bold text-gray-800">Quantity: <span class="font-normal">{detail.quantity}</span></p>
+					  <p class="text-lg font-bold text-gray-800">Price: <span class="font-normal">{detail.productPrice}</span></p>
 					  <p class="text-lg font-bold text-gray-800">Order Status: <span class="font-normal">{detail.orderItemStatus}</span></p>
 				
 						<div className="flex space-x-2">

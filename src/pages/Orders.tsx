@@ -83,9 +83,9 @@ const Orders: React.FC = () => {
             </div>
             {data.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-6">
-                    {data.map(product => (
+                  
                          <OrderGrid orders={data} handleAction={handleAction} />
-                    ))}
+                  
                 </div>
 			
             ) : (
