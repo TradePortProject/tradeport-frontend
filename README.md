@@ -1,6 +1,6 @@
 # TradePort Frontend
 
-The **TradePort Frontend** is a web application developed using **React**, **TypeScript**, and **Tailwind CSS**. It serves as the user interface for the TradePort platform, providing seamless and secure access to trading functionalities. Authentication is managed using **Google Authentication**, ensuring robust user identity management.
+The **TradePort Frontend** is a web application developed using **React**, **TypeScript**, and **Tailwind CSS**. It serves as the user interface for the TradePort platform, providing seamless and sophisticated user experiences.
 
 ## 🚀 Features
 - ⚡ **Modern UI/UX** with React and Tailwind CSS
@@ -28,7 +28,9 @@ tradeport-frontend/
 ├── tailwind.config.js  # Tailwind CSS configuration
 └── tsconfig.json       # TypeScript configuration
 ```
+
 ## ⚙️ Getting Started
+
 ### Prerequisites
 Ensure you have the following installed:
 - [Node.js](https://nodejs.org/en/) (v16 or higher)
@@ -38,7 +40,7 @@ Ensure you have the following installed:
 
 1. **Clone the repository:**
 ```bash
-git clone https://github.com/your-org/tradeport-frontend.git
+git clone https://github.com/TradePortProject/tradeport-frontend.git
 cd tradeport-frontend
 ```
 2. **Install dependencies:**
@@ -47,7 +49,6 @@ npm install
 # or
 yarn install
 ```
-
 
 ### Running the Application
 ```bash
@@ -68,10 +69,13 @@ npm run test
 # or
 yarn test
 ```
-## 🛡️ Authentication (Google authentication)
-The app uses **Google Authentication** for authentication. The configuration is managed through environment variables
+
+## 🛡️ Authentication (Google Authentication)
+The app uses **Google Authentication** for authentication. The configuration is managed through environment variables.
+
 ## 🏗️ Backend Integration
 The frontend communicates with C# backend services through REST APIs. Ensure the backend is running and accessible at the correct endpoints defined in the `services/` directory.
+
 ## 📦 Deployment
 To create a production build:
 ```bash
@@ -85,6 +89,7 @@ npm run preview
 # or
 yarn preview
 ```
+
 ## 🤝 Contributing
 1. Fork the repository
 2. Create a new branch (`git checkout -b feature/feature-name`)
@@ -93,7 +98,7 @@ yarn preview
 5. Open a Pull Request
 
 ## 📬 Contact
-For issues, reach out via the repository's [issues page](https://github.com/your-org/tradeport-frontend/issues).
+For issues, reach out via the repository's [issues page](https://github.com/TradePortProject/tradeport-frontend/issues).
 
 Happy Coding! 🚀
 
