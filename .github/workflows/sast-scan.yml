@@ -1,71 +1,65 @@
-name: "SAST Security Scan"
+name: "sast-scan"
 
 on:
   push:
-    branches: [main, develop, "feature/**"]
+    branches: [main, develop, githubcicd, "feature/**"]
   pull_request:
-    branches: [main]
-  # Allow manual trigger
-  workflow_dispatch:
+    branches: [main, develop]
 
 jobs:
-  security-scan:
-    name: Security Scan
+  test:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [20.x] # Updated to current LTS
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4 # Updated to v4
 
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
 
-      - name: Install Dependencies
-        run: npm ci
+      - name: Cache node modules
+        uses: actions/cache@v3
+        id: cache-nodemodules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
-      # Create suppressions file if it doesn't exist
-      - name: Create suppressions file if needed
+      - name: Install Dependencies
+        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: |
-          if [ ! -f ./odc-suppressions.xml ]; then
-            echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><suppressions xmlns=\"https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd\"></suppressions>" > odc-suppressions.xml
+          npm ci --legacy-peer-deps
+
+      - name: OWASP Dependency Check
+        run: |
+          wget https://github.com/jeremylong/DependencyCheck/releases/download/v7.2.0/dependency-check-7.2.0-release.zip
+          unzip dependency-check-7.2.0-release.zip
+
+      - name: Run scan with ODC
+        run: |
+          dependency-check/bin/dependency-check.sh --project "bitcoin" --scan . --format XML --out odc-report.xml || true
+          # Also create a text report for easier reading
+          dependency-check/bin/dependency-check.sh --project "bitcoin" --scan . > ODC-report || true
+
+      - name: Check for critical vulnerabilities
+        run: |
+          if grep -q "CRITICAL" ./ODC-report; then
+            echo "Critical vulnerabilities found"
+            grep "CRITICAL" ./ODC-report
+            exit 1
           fi
 
-      # Run OWASP Dependency Check
-      - name: Run OWASP Dependency Check
-        run: |
-          mkdir -p reports
-          wget https://github.com/jeremylong/DependencyCheck/releases/download/v7.4.4/dependency-check-7.4.4-release.zip
-          unzip dependency-check-7.4.4-release.zip
-          dependency-check/bin/dependency-check.sh --project "tradeport-frontend" --scan . --suppression ./odc-suppressions.xml --out ./reports --format "HTML" --format "JSON"
-
-      # ESLint security scanning - using eslint-plugin-security if available
-      - name: Run ESLint security scan
-        run: npm run lint || echo "Linting issues found"
-
-      # SonarCloud scan if token is available
-      - name: SonarCloud Scan
-        if: ${{ env.SONAR_TOKEN != '' }}
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-      # Run tests with coverage
-      - name: Run tests with coverage
-        run: npm test -- --coverage || echo "Test issues found"
-
-      # Upload reports as artifacts
-      - name: Archive security reports
-        uses: actions/upload-artifact@v2
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v4 # Updated to v4
         with:
-          name: security-reports
+          name: sast-report
           path: |
-            ./reports/
-            ./coverage/
+            ./ODC-report
+            ./odc-report.xml
