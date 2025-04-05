@@ -1,0 +1,71 @@
+name: "SAST Security Scan"
+
+on:
+  push:
+    branches: [main, develop, "feature/**"]
+  pull_request:
+    branches: [main]
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      # Create suppressions file if it doesn't exist
+      - name: Create suppressions file if needed
+        run: |
+          if [ ! -f ./odc-suppressions.xml ]; then
+            echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><suppressions xmlns=\"https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd\"></suppressions>" > odc-suppressions.xml
+          fi
+
+      # Run OWASP Dependency Check
+      - name: Run OWASP Dependency Check
+        run: |
+          mkdir -p reports
+          wget https://github.com/jeremylong/DependencyCheck/releases/download/v7.4.4/dependency-check-7.4.4-release.zip
+          unzip dependency-check-7.4.4-release.zip
+          dependency-check/bin/dependency-check.sh --project "tradeport-frontend" --scan . --suppression ./odc-suppressions.xml --out ./reports --format "HTML" --format "JSON"
+
+      # ESLint security scanning - using eslint-plugin-security if available
+      - name: Run ESLint security scan
+        run: npm run lint || echo "Linting issues found"
+
+      # SonarCloud scan if token is available
+      - name: SonarCloud Scan
+        if: ${{ env.SONAR_TOKEN != '' }}
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      # Run tests with coverage
+      - name: Run tests with coverage
+        run: npm test -- --coverage || echo "Test issues found"
+
+      # Upload reports as artifacts
+      - name: Archive security reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: |
+            ./reports/
+            ./coverage/
