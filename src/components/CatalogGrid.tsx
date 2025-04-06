@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import ProductCard from "./ProductCard";
 import CategorySelect from "./CategorySelect";
 import PriceRangeSelect from "./PriceRangeSelect";
@@ -62,7 +62,7 @@ const retailPriceRanges = [
 const CatalogGrid: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number>(0);
-  const [selectedQuantity, setselectedQuantity] = useState<number>(0);
+  const [selectedQuantity, setSelectedQuantity] = useState<number>(0); // Fixed camelCase
   const [selectedPrice, setSelectedPriceRange] = useState<string>(
     "All Wholesale Price",
   );
@@ -71,29 +71,33 @@ const CatalogGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [searchText, setSearchText] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (searchText.length >= 3 || searchText.length === 0) {
-      fetchProducts(); // Call API only if the searchText condition is satisfied
-    }
-  }, [searchText]);
+  const getWholesalePriceRange = useCallback((label: string) => {
+    return (
+      priceRanges.find((price) => price.label === label) || {
+        min: 0,
+        max: 1000000,
+      }
+    );
+  }, []);
 
-  useEffect(() => {
-    fetchProducts();
-  }, [
-    pageNumber,
-    selectedCategory,
-    selectedQuantity,
-    selectedPrice,
-    selectedRetailPrice,
-  ]);
+  const getRetailPriceRange = useCallback((label: string) => {
+    return (
+      retailPriceRanges.find((price) => price.label === label) || {
+        min: 0,
+        max: 1000000,
+      }
+    );
+  }, []);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
+    setLoading(true);
     try {
       const wholesaleRange = getWholesalePriceRange(selectedPrice);
       const retailRange = getRetailPriceRange(selectedRetailPrice);
       const categoryQuery =
-        selectedCategory !== 0 ? `&category=${selectedCategory}` : " ";
+        selectedCategory !== 0 ? `&category=${selectedCategory}` : "";
       const response = await fetch(
         `http://localhost:3016/api/productManagement/GetFilteredProducts?pageNumber=${pageNumber}&searchText=${searchText}${categoryQuery}&quantity=${selectedQuantity}&minWholesalePrice=${wholesaleRange.min}&maxWholesalePrice=${wholesaleRange.max}&minRetailPrice=${retailRange.min}&maxRetailPrice=${retailRange.max}`,
       );
@@ -104,45 +108,58 @@ const CatalogGrid: React.FC = () => {
     } catch (error) {
       console.error("Error fetching products:", error);
       setProducts([]); // Clear products on error
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [
+    pageNumber,
+    searchText,
+    selectedCategory,
+    selectedQuantity,
+    selectedPrice,
+    selectedRetailPrice,
+    getWholesalePriceRange,
+    getRetailPriceRange,
+  ]);
 
-  const getWholesalePriceRange = (label: string) => {
-    return (
-      priceRanges.find((price) => price.label === label) || {
-        min: 0,
-        max: 1000000,
-      }
-    );
-  };
-
-  const getRetailPriceRange = (label: string) => {
-    return (
-      retailPriceRanges.find((price) => price.label === label) || {
-        min: 0,
-        max: 1000000,
-      }
-    );
-  };
+  useEffect(() => {
+    // Only fetch if searchText is empty or at least 3 characters
+    if (searchText.length >= 3 || searchText.length === 0) {
+      fetchProducts();
+    }
+  }, [
+    fetchProducts,
+    pageNumber,
+    selectedCategory,
+    selectedQuantity,
+    selectedPrice,
+    selectedRetailPrice,
+    searchText,
+  ]);
 
   const handleSearchChange = (newSearchText: string) => {
     setSearchText(newSearchText);
+    setPageNumber(1); // Reset to first page on new search
   };
 
   const handleCategoryChange = (selectedId: number) => {
     setSelectedCategory(selectedId);
+    setPageNumber(1); // Reset to first page on category change
   };
 
   const handleQuantityChange = (selectedId: number) => {
-    setselectedQuantity(selectedId);
+    setSelectedQuantity(selectedId);
+    setPageNumber(1); // Reset to first page on quantity change
   };
 
   const handleWholesalePriceRangeChange = (selectedLabel: string) => {
     setSelectedPriceRange(selectedLabel);
+    setPageNumber(1); // Reset to first page on price change
   };
 
   const handleRetailPriceRangeChange = (selectedLabel: string) => {
     setSelectedRetailPriceRange(selectedLabel);
+    setPageNumber(1); // Reset to first page on price change
   };
 
   const handlePageChange = (page: number) => {
@@ -169,17 +186,20 @@ const CatalogGrid: React.FC = () => {
           />
           <PriceRangeSelect
             priceRanges={priceRanges}
-            selectedPrice={selectedPrice}
+            selectedPriceRange={selectedPrice}
             onChange={handleWholesalePriceRangeChange}
           />
           <PriceRangeSelect
             priceRanges={retailPriceRanges}
-            selectedPrice={selectedRetailPrice}
+            selectedPriceRange={selectedRetailPrice}
             onChange={handleRetailPriceRangeChange}
           />
         </div>
       </div>
-      {products.length > 0 ? (
+
+      {loading ? (
+        <div className="py-4 text-center">Loading products...</div>
+      ) : products.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {products.map((product) => (
             <ProductCard key={product.productID} {...product} />
@@ -188,6 +208,7 @@ const CatalogGrid: React.FC = () => {
       ) : (
         <div>No products found. Adjust your filters.</div>
       )}
+
       <div className="mt-4 flex justify-center">
         <Pagination
           pageNumber={pageNumber}

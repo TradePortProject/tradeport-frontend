@@ -14,7 +14,9 @@ const Profile: React.FC = () => {
     displayName: user?.name || "N/A",
     email: user?.email || "N/A",
     companyName: "", // Not available in Redux (optional)
-    businessType: user?.role ? capitalizeFirstLetter(user.role) : "N/A",
+    businessType: user?.role
+      ? capitalizeFirstLetter(user.role.toString())
+      : "N/A",
     phoneNumber: user?.phoneNo || "N/A",
     address: user?.address || "N/A",
     remarks: user?.remarks || "N/A",

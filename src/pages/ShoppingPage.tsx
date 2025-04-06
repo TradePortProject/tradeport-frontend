@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
-import { useDispatch } from 'react-redux'; // Import useDispatch
-import { addToCart, removeFromCart } from '../store/features/cartSlice.ts'; // Import the action
-
+import { useDispatch } from "react-redux"; // Import useDispatch
+import { addToCart, removeFromCart } from "../store/features/cartSlice.ts"; // Import the action
 import { ShoppingCart } from "../posts/types";
-import { orderPost } from "../posts/orderPost";
 import { useNavigate } from "react-router-dom";
 import { getShoppingPosts } from "../posts/getShoppingPosts";
-import { useSelector } from 'react-redux'; // Import useSelector for Redux
-import { RootState } from '../store/store';
+import { useSelector } from "react-redux"; // Import useSelector for Redux
+import { RootState } from "../store/store";
 import { TrashIcon } from "../components/TrashIcon.tsx"; // Adjust the path as needed
 import { removeFromCartShoppingPosts } from "../posts/removeFromCartShoppingPosts.ts";
 import ShoppingCartIcon from "../assets/icons/shopping-cart.svg";
@@ -20,7 +18,7 @@ export function ShoppingPage() {
   const [posts, setPosts] = useState<ShoppingCart[] | null>(null);
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const retailerID = useSelector((state: RootState) => state.auth.user?.userID); // Access userID from the Redux store
-  console.log('userID:', retailerID);
+  console.log("userID:", retailerID);
 
   useEffect(() => {
     // Fetch shopping posts when retailerID changes
@@ -33,7 +31,7 @@ export function ShoppingPage() {
       setPosts(postsData);
       calculateTotal(postsData);
       if (postsData && Array.isArray(postsData)) {
-        postsData.forEach(post => dispatch(addToCart(post))); // Dispatch each post individually
+        postsData.forEach((post) => dispatch(addToCart(post))); // Dispatch each post individually
       }
     };
     fetchPost();
@@ -41,7 +39,11 @@ export function ShoppingPage() {
 
   // Calculate total price of items in the cart
   const calculateTotal = (posts: ShoppingCart[]) => {
-    const total = posts.reduce((sum, post) => sum + (Number(post.productPrice) * Number(post.orderQuantity)), 0);
+    const total = posts.reduce(
+      (sum, post) =>
+        sum + Number(post.productPrice) * Number(post.orderQuantity),
+      0,
+    );
     setTotalPrice(total);
   };
 
@@ -49,7 +51,7 @@ export function ShoppingPage() {
   const onSubmit = async (posts: ShoppingCart[]): Promise<void> => {
     console.log("Submitted details:", posts);
     try {
-       //const body = await orderPost(posts);
+      //const body = await orderPost(posts);
       //console.log("response:", body);
       navigate(`/Contact`);
     } catch (error) {
@@ -62,7 +64,7 @@ export function ShoppingPage() {
     if (!posts) return;
     try {
       const removedPosts = await removeFromCartShoppingPosts(cartID);
-      const updatedPosts = posts.filter(post => post.cartID !== cartID);
+      const updatedPosts = posts.filter((post) => post.cartID !== cartID);
       setPosts(updatedPosts);
       calculateTotal(updatedPosts);
       dispatch(removeFromCart(cartID)); // Dispatch the action to remove from Redux store
@@ -73,74 +75,114 @@ export function ShoppingPage() {
   };
 
   return (
-    <div className="flex flex-col items-start gap-4 py-10 lg:py-10 min-h-screen mx-4 lg:mx-10">
+    <div className="mx-4 flex min-h-screen flex-col items-start gap-4 py-10 lg:mx-10 lg:py-10">
       {/* Header Section */}
-      <div className="flex flex-row justify-center   w-full p-10 mb-4">
-
-        <div className="grid grid-cols-2 gap-4 ">
-          <div
-            className="text-sm sm:text-base text-green-400 font-bold flex items-center justify-center cursor-pointer border-b"
-            
-          > 
-          <img src={ShoppingCartIcon} alt="Shopping Cart" className="h-5 w-5 mr-2" />
+      <div className="mb-4 flex w-full flex-row justify-center p-10">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex cursor-pointer items-center justify-center border-b text-sm font-bold text-green-400 sm:text-base">
+            <img
+              src={ShoppingCartIcon}
+              alt="Shopping Cart"
+              className="mr-2 h-5 w-5"
+            />
             Shopping Cart
           </div>
-          <div className="text-sm sm:text-base  text-gray-400 font-bold flex items-center justify-center cursor-pointer"
-           onClick={() => navigate("/Contact")}
+          <div
+            className="flex cursor-pointer items-center justify-center text-sm font-bold text-gray-400 sm:text-base"
+            onClick={() => navigate("/Contact")}
           >
-            <img src={ContactInfo} alt="Contact" className="h-5 w-5 mr-2" />
+            <img src={ContactInfo} alt="Contact" className="mr-2 h-5 w-5" />
             Checkout Summary
           </div>
         </div>
       </div>
 
       {/* Product List Section */}
-      <div className="flex flex-col lg:flex-row justify-center gap-5 w-full">
-        <div className="flex flex-col w-full lg:w-auto gap-4 bg-white rounded-lg p-4 sm:p-6  ">
+      <div className="flex w-full flex-col justify-center gap-5 lg:flex-row">
+        <div className="flex w-full flex-col gap-4 rounded-lg bg-white p-4 sm:p-6 lg:w-auto">
           {/* Header Row */}
-          <div className="grid grid-cols-5 lg:grid-cols-[3fr_1fr_1fr_1fr_1fr] gap-2 lg:gap-4 w-full pb-6 border-b border-gray-400">
-            <div className="text-sm sm:text-lg font-semibold text-gray-900 pr-4 lg:pr-12">Product</div>
-            <div className="text-sm sm:text-lg font-semibold text-gray-900">Quantity</div>
-            <div className="text-sm sm:text-lg font-semibold text-gray-900">Price</div>
-            <div className="text-sm sm:text-lg font-semibold text-gray-900">Subtotal</div>
-            <div className="text-sm sm:text-lg font-semibold text-gray-900"></div>
+          <div className="grid w-full grid-cols-5 gap-2 border-b border-gray-400 pb-6 lg:grid-cols-[3fr_1fr_1fr_1fr_1fr] lg:gap-4">
+            <div className="pr-4 text-sm font-semibold text-gray-900 sm:text-lg lg:pr-12">
+              Product
+            </div>
+            <div className="text-sm font-semibold text-gray-900 sm:text-lg">
+              Quantity
+            </div>
+            <div className="text-sm font-semibold text-gray-900 sm:text-lg">
+              Price
+            </div>
+            <div className="text-sm font-semibold text-gray-900 sm:text-lg">
+              Subtotal
+            </div>
+            <div className="text-sm font-semibold text-gray-900 sm:text-lg"></div>
           </div>
           {/* Product Rows */}
-          <div className="grid grid-cols-5 lg:grid-cols-[3fr_1fr_1fr_1fr_1fr] gap-2 lg:gap-4 w-full py-6 border-b border-gray-200">
-            {posts && posts.length > 0 && posts.map((post) => (
-              <>
-                <div className="flex items-center text-base font-normal text-gray-900 pr-4 lg:pr-12" key={post.cartID}>
-                  {post.productName}
-                </div>
-                <div className="text-base font-normal text-gray-900 text-center">{post.orderQuantity}</div>
-                <div className="text-base font-normal text-gray-900">${post.productPrice}</div>
-                <div className="text-base font-normal text-gray-900">${Number(post.productPrice) * Number(post.orderQuantity)}</div>
-                <button className="ml-2 text-red-500 hover:text-red-700" onClick={() => removePost(post.cartID)}>
-                  <TrashIcon />
-                </button>
-              </>
-            ))}
+          <div className="grid w-full grid-cols-5 gap-2 border-b border-gray-200 py-6 lg:grid-cols-[3fr_1fr_1fr_1fr_1fr] lg:gap-4">
+            {posts &&
+              posts.length > 0 &&
+              posts.map((post) => (
+                <>
+                  <div
+                    className="flex items-center pr-4 text-base font-normal text-gray-900 lg:pr-12"
+                    key={post.cartID}
+                  >
+                    {post.productName}
+                  </div>
+                  <div className="text-center text-base font-normal text-gray-900">
+                    {post.orderQuantity}
+                  </div>
+                  <div className="text-base font-normal text-gray-900">
+                    ${post.productPrice}
+                  </div>
+                  <div className="text-base font-normal text-gray-900">
+                    ${Number(post.productPrice) * Number(post.orderQuantity)}
+                  </div>
+                  <button
+                    className="ml-2 text-red-500 hover:text-red-700"
+                    onClick={() => removePost(post.cartID)}
+                  >
+                    <TrashIcon />
+                  </button>
+                </>
+              ))}
           </div>
         </div>
 
         {/* Cart Summary Section */}
-        <div className="flex flex-col items-start justify-center gap-4 p-4 sm:p-6 rounded w-full sm:w-auto lg:w-[300px] border border-black mx-auto lg:mx-0 shadow-md">
-          <div className="self-stretch text-lg sm:text-xl font-medium text-gray-900">Cart summary</div>
-          <div className="grid grid-cols-2 gap-2 w-full border-b-2 border-black">
-            <div className="text-sm sm:text-lg font-normal text-gray-900">Free shipping</div>
-            <div className="text-sm sm:text-lg font-normal text-right text-gray-900">$0.00</div>
-            <div className="text-sm sm:text-lg font-normal text-gray-900 border-b border-gray-200">SubTotal</div>
-            <div className="text-sm sm:text-lg font-normal text-right text-gray-900 border-b border-gray-200">${totalPrice.toFixed(2)}</div>
-            <div className="text-sm sm:text-lg font-normal text-gray-900">Total</div>
-            <div className="text-sm sm:text-lg font-normal text-right text-gray-900">${totalPrice.toFixed(2)}</div>
+        <div className="mx-auto flex w-full flex-col items-start justify-center gap-4 rounded border border-black p-4 shadow-md sm:w-auto sm:p-6 lg:mx-0 lg:w-[300px]">
+          <div className="self-stretch text-lg font-medium text-gray-900 sm:text-xl">
+            Cart summary
           </div>
-          <div className="flex items-center justify-center w-full lg:w-[300px] p-2.5 bg-gray-900 rounded border border-lime-500 cursor-pointer" onClick={() => posts && onSubmit(posts)}>
-            <div className="text-sm sm:text-lg font-medium text-center text-white">Checkout</div>
+          <div className="grid w-full grid-cols-2 gap-2 border-b-2 border-black">
+            <div className="text-sm font-normal text-gray-900 sm:text-lg">
+              Free shipping
+            </div>
+            <div className="text-right text-sm font-normal text-gray-900 sm:text-lg">
+              $0.00
+            </div>
+            <div className="border-b border-gray-200 text-sm font-normal text-gray-900 sm:text-lg">
+              SubTotal
+            </div>
+            <div className="border-b border-gray-200 text-right text-sm font-normal text-gray-900 sm:text-lg">
+              ${totalPrice.toFixed(2)}
+            </div>
+            <div className="text-sm font-normal text-gray-900 sm:text-lg">
+              Total
+            </div>
+            <div className="text-right text-sm font-normal text-gray-900 sm:text-lg">
+              ${totalPrice.toFixed(2)}
+            </div>
+          </div>
+          <div
+            className="flex w-full cursor-pointer items-center justify-center rounded border border-lime-500 bg-gray-900 p-2.5 lg:w-[300px]"
+            onClick={() => posts && onSubmit(posts)}
+          >
+            <div className="text-center text-sm font-medium text-white sm:text-lg">
+              Checkout
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 }
-
-
