@@ -40,17 +40,16 @@ jobs:
         run: |
           wget https://github.com/github/codeql-cli-binaries/releases/download/v2.14.5/codeql-linux64.zip
           unzip codeql-linux64.zip -d codeql
-          echo "$(pwd)/codeql/codeql" >> $GITHUB_PATH
 
       - name: Create CodeQL database
         run: |
           mkdir codeql-db
-          ./codeql/codeql database create codeql-db --language=javascript --source-root=.
+          ./codeql/codeql/codeql database create codeql-db --language=javascript --source-root=.
 
       - name: Analyze with CodeQL and generate SARIF
         run: |
           mkdir -p results
-          ./codeql/codeql database analyze codeql-db \
+          ./codeql/codeql/codeql database analyze codeql-db \
             javascript-code-scanning.qls \
             --format=sarif-latest \
             --output=results/javascript.sarif || true
