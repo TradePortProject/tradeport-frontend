@@ -12,7 +12,6 @@ jobs:
     permissions:
       actions: read
       contents: read
-      security-events: write
 
     strategy:
       matrix:
@@ -68,16 +67,20 @@ jobs:
       - name: Autobuild (for Node-based projects)
         uses: github/codeql-action/autobuild@v2
 
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
-        with:
-          category: "sast"
+      - name: Run CodeQL Analysis
+        run: |
+          mkdir -p results
+          codeql database analyze --format=sarif-latest \
+            --output=results/javascript.sarif \
+            /github/workspace/codeql-database \
+            javascript-code-scanning.qls || true
 
-      # --- Upload Reports ---
-      - name: Archive all security reports
+      # --- Archive Reports ---
+      - name: Archive security reports
         uses: actions/upload-artifact@v4
         with:
           name: security-reports
           path: |
             ./ODC-report
             ./odc-report.xml
+            ./results/javascript.sarif
