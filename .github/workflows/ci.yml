@@ -1,4 +1,4 @@
-name: "CI - Stage 1 - Build and Test"
+name: "CI - Stage 1 - Build and Test (Parallel)"
 
 on:
   push:
@@ -15,11 +15,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
-    name: Build and Test
+  setup:
+    name: Setup Environment
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-
+    outputs:
+      node-modules-cache-hit: ${{ steps.cache-nodemodules.outputs.cache-hit }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -30,30 +30,47 @@ jobs:
           node-version: "20"
           cache: "npm"
 
+      - name: Cache node_modules
+        id: cache-nodemodules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
       - name: Install Dependencies
+        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: npm ci --prefer-offline
 
-      - name: Run Linting
-        run: npm run lint || true # Allow lint warnings without failing
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm run lint || true
 
-      - name: Run Unit Tests
-        run: npm run test || true # Allow unit test failures without failing
-
-      - name: Run Coverage Tests
-        run: npm run test:coverage || true # Allow coverage test failures without failing
-
-      - name: Upload Coverage Report
-        uses: actions/upload-artifact@v4
+  unit-test:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm run test || true
+      - run: npm run test:coverage || true
+      - uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: coverage/
           retention-days: 7
 
-      - name: Build Frontend
-        run: npm run build || true
-
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
+  build:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm run build || true
+      - uses: actions/upload-artifact@v4
         with:
           name: build-files
           path: dist/
@@ -62,47 +79,24 @@ jobs:
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: test
+    needs: [lint, unit-test, build]
     permissions:
       actions: read
       contents: read
       security-events: write
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20.x
           cache: "npm"
-
-      - name: Install Dependencies
-        run: npm ci --prefer-offline --no-audit
-
-      # - name: Initialize CodeQL
-      #   uses: github/codeql-action/init@v2
-      #   with:
-      #     languages: javascript, typescript
-
-      # - name: Perform CodeQL Analysis
-      #   uses: github/codeql-action/analyze@v2
-      #   with:
-      #     category: "/language:javascript"
-
-      - name: Run npm audit
-        run: npm audit --json > npm-audit.json || true
-
-      - name: Detect High Severity Issues
-        run: |
+      - run: npm ci --prefer-offline --no-audit
+      - run: npm audit --json > npm-audit.json || true
+      - run: |
           if grep -q '"severity":"high"' ./npm-audit.json; then
             echo "⚠️ High severity vulnerabilities found"
           fi
-
-      - name: Upload Security Audit
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: security-reports
           path: npm-audit.json
@@ -113,15 +107,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: security-scan
     if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request' && github.base_ref == 'main'
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@master
+      - uses: sonarsource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
