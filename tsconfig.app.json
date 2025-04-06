@@ -22,12 +22,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": [
-    "src",
-    "tests/store/features/authSlice.test.ts",
-    "tests/components/Hero.test.tsx",
-    "tests/pages/ThankYouPage.test.tsx",
-    "tests/pages/Login.test.tsx",
-    "tests/components/TrashIcon.test.tsx"
-  ]
+  "include": ["src"]
 }
