@@ -2,9 +2,9 @@ name: "CI-Stage-2-SAST-and-SCA-Scan"
 
 on:
   push:
-    branches: [main, develop, githubcicd, "feature/**"]
+    branches: [main, "feature/**"]
   pull_request:
-    branches: [main, develop]
+    branches: [main]
 
 jobs:
   sast:
