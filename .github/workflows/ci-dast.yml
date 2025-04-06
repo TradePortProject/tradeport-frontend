@@ -60,6 +60,9 @@ jobs:
           nohup npm run preview -- --port 4173 &
           sleep 10
 
+      - name: 🧪 Confirm App is Running
+        run: curl -I http://localhost:4173 || exit 1
+
       - name: ☣️ Run OWASP ZAP Scan
         run: |
           docker run --network host \
