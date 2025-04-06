@@ -1,0 +1,10 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/tradeport-frontend"
+    schedule:
+      interval: "daily" # You can change this to 'daily' or 'monthly' if needed
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - frontend
