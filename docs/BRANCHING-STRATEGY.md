@@ -2,7 +2,7 @@
 
 This repository follows **Trunk Based Development (TBD)** to enable rapid builds, quality delivery through automation, and frictionless feature flow. This strategy supports CI/CD for all frontend and backend services.
 
-![img](./docs/img/image-1.png)
+![img](./img/image-1.png)
 
 ## 📂 Branch Types
 
@@ -36,7 +36,7 @@ This repository follows **Trunk Based Development (TBD)** to enable rapid builds
 
 ---
 
-![img](./docs/img/image-2-ci.png)
+![img](./img/image-2-ci.png)
 
 ## 📌 Release Strategy
 
