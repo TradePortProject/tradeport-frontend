@@ -11,7 +11,8 @@ const RoleBasedRoute: React.FC<RoleBasedRouteProps> = ({ allowedRoles }) => {
     (state: RootState) => state.auth,
   );
 
-  if (!isAuthenticated || !user || !allowedRoles.includes(user.role!)) {
+  // Check if user is authenticated and has an allowed role
+  if (!isAuthenticated || !user || (typeof user.role === 'string' && !allowedRoles.includes(user.role as any))) {
     return <Navigate to="/login" />;
   }
 

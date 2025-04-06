@@ -3,7 +3,8 @@ import { useDispatch } from 'react-redux'; // Import useDispatch
 import { addToCart, removeFromCart } from '../store/features/cartSlice.ts'; // Import the action
 
 import { ShoppingCart } from "../posts/types";
-import { orderPost } from "../posts/orderPost";
+// Import orderPost if needed
+// import { orderPost } from "../posts/orderPost";
 import { useNavigate } from "react-router-dom";
 import { getShoppingPosts } from "../posts/getShoppingPosts";
 import { useSelector } from 'react-redux'; // Import useSelector for Redux

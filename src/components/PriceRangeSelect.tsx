@@ -8,11 +8,14 @@ interface PriceRange {
 
 interface PriceRangeSelectProps {
     priceRanges: PriceRange[];
-    selectedPriceRange: string;
+    selectedPriceRange?: string;
+    selectedPrice?: string; // Added for backward compatibility
     onChange: (selectedPriceRange: string) => void;
 }
 
-const PriceRangeSelect: React.FC<PriceRangeSelectProps> = ({ priceRanges, selectedPriceRange, onChange }) => {
+const PriceRangeSelect: React.FC<PriceRangeSelectProps> = ({ priceRanges, selectedPriceRange, selectedPrice, onChange }) => {
+    // Use selectedPriceRange if provided, otherwise fall back to selectedPrice
+    const selectedValue = selectedPriceRange || selectedPrice || priceRanges[0].label;
     const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedLabel = event.target.value;
         onChange(selectedLabel);
@@ -21,7 +24,7 @@ const PriceRangeSelect: React.FC<PriceRangeSelectProps> = ({ priceRanges, select
     return (
         <div className="price-range-select">
             <select
-                value={selectedPriceRange}
+                value={selectedValue}
                 onChange={handleChange}
                 className="px-4 py-2 border rounded"
             >

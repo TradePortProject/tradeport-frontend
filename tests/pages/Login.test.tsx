@@ -30,12 +30,12 @@ vi.mock("../../src/components/GoogleAuthButton", () => ({
 }));
 
 // Helper function to render with Router context
-const renderWithRouter = (ui) => {
+const renderWithRouter = (ui: React.ReactElement) => {
   return render(<MemoryRouter>{ui}</MemoryRouter>);
 };
 
 describe("Login Component", () => {
-  let mockDispatch;
+  let mockDispatch: any;
 
   beforeEach(() => {
     mockDispatch = vi.fn();
