@@ -1,76 +1,70 @@
 name: "CI - Stage-2 - Security Scan - SAST & SCA"
 
 on:
-  # Only run on PRs to main and pushes to main or feature branches to save GitHub Actions minutes
   push:
     branches: [main, "feature/**"]
   pull_request:
     branches: [main]
-  # Allow manual triggering
-  workflow_dispatch:
 
-# Limit concurrent runs to save resources on personal account
+# Limit concurrent runs to save GitHub minutes
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  security-scan:
+  owasp-sca:
+    name: OWASP Dependency Check
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      actions: read
-      contents: read
+    timeout-minutes: 10
+
+    strategy:
+      matrix:
+        node-version: [20.x]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: ${{ matrix.node-version }}
           cache: "npm"
 
+      - name: Cache node modules
+        uses: actions/cache@v3
+        id: cache-nodemodules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Install Dependencies
-        run: npm ci --prefer-offline --no-audit
+        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
+        run: npm ci --legacy-peer-deps
 
-      # --- SAST with CodeQL CLI (no GHAS required) ---
-      - name: Download CodeQL CLI
+      - name: Download OWASP Dependency Check
         run: |
-          wget https://github.com/github/codeql-cli-binaries/releases/download/v2.14.5/codeql-linux64.zip
-          unzip codeql-linux64.zip -d codeql
+          wget https://github.com/jeremylong/DependencyCheck/releases/download/v7.2.0/dependency-check-7.2.0-release.zip
+          unzip dependency-check-7.2.0-release.zip
 
-      - name: Create CodeQL database
+      - name: Run OWASP Scan and Generate Reports
         run: |
-          mkdir codeql-db
-          ./codeql/codeql/codeql database create codeql-db --language=javascript --source-root=.
+          dependency-check/bin/dependency-check.sh --project "TradePort" --scan . --format XML --out odc-report.xml | tee ODC-report || true
 
-      - name: Analyze with CodeQL and generate SARIF
+      - name: Check for critical vulnerabilities
         run: |
-          mkdir -p results
-          ./codeql/codeql/codeql database analyze codeql-db \
-            javascript-code-scanning.qls \
-            --format=sarif-latest \
-            --output=results/javascript.sarif || true
-
-      # --- Lightweight SCA using npm audit ---
-      - name: Run npm audit for dependencies
-        run: npm audit --json > npm-audit.json || true
-
-      - name: Check for high severity vulnerabilities
-        run: |
-          if grep -q '"severity":"high"' ./npm-audit.json; then
-            echo "⚠️ High severity vulnerabilities found in dependencies"
-            echo "Review npm-audit.json for details (but won't fail the build)"
+          if grep -q "CRITICAL" ./ODC-report; then
+            echo "🚨 Critical vulnerabilities found"
+            grep "CRITICAL" ./ODC-report
+            exit 1
           fi
 
-      # --- Archive Reports ---
-      - name: Archive security reports
+      - name: Archive ODC reports
         uses: actions/upload-artifact@v4
         with:
-          name: security-reports
+          name: sast-report
           path: |
-            ./npm-audit.json
-            ./results/javascript.sarif
+            ./ODC-report
+            ./odc-report.xml
           retention-days: 7
