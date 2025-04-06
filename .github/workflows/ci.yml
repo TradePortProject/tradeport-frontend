@@ -76,7 +76,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: npm ci
-      - run: npm run build
+
+      - run: |
+          export ROLLUP_USE_NODE_BUILTINS=true
+          npm run build
+
       # - run: npm run build || true
       - uses: actions/upload-artifact@v4
         with:
