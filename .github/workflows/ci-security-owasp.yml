@@ -1,4 +1,4 @@
-name: "CI - Stage-2 - Security Scan - SAST & SCA"
+name: "CI - Stage 2 - Security Scan - SAST & SCA"
 
 on:
   push:
