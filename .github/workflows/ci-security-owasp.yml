@@ -1,0 +1,101 @@
+name: "CI - Stage 2 - Security Scan - SAST & SCA"
+
+on:
+  push:
+    branches: [main, "feature/**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  setup:
+    name: Security Scan Setup
+    runs-on: ubuntu-latest
+    outputs:
+      cache-hit: ${{ steps.cache-nodemodules.outputs.cache-hit }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: "npm"
+
+      - name: Cache node_modules
+        id: cache-nodemodules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install Dependencies
+        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
+        run: npm ci --legacy-peer-deps
+
+  npm-audit:
+    name: SCA - npm Audit
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: "npm"
+      - run: npm ci --prefer-offline --no-audit
+      - name: Run npm audit
+        run: npm audit --json > npm-audit.json || true
+      - name: Detect High Severity
+        run: |
+          if grep -q '"severity":"high"' ./npm-audit.json; then
+            echo "⚠️ High severity vulnerabilities found"
+          fi
+      - name: Upload npm audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: npm-audit.json
+          retention-days: 7
+
+  owasp-sca:
+    name: SCA - OWASP Dependency Check
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download OWASP Dependency Check
+        run: |
+          wget https://github.com/jeremylong/DependencyCheck/releases/download/v7.2.0/dependency-check-7.2.0-release.zip
+          unzip dependency-check-7.2.0-release.zip
+      - name: Run OWASP Scan
+        run: |
+          dependency-check/bin/dependency-check.sh --project "TradePort" --scan . --format XML --out odc-report.xml | tee ODC-report || true
+      - name: Check for CRITICAL vulnerabilities
+        run: |
+          if grep -q "CRITICAL" ./ODC-report; then
+            echo "🚨 Critical vulnerabilities found"
+            grep "CRITICAL" ./ODC-report
+            exit 1
+          fi
+      - name: Upload OWASP reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: owasp-report
+          path: |
+            ODC-report
+            odc-report.xml
+          retention-days: 7
+
+  archive:
+    name: 📦 Final Security Archive
+    runs-on: ubuntu-latest
+    needs: [npm-audit, owasp-sca]
+    steps:
+      - name: ✅ Security scan summary
+        run: echo "Both npm audit and OWASP scan completed."
