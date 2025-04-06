@@ -37,7 +37,7 @@ const App = () => {
         <Route path="/Contact" element={<ContactInfoPage />} />
 
         {/* Protected Routes (Only Authenticated Users) */}
-          <Route element={<ProtectedRoute />}>   
+        <Route element={<ProtectedRoute />}>
           <Route path="/profile" element={<Profile />} />
           <Route path="/thank-you" element={<ThankYouPage />} />
           <Route path="/orders" element={<Orders />} />
@@ -48,7 +48,7 @@ const App = () => {
           <Route path="/retailer-dashboard" element={<RetailerDashboard />} />
         </Route>
 
-        <Route element={<RoleBasedRoute allowedRoles={["wholesaler"]} />}>
+        <Route element={<RoleBasedRoute allowedRoles={["manufacturer"]} />}>
           <Route
             path="/wholesaler-dashboard"
             element={<WholesalerDashboard />}

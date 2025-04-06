@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 
 interface RoleBasedRouteProps {
-  allowedRoles: ("retailer" | "wholesaler" | "admin")[];
+  allowedRoles: (number | "admin" | "retailer" | "manufacturer" | "delivery")[];
 }
 
 const RoleBasedRoute: React.FC<RoleBasedRouteProps> = ({ allowedRoles }) => {

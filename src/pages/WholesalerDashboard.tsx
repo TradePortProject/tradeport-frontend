@@ -10,7 +10,7 @@ const WholesalerDashboard: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isAuthenticated || user?.role !== "wholesaler") {
+    if (!isAuthenticated || user?.role !== "manufacturer") {
       navigate("/login");
     }
   }, [isAuthenticated, user, navigate]);
