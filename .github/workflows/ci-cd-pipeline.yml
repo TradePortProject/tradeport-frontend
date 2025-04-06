@@ -1,0 +1,171 @@
+name: "CI - Stage-1 - Build and Run"
+
+on:
+  push:
+    branches:
+      - main
+      - "feature/**" # Trigger on all feature branches
+  pull_request:
+    branches:
+      - main
+  # Allow manual triggering
+  workflow_dispatch:
+
+# Limit concurrent runs to save resources on personal account
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Stage 1: Build and Test
+  test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci --prefer-offline
+
+      - name: Run Linting
+        run: npm run lint || true # Don't fail workflow on linting errors, just report them
+
+      - name: Run Unit Tests
+        run: npm run test
+
+      - name: Run Unit Tests with Coverage
+        run: npm run test:coverage
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7 # Shorter retention to save space
+
+      - name: Build Frontend
+        run: npm run build
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-files
+          path: dist/
+          retention-days: 1 # Only needed for deployment job
+
+  # Stage 2: Security Scan
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: test
+    permissions:
+      actions: read
+      contents: read
+      security-events: write # For GitHub security dashboard integration
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      # --- Use GitHub's native CodeQL for SAST ---
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript, typescript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:javascript"
+
+      # --- Lightweight SCA using npm audit ---
+      - name: Run npm audit for dependencies
+        run: npm audit --json > npm-audit.json || true
+
+      - name: Check for high severity vulnerabilities
+        run: |
+          if grep -q '"severity":"high"' ./npm-audit.json; then
+            echo "⚠️ High severity vulnerabilities found in dependencies"
+            echo "Review npm-audit.json for details (but won't fail the build)"
+          fi
+
+      # --- Archive Reports ---
+      - name: Archive security reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            ./npm-audit.json
+          retention-days: 7
+
+  # Stage 3: SonarQube Analysis (only on main branch or PRs to main)
+  sonar:
+    name: SonarQube Analysis
+    runs-on: ubuntu-latest
+    needs: security-scan
+    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request' && github.base_ref == 'main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for better SonarQube analysis
+
+      - name: Set up SonarQube
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+            -Dsonar.host.url=https://sonarcloud.io
+
+  # Stage 4: Docker Build and Push (only on main branch)
+  docker:
+    name: Docker Build and Push
+    runs-on: ubuntu-latest
+    needs: [test, security-scan]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/tradeport-frontend:latest,${{ secrets.DOCKER_USERNAME }}/tradeport-frontend:${{ github.sha }}
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/tradeport-frontend:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/tradeport-frontend:buildcache,mode=max
