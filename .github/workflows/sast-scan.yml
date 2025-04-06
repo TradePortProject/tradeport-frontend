@@ -58,24 +58,27 @@ jobs:
             exit 1
           fi
 
-      # --- CodeQL (SAST) ---
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
-        with:
-          languages: javascript
+      # --- CodeQL (SAST) with CLI Mode ---
+      - name: Download CodeQL CLI
+        run: |
+          wget https://github.com/github/codeql-cli-binaries/releases/download/v2.14.5/codeql-linux64.zip
+          unzip codeql-linux64.zip -d codeql
+          echo "$(pwd)/codeql/codeql" >> $GITHUB_PATH
 
-      - name: Autobuild (for Node-based projects)
-        uses: github/codeql-action/autobuild@v2
+      - name: Create CodeQL database
+        run: |
+          mkdir codeql-db
+          ./codeql/codeql database create codeql-db --language=javascript --source-root=.
 
-      - name: Run CodeQL Analysis
+      - name: Run CodeQL analysis and generate SARIF
         run: |
           mkdir -p results
-          codeql database analyze --format=sarif-latest \
-            --output=results/javascript.sarif \
-            /github/workspace/codeql-database \
-            javascript-code-scanning.qls || true
+          ./codeql/codeql database analyze codeql-db \
+            javascript-code-scanning.qls \
+            --format=sarif-latest \
+            --output=results/javascript.sarif || true
 
-      # --- Archive Reports ---
+      # --- Archive All Reports ---
       - name: Archive security reports
         uses: actions/upload-artifact@v4
         with:
