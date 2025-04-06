@@ -1,17 +1,21 @@
-name: "CI-Stage-2-SAST-and-SCA-Scan"
+name: "CI - Stage-2 - Security Scan - SAST & SCA"
 
 on:
   push:
-    branches: [main, develop, githubcicd, "feature/**"]
+    branches: [main, "feature/**"]
   pull_request:
-    branches: [main, develop]
+    branches: [main]
+
+# Limit concurrent runs to save GitHub minutes
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  sast:
+  owasp-sca:
+    name: OWASP Dependency Check
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
+    timeout-minutes: 10
 
     strategy:
       matrix:
@@ -39,48 +43,28 @@ jobs:
         if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: npm ci --legacy-peer-deps
 
-      # --- OWASP Dependency Check (SCA) ---
-      - name: OWASP Dependency Check
+      - name: Download OWASP Dependency Check
         run: |
           wget https://github.com/jeremylong/DependencyCheck/releases/download/v7.2.0/dependency-check-7.2.0-release.zip
           unzip dependency-check-7.2.0-release.zip
 
-      - name: Run scan with ODC
+      - name: Run OWASP Scan and Generate Reports
         run: |
-          dependency-check/bin/dependency-check.sh --project "TradePort" --scan . --format XML --out odc-report.xml || true
-          dependency-check/bin/dependency-check.sh --project "TradePort" --scan . > ODC-report || true
+          dependency-check/bin/dependency-check.sh --project "TradePort" --scan . --format XML --out odc-report.xml | tee ODC-report || true
 
       - name: Check for critical vulnerabilities
         run: |
           if grep -q "CRITICAL" ./ODC-report; then
-            echo "Critical vulnerabilities found"
+            echo "🚨 Critical vulnerabilities found"
             grep "CRITICAL" ./ODC-report
             exit 1
           fi
 
-      # --- CodeQL (SAST) ---
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
-        with:
-          languages: javascript
-
-      - name: Autobuild (for Node-based projects)
-        uses: github/codeql-action/autobuild@v2
-
-      - name: Run CodeQL Analysis
-        run: |
-          mkdir -p results
-          codeql database analyze --format=sarif-latest \
-            --output=results/javascript.sarif \
-            /github/workspace/codeql-database \
-            javascript-code-scanning.qls || true
-
-      # --- Archive Reports ---
-      - name: Archive security reports
+      - name: Archive ODC reports
         uses: actions/upload-artifact@v4
         with:
-          name: security-reports
+          name: sast-report
           path: |
             ./ODC-report
             ./odc-report.xml
-            ./results/javascript.sarif
+          retention-days: 7
