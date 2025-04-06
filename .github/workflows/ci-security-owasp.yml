@@ -99,3 +99,23 @@ jobs:
     steps:
       - name: ✅ Security scan summary
         run: echo "Both npm audit and OWASP scan completed."
+
+  update-readme-badges:
+    name: Update README Badges
+    runs-on: ubuntu-latest
+    needs: archive
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Update README with Workflow Badges
+        uses: rubennorte/github-actions-badges-readme@v1
+
+      - name: Commit & Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "🔄 auto: update GitHub Actions badges in README" || echo "No changes to commit"
+          git push
