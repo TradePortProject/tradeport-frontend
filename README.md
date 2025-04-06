@@ -1,8 +1,12 @@
+<!--START_SECTION:github-actions-badges-->
+<!--END_SECTION:github-actions-badges-->
+
 # TradePort Frontend
 
 The **TradePort Frontend** is a web application developed using **React**, **TypeScript**, and **Tailwind CSS**. It serves as the user interface for the TradePort platform, providing seamless and sophisticated user experiences.
 
 ## 🚀 Features
+
 - ⚡ **Modern UI/UX** with React and Tailwind CSS
 - ⚛️ **Type-Safe Development** with TypeScript
 - 📈 **Scalable and Maintainable Architecture**
@@ -32,18 +36,23 @@ tradeport-frontend/
 ## ⚙️ Getting Started
 
 ### Prerequisites
+
 Ensure you have the following installed:
+
 - [Node.js](https://nodejs.org/en/) (v16 or higher)
 - [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
 
 ### Installation
 
 1. **Clone the repository:**
+
 ```bash
 git clone https://github.com/TradePortProject/tradeport-frontend.git
 cd tradeport-frontend
 ```
+
 2. **Install dependencies:**
+
 ```bash
 npm install
 # or
@@ -51,11 +60,13 @@ yarn install
 ```
 
 ### Running the Application
+
 ```bash
 npm run dev
 # or
 yarn dev
 ```
+
 The app will be available at [http://localhost:3001](http://localhost:3001).
 
 ## 🧪 Testing
@@ -71,19 +82,25 @@ yarn test
 ```
 
 ## 🛡️ Authentication (Google Authentication)
+
 The app uses **Google Authentication** for authentication. The configuration is managed through environment variables.
 
 ## 🏗️ Backend Integration
+
 The frontend communicates with C# backend services through REST APIs. Ensure the backend is running and accessible at the correct endpoints defined in the `services/` directory.
 
 ## 📦 Deployment
+
 To create a production build:
+
 ```bash
 npm run build
 # or
 yarn build
 ```
+
 Serve the build locally:
+
 ```bash
 npm run preview
 # or
@@ -91,6 +108,7 @@ yarn preview
 ```
 
 ## 🤝 Contributing
+
 1. Fork the repository
 2. Create a new branch (`git checkout -b feature/feature-name`)
 3. Commit your changes (`git commit -m 'Add some feature'`)
@@ -98,7 +116,7 @@ yarn preview
 5. Open a Pull Request
 
 ## 📬 Contact
+
 For issues, reach out via the repository's [issues page](https://github.com/TradePortProject/tradeport-frontend/issues).
 
 Happy Coding! 🚀
-
