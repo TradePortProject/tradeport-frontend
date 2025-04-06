@@ -1,4 +1,4 @@
-name: "CI-Stage-2-SAST-Scan"
+name: "CI-Stage-2-SAST-and-SCA-Scan"
 
 on:
   push:
@@ -7,15 +7,19 @@ on:
     branches: [main, develop]
 
 jobs:
-  test:
+  sast:
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
 
     strategy:
       matrix:
-        node-version: [20.x] # Updated to current LTS
+        node-version: [20.x]
 
     steps:
-      - uses: actions/checkout@v4 # Updated to v4
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -34,9 +38,9 @@ jobs:
 
       - name: Install Dependencies
         if: steps.cache-nodemodules.outputs.cache-hit != 'true'
-        run: |
-          npm ci --legacy-peer-deps
+        run: npm ci --legacy-peer-deps
 
+      # --- OWASP Dependency Check (SCA) ---
       - name: OWASP Dependency Check
         run: |
           wget https://github.com/jeremylong/DependencyCheck/releases/download/v7.2.0/dependency-check-7.2.0-release.zip
@@ -44,9 +48,8 @@ jobs:
 
       - name: Run scan with ODC
         run: |
-          dependency-check/bin/dependency-check.sh --project "bitcoin" --scan . --format XML --out odc-report.xml || true
-          # Also create a text report for easier reading
-          dependency-check/bin/dependency-check.sh --project "bitcoin" --scan . > ODC-report || true
+          dependency-check/bin/dependency-check.sh --project "TradePort" --scan . --format XML --out odc-report.xml || true
+          dependency-check/bin/dependency-check.sh --project "TradePort" --scan . > ODC-report || true
 
       - name: Check for critical vulnerabilities
         run: |
@@ -56,10 +59,25 @@ jobs:
             exit 1
           fi
 
-      - name: Archive production artifacts
-        uses: actions/upload-artifact@v4 # Updated to v4
+      # --- CodeQL (SAST) ---
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
         with:
-          name: sast-report
+          languages: javascript
+
+      - name: Autobuild (for Node-based projects)
+        uses: github/codeql-action/autobuild@v2
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "sast"
+
+      # --- Upload Reports ---
+      - name: Archive all security reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
           path: |
             ./ODC-report
             ./odc-report.xml
