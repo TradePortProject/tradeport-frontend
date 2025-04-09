@@ -38,7 +38,6 @@ jobs:
         if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: npm ci --legacy-peer-deps
 
-  # 🧪 SCA - npm Audit
   npm-audit:
     name: 🧪 SCA - npm Audit
     runs-on: ubuntu-latest
@@ -64,7 +63,6 @@ jobs:
           path: npm-audit.json
           retention-days: 7
 
-  # 🧪 SCA - OWASP Dependency Check
   owasp-sca:
     name: 🧪 SCA - OWASP Dependency Check
     runs-on: ubuntu-latest
@@ -94,7 +92,6 @@ jobs:
             odc-report.xml
           retention-days: 7
 
-  # ☢️ SAST - CodeQL Analysis
   codeql-sast:
     name: ☢️ SAST - CodeQL Analysis
     runs-on: ubuntu-latest
@@ -103,9 +100,6 @@ jobs:
       actions: read
       contents: read
       security-events: write
-    strategy:
-      matrix:
-        language: [javascript] # Add 'typescript' or others if needed
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -113,7 +107,7 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
-          languages: ${{ matrix.language }}
+          languages: javascript # Add typescript if needed
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v2
@@ -121,7 +115,6 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
 
-  # 📦 Final archive to wrap it all up
   archive:
     name: 📦 Final Security Archive
     runs-on: ubuntu-latest
