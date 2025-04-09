@@ -92,10 +92,33 @@ jobs:
             odc-report.xml
           retention-days: 7
 
+  codeql-sast:
+    name: ☢️ SAST - CodeQL Analysis
+    runs-on: ubuntu-latest
+    needs: setup
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript # Add typescript if needed
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
   archive:
     name: 📦 Final Security Archive
     runs-on: ubuntu-latest
-    needs: [npm-audit, owasp-sca]
+    needs: [npm-audit, owasp-sca, codeql-sast]
     steps:
       - name: ✅ Security scan summary
-        run: echo "Both npm audit and OWASP scan completed."
+        run: echo "npm audit, OWASP scan, and CodeQL completed."
