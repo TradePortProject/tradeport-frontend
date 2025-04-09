@@ -1,0 +1,38 @@
+name: CD - Stage 1 - Deploy to DigitalOcean Droplet
+
+on:
+  push:
+    branches: [main, "feature/**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  DOCKERHUB_IMAGE_FRONTEND: sreerajrone/tradeport-frontend
+  REMOTE_DIR: /root/tradeport
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔐 Inject VITE_API_URL from GitHub Secret
+        run: |
+          mkdir -p ./frontend
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL || 'http://backend:3000/api' }}" > ./frontend/.env.production
+
+      - name: 🐳 Log in to Docker Hub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      - name: 🐳 Build and Push Frontend Image
+        run: |
+          docker build -t $DOCKERHUB_IMAGE_FRONTEND:latest -f ./frontend/Dockerfile.dev ./frontend
+          docker push $DOCKERHUB_IMAGE_FRONTEND:latest
+
+      - name: 🐳 Build and Push Backend Image
+        run: |
+          docker build -t $DOCKERHUB_IMAGE_BACKEND:latest -f ./backend/Dockerfile.dev ./backend
+          docker push $DOCKERHUB_IMAGE_BACKEND:latest
