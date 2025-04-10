@@ -42,7 +42,16 @@ jobs:
 
       - name: 🔐 Create environment variables file
         run: |
-          echo "VITE_API_URL=${{ secrets.VITE_API_URL || 'http://backend:3000/api' }}" > ./.env.production
+          # Debug to check current directory
+          pwd
+          ls -la
+
+          # Create .env.production file with explicit path
+          mkdir -p $(pwd)
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL || 'http://backend:3000/api' }}" > $(pwd)/.env.production
+
+          # Verify file was created
+          ls -la $(pwd)/.env.production || echo "Failed to create .env file"
 
       - name: 📤 Upload .env file
         uses: actions/upload-artifact@v4
@@ -50,6 +59,7 @@ jobs:
           name: env-file
           path: ./.env.production
           retention-days: 1
+          if-no-files-found: warn
 
   build:
     needs: prepare
