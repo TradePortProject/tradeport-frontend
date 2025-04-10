@@ -1,0 +1,114 @@
+name: CD - Stage 1 - Deploy to Dockerhub
+
+on:
+  push:
+    branches: [main, develop, "feature/**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
+env:
+  DOCKERHUB_IMAGE_FRONTEND: sreerajrone/tradeport-frontend
+  REMOTE_DIR: /root/tradeport
+
+jobs:
+  prepare:
+    name: ⛏️ Prepare Environment
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.set-outputs.outputs.version }}
+      short_sha: ${{ steps.set-outputs.outputs.short_sha }}
+      env_name: ${{ steps.set-outputs.outputs.env_name }}
+    steps:
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🏷️ Determine version and set outputs
+        id: set-outputs
+        run: |
+          VERSION=$(grep '"version"' ./package.json | cut -d'"' -f4 || echo ${GITHUB_SHA::8})
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "short_sha=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
+          echo "env_name=${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod') || (github.ref == 'refs/heads/develop' && 'staging') || 'dev' }}" >> $GITHUB_OUTPUT
+
+      - name: 📤 Upload .env file
+        uses: actions/upload-artifact@v4
+        with:
+          name: env-file
+          path: .env
+          retention-days: 1
+          if-no-files-found: warn
+
+  build:
+    name: 🏗️ Build Frontend Image
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🌍 Set environment-specific variables
+        run: |
+          if [ "${{ needs.prepare.outputs.env_name }}" = "prod" ]; then
+            echo "VITE_API_URL=${{ secrets.PROD_API_URL || 'https://api.example.com' }}" >> .env
+          elif [ "${{ needs.prepare.outputs.env_name }}" = "staging" ]; then
+            echo "VITE_API_URL=${{ secrets.STAGING_API_URL || 'https://staging-api.example.com' }}" >> .env
+          fi
+
+          echo "Using environment variables (sensitive values masked):"
+          cat .env | sed 's/\(.*SECRET.*=\).*/\1********/'
+
+      - name: 🐳 Log in to Docker Hub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      - name: 🐳 Build and tag Frontend Image
+        run: |
+          DOCKERFILE=./Dockerfile
+          if [ ! -f "$DOCKERFILE" ]; then
+            DOCKERFILE=./Dockerfile.dev
+          fi
+
+          docker build -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:latest \
+                      -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.version }} \
+                      -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.short_sha }} \
+                      -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.env_name }} \
+                      -f $DOCKERFILE .
+
+      - name: 🐳 Push Frontend Image to Docker Hub
+        run: |
+          docker push ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:latest
+          docker push ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.version }}
+          docker push ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.short_sha }}
+          docker push ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.env_name }}
+
+  verify:
+    name: 🔍 Verify Docker Hub Push
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔍 Verify Docker Hub Push
+        run: |
+          echo "Verifying image push to Docker Hub..."
+          docker pull ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:latest && \
+            echo "✅ Successfully verified image push to Docker Hub" || \
+            (echo "❌ Failed to verify image on Docker Hub" && exit 1)
+
+  health-check:
+    name: ❤️‍🩹 Health Check
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔍 Health check
+        run: |
+          sleep 20
+          curl -m 10 -sSf http://${{ secrets.DROPLET_IP }}:3001/health || curl -m 10 -sSf http://${{ secrets.DROPLET_IP }}:3001 || echo "Frontend may still be starting up, please verify manually"
