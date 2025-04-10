@@ -1,4 +1,4 @@
-name: CD - Stage 1 - Deploy to DigitalOcean Droplet
+name: CD - Stage 1 - Deploy to Dockerhub
 
 on:
   push:
@@ -22,29 +22,47 @@ env:
   REMOTE_DIR: /root/tradeport
 
 jobs:
-  deploy:
+  prepare:
     runs-on: ubuntu-latest
-
-    # Map branch to environment
-    environment:
-      name: ${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod') || (github.ref == 'refs/heads/develop' && 'staging') || 'dev' }}
-
+    outputs:
+      version: ${{ steps.set-outputs.outputs.version }}
+      short_sha: ${{ steps.set-outputs.outputs.short_sha }}
+      env_name: ${{ steps.set-outputs.outputs.env_name }}
     steps:
       - name: ⬇️ Checkout code
         uses: actions/checkout@v4
 
-      - name: 🏷️ Determine version
-        id: version
+      - name: 🏷️ Determine version and set outputs
+        id: set-outputs
         run: |
           VERSION=$(grep '"version"' ./package.json | cut -d'"' -f4 || echo ${GITHUB_SHA::8})
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "SHORT_SHA=${GITHUB_SHA::8}" >> $GITHUB_ENV
-          echo "ENV_NAME=${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod') || (github.ref == 'refs/heads/develop' && 'staging') || 'dev' }}" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "short_sha=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
+          echo "env_name=${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod') || (github.ref == 'refs/heads/develop' && 'staging') || 'dev' }}" >> $GITHUB_OUTPUT
 
-      - name: 🔐 Inject environment variables
+      - name: 🔐 Create environment variables file
         run: |
-          # Fix the path to create .env.production in the right location
           echo "VITE_API_URL=${{ secrets.VITE_API_URL || 'http://backend:3000/api' }}" > ./.env.production
+
+      - name: 📤 Upload .env file
+        uses: actions/upload-artifact@v3
+        with:
+          name: env-file
+          path: ./.env.production
+          retention-days: 1
+
+  build:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Download .env file
+        uses: actions/download-artifact@v3
+        with:
+          name: env-file
+          path: ./
 
       - name: 🐳 Log in to Docker Hub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
@@ -58,31 +76,35 @@ jobs:
           fi
 
           # Build with multiple tags
-          docker build -t $DOCKERHUB_IMAGE_FRONTEND:latest \
-                      -t $DOCKERHUB_IMAGE_FRONTEND:$VERSION \
-                      -t $DOCKERHUB_IMAGE_FRONTEND:$SHORT_SHA \
-                      -t $DOCKERHUB_IMAGE_FRONTEND:$ENV_NAME \
+          docker build -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:latest \
+                      -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.version }} \
+                      -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.short_sha }} \
+                      -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.env_name }} \
                       -f $DOCKERFILE .
 
       - name: 🐳 Push Frontend Image to Docker Hub
         run: |
-          # Add missing push for ENV_NAME tag
-          docker push $DOCKERHUB_IMAGE_FRONTEND:latest
-          docker push $DOCKERHUB_IMAGE_FRONTEND:$VERSION
-          docker push $DOCKERHUB_IMAGE_FRONTEND:$SHORT_SHA
-          docker push $DOCKERHUB_IMAGE_FRONTEND:$ENV_NAME
+          docker push ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:latest
+          docker push ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.version }}
+          docker push ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.short_sha }}
+          docker push ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.env_name }}
 
+  verify:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: 🔍 Verify Docker Hub Push
         run: |
-          # Add a simple verification that the push succeeded
           echo "Verifying image push to Docker Hub..."
-          docker pull $DOCKERHUB_IMAGE_FRONTEND:latest && \
+          docker pull ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:latest && \
             echo "✅ Successfully verified image push to Docker Hub" || \
             (echo "❌ Failed to verify image on Docker Hub" && exit 1)
 
+  health-check:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
       - name: 🔍 Health check
         run: |
-          # Wait for deployment to stabilize
           sleep 20
-          # Check if the frontend is responding
           curl -m 10 -sSf http://${{ secrets.DROPLET_IP }}:3001/health || curl -m 10 -sSf http://${{ secrets.DROPLET_IP }}:3001 || echo "Frontend may still be starting up, please verify manually"
