@@ -40,24 +40,11 @@ jobs:
           echo "short_sha=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
           echo "env_name=${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod') || (github.ref == 'refs/heads/develop' && 'staging') || 'dev' }}" >> $GITHUB_OUTPUT
 
-      - name: 🔐 Create environment variables file
-        run: |
-          # Debug to check current directory
-          pwd
-          ls -la
-
-          # Create .env.production file with explicit path
-          mkdir -p $(pwd)
-          echo "VITE_API_URL=${{ secrets.VITE_API_URL || 'http://backend:3000/api' }}" > $(pwd)/.env.production
-
-          # Verify file was created
-          ls -la $(pwd)/.env.production || echo "Failed to create .env file"
-
       - name: 📤 Upload .env file
         uses: actions/upload-artifact@v4
         with:
           name: env-file
-          path: ./.env.production
+          path: .env
           retention-days: 1
           if-no-files-found: warn
 
@@ -68,24 +55,27 @@ jobs:
       - name: ⬇️ Checkout code
         uses: actions/checkout@v4
 
-      - name: 📥 Download .env file
-        uses: actions/download-artifact@v4
-        with:
-          name: env-file
-          path: ./
+      - name: 🌍 Set environment-specific variables
+        run: |
+          if [ "${{ needs.prepare.outputs.env_name }}" = "prod" ]; then
+            echo "VITE_API_URL=${{ secrets.PROD_API_URL || 'https://api.example.com' }}" >> .env
+          elif [ "${{ needs.prepare.outputs.env_name }}" = "staging" ]; then
+            echo "VITE_API_URL=${{ secrets.STAGING_API_URL || 'https://staging-api.example.com' }}" >> .env
+          fi
+
+          echo "Using environment variables (sensitive values masked):"
+          cat .env | sed 's/\(.*SECRET.*=\).*/\1********/'
 
       - name: 🐳 Log in to Docker Hub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
       - name: 🐳 Build and tag Frontend Image
         run: |
-          # Use a production Dockerfile or fallback to dev if necessary
           DOCKERFILE=./Dockerfile
           if [ ! -f "$DOCKERFILE" ]; then
             DOCKERFILE=./Dockerfile.dev
           fi
 
-          # Build with multiple tags
           docker build -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:latest \
                       -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.version }} \
                       -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.short_sha }} \
