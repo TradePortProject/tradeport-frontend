@@ -23,6 +23,7 @@ env:
 
 jobs:
   prepare:
+    name: ⛏️ Prepare Environment
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.set-outputs.outputs.version }}
@@ -49,6 +50,7 @@ jobs:
           if-no-files-found: warn
 
   build:
+    name: 🏗️ Build Frontend Image
     needs: prepare
     runs-on: ubuntu-latest
     steps:
@@ -90,6 +92,7 @@ jobs:
           docker push ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.env_name }}
 
   verify:
+    name: 🔍 Verify Docker Hub Push
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -101,6 +104,7 @@ jobs:
             (echo "❌ Failed to verify image on Docker Hub" && exit 1)
 
   health-check:
+    name: ❤️‍🩹 Health Check
     needs: verify
     runs-on: ubuntu-latest
     steps:
