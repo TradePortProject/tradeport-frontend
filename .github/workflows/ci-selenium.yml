@@ -40,7 +40,7 @@ jobs:
             tests/selenium/tradeport-e2e.side
 
       - name: 📤 Upload Selenium Test Reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: selenium-ide-reports
           path: test-results
