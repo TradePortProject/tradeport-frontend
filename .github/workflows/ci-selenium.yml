@@ -1,0 +1,46 @@
+name: "CI - Stage 4 - Selenium Tests"
+
+on:
+  push:
+    branches: [main, "feature/**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  # schedule:
+  #   - cron: "0 2 * * *" # Uncomment to run every day at 2am UTC
+
+jobs:
+  Selenium-Tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 📦 Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: ⚙️ Install Dependencies
+        run: npm install -g selenium-side-runner chromedriver wait-on
+
+      - name: 🚀 Start React Dev Server and Wait Until Ready
+        run: |
+          npm install
+          npm run dev &  # Launch in background
+          wait-on http://localhost:3001 --timeout 60000  # Wait up to 60s for the server to be ready
+
+      - name: 🧪 Run Selenium IDE Test Suite
+        run: |
+          selenium-side-runner \
+            --base-url http://localhost:3001 \
+            --output-directory test-results \
+            -c "goog:chromeOptions.args=[--headless, --no-sandbox, --disable-dev-shm-usage, --disable-gpu, --user-data-dir=/tmp/chrome-data-$RANDOM]" \
+            tests/selenium/tradeport-e2e.side
+
+      - name: 📤 Upload Selenium Test Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: selenium-ide-reports
+          path: test-results
