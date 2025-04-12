@@ -36,7 +36,6 @@ jobs:
           selenium-side-runner \
             --base-url http://localhost:3001 \
             --output-directory test-results \
-            --output-format junit \
             tests/selenium/tradeport-e2e.side
 
       - name: 📤 Upload Selenium Test Reports
