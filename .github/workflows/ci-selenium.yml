@@ -10,7 +10,7 @@ on:
   #   - cron: "0 2 * * *" # Uncomment to run every day at 2am UTC
 
 jobs:
-  selenium-ide-e2e:
+  Selenium-Tests:
     runs-on: ubuntu-latest
 
     steps:
