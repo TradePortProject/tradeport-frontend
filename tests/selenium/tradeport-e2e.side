@@ -1,0 +1,50 @@
+{
+  "id": "b8898eb7-40a0-4819-a06d-7b2f7ee626e3",
+  "version": "2.0",
+  "name": "tradeport",
+  "url": "http://localhost:3001",
+  "tests": [{
+    "id": "7f64a5ce-fa11-47f0-a09d-dc9395f27b79",
+    "name": "home",
+    "commands": [{
+      "id": "94369490-e94b-4227-b6ca-429bd4ec62b0",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "8a53e3a4-d57c-4574-bf55-6ac30f224ba8",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1502x763",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "c65a6398-19df-4303-ac2b-1cec5eece038",
+      "comment": "",
+      "command": "assertElementPresent",
+      "target": "linkText=Home",
+      "targets": [
+        ["linkText=Home", "linkText"],
+        ["css=.border-b-2", "css:finder"],
+        ["xpath=//a[contains(text(),'Home')]", "xpath:link"],
+        ["xpath=//div[@id='root']/nav/div/div/div[2]/div/a", "xpath:idRelative"],
+        ["xpath=(//a[contains(@href, '/')])[2]", "xpath:href"],
+        ["xpath=//div[2]/div/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Home')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }]
+  }],
+  "suites": [{
+    "id": "a597e7c2-316d-4db3-86ae-ea82471aa019",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["7f64a5ce-fa11-47f0-a09d-dc9395f27b79"]
+  }],
+  "urls": ["http://localhost:3001/"],
+  "plugins": []
+}
