@@ -27,15 +27,18 @@ const GoogleAuthButton: React.FC = () => {
 
       dispatch(setUserDetails({ email, name, picture }));
 
-      // Send only the token as raw text/plain
       const response = await axios.post(
         "http://localhost:7237/api/User/validategoogleuser",
-        credentialResponse.credential, // Send as a raw string
+        { token: credentialResponse.credential }, // ✅ Send as JSON object
         {
-          headers: { "Content-Type": "application/json" }, // Ensure raw string format
-          validateStatus: (status) => status < 500, // Prevents throwing errors for 4xx responses
-        },
+          headers: {
+            "Content-Type": "application/json"
+          },
+          validateStatus: (status) => status < 500,
+        }
       );
+
+
 
       if (response.status === 200) {
         console.log("Backend validation successful:", response.data);
