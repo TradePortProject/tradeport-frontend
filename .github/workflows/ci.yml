@@ -63,29 +63,29 @@ jobs:
           path: coverage/
           retention-days: 7
 
-build:
-  name: 🏗️ Build Frontend
-  runs-on: ubuntu-latest
-  needs: setup
-  steps:
-    - name: 📥 Checkout Repository
-      uses: actions/checkout@v4
+  build:
+    name: 🏗️ Build Frontend
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: 🧰 Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: "20"
-        cache: "npm"
+      - name: 🧰 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
 
-    - name: 📦 Install Dependencies
-      run: npm ci
+      - name: 📦 Install Dependencies
+        run: npm ci
 
-    - name: 🏗️ Run Production Build
-      run: npm run build:prod
+      - name: 🏗️ Run Production Build
+        run: npm run build:prod
 
-    - name: 📤 Upload Build Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-files
-        path: dist/
-        retention-days: 1
+      - name: 📤 Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-files
+          path: dist/
+          retention-days: 1
