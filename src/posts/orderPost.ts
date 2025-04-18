@@ -1,6 +1,8 @@
-import { ShoppingCart } from './types';
+import { ShoppingCart } from "./types";
+import ENDPOINTS from "../config/apiConfig";
 
-const apiUrl = process.env.REACT_APP_PRODUCT_API_URL || 'http://localhost:3017/api/OrderManagement/CreateOrder';
+// const apiUrl = process.env.REACT_APP_PRODUCT_API_URL || 'http://localhost:3017/api/OrderManagement/CreateOrder';
+const apiUrl = ENDPOINTS.ORDER.ORDERS.CREATE;
 
 export async function orderPost(newPostData: ShoppingCart[]) {
   try {
@@ -8,38 +10,40 @@ export async function orderPost(newPostData: ShoppingCart[]) {
     const payload = {
       retailerID: newPostData[0].retailerID,
       paymentMode: newPostData[0].paymentMode,
-      paymentCurrency: newPostData[0].paymentCurrency|| 'SGD',
+      paymentCurrency: newPostData[0].paymentCurrency || "SGD",
       shippingCost: newPostData[0].shippingCost || 10,
-      shippingCurrency: newPostData[0].shippingCurrency || 'SGD',
-      shippingAddress: newPostData[0].shippingAddress|| 'AMK', 
-      createdBy:newPostData[0].retailerID,
+      shippingCurrency: newPostData[0].shippingCurrency || "SGD",
+      shippingAddress: newPostData[0].shippingAddress || "AMK",
+      createdBy: newPostData[0].retailerID,
       orderDetails: createOrderDetails(newPostData),
     };
 
     const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
-      throw new Error('Failed to save post');
+      throw new Error("Failed to save post");
     }
 
     const body = await response.json();
     return body;
   } catch (error) {
-    console.error('Error in Connecting to the endpoint:', error);
+    console.error("Error in Connecting to the endpoint:", error);
     if (error instanceof Error) {
       return { error: error.message };
     } else {
-      return { error: 'An unknown error occurred' };
+      return { error: "An unknown error occurred" };
     }
   }
 }
 
-export function createOrderDetails(newPostData: ShoppingCart[]): OrderDetails[] {
-  return newPostData.map(post => ({
+export function createOrderDetails(
+  newPostData: ShoppingCart[],
+): OrderDetails[] {
+  return newPostData.map((post) => ({
     productID: post.productID,
     Quantity: post.orderQuantity,
     productPrice: post.productPrice,

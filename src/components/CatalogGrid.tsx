@@ -4,6 +4,7 @@ import CategorySelect from "./CategorySelect";
 import PriceRangeSelect from "./PriceRangeSelect";
 import SearchBar from "./SearchBar";
 import Pagination from "./Pagination";
+import ENDPOINTS from "../config/apiConfig";
 
 interface Product {
   productID: string;
@@ -94,8 +95,11 @@ const CatalogGrid: React.FC = () => {
       const retailRange = getRetailPriceRange(selectedRetailPrice);
       const categoryQuery =
         selectedCategory !== 0 ? `&category=${selectedCategory}` : " ";
+      
+      const queryParams = `?pageNumber=${pageNumber}&searchText=${searchText}${categoryQuery}&quantity=${selectedQuantity}&minWholesalePrice=${wholesaleRange.min}&maxWholesalePrice=${wholesaleRange.max}&minRetailPrice=${retailRange.min}&maxRetailPrice=${retailRange.max}`;
+      
       const response = await fetch(
-        `http://localhost:3016/api/productManagement/GetFilteredProducts?pageNumber=${pageNumber}&searchText=${searchText}${categoryQuery}&quantity=${selectedQuantity}&minWholesalePrice=${wholesaleRange.min}&maxWholesalePrice=${wholesaleRange.max}&minRetailPrice=${retailRange.min}&maxRetailPrice=${retailRange.max}`,
+        ENDPOINTS.PRODUCT.FILTERED(queryParams)
       );
       const data = await response.json();
       console.log("Fetched products:", data.product);

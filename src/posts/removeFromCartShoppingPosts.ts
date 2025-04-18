@@ -1,16 +1,18 @@
-import {ShoppingCart } from './types';
+import { ShoppingCart } from "./types";
+import ENDPOINTS from "../config/apiConfig";
 
-export async function removeFromCartShoppingPosts(CartID: string): Promise<ShoppingCart[]> {
-  
- 
-  const apiUrl = `http://localhost:3017/api/OrderManagement/DeleteCartItemByID/?CartID=${CartID}`;
-  const response = await fetch(apiUrl, { method: 'PUT' });
+export async function removeFromCartShoppingPosts(
+  CartID: string,
+): Promise<ShoppingCart[]> {
+  const apiUrl = ENDPOINTS.ORDER.SHOPPING_CART.DELETE_ITEM(CartID);
+  // const apiUrl = `http://localhost:3017/api/OrderManagement/DeleteCartItemByID/?CartID=${CartID}`;
+
+  const response = await fetch(apiUrl, { method: "PUT" });
   const data = await response.json();
   if (!response.ok) {
-    throw new Error('Failed to save post');   
+    throw new Error("Failed to save post");
   }
-  console.log('Data:', data);  
-  
+  console.log("Data:", data);
+
   return data;
 }
-
