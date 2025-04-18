@@ -74,11 +74,11 @@ jobs:
       - name: 🐳 Build and tag Frontend Image
         run: |
           # choose Dockerfile based on target environment
-          if [ "${{ needs.prepare.outputs.env_name }}" = "prod" ]; then
-            DOCKERFILE=./Dockerfile.prod
-          else
-            # for non-prod (dev/staging), use the dev Dockerfile
+          if [ "${{ needs.prepare.outputs.env_name }}" = "dev" ]; then
             DOCKERFILE=./Dockerfile.dev
+          else
+            # for staging & prod, use the production Dockerfile
+            DOCKERFILE=./Dockerfile.prod
           fi
 
           docker build -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:latest \
