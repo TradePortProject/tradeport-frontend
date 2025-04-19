@@ -18,7 +18,7 @@ on:
           - prod
 
 env:
-  DOCKERHUB_IMAGE_FRONTEND: sreerajrone/tradeport-frontend
+  DOCKERHUB_IMAGE_FRONTEND: prabhulalithakrishnan/tradeport-frontend
   REMOTE_DIR: /root/tradeport
 
 jobs:
