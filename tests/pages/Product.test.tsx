@@ -1,49 +1,103 @@
-import { render, screen } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
-import { Product } from "../../src/pages/Product"; // Fixed import from ProductMaster to Product
-import { BrowserRouter } from "react-router-dom";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { vi } from "vitest";
+import { Provider } from "react-redux";
+import { MemoryRouter } from "react-router-dom";
+import { ProductMaster } from "../../src/pages/Product";
+import { savePost } from "../../src/posts/savePost";
+import store from "../../src/store/store";
 
-describe("Product Component", () => { // Updated description to match the component name
-  it("renders the product page with title and product list", () => {
-    const mockProduct = {
-      productID: "1",
-      productCode: "P001",
-      manufacturerID: "M001",
-      productName: "Test Product",
-      description: "Test description",
-      category: "Test Category",
-      wholesalePrice: 50,
-      retailPrice: 100,
-      retailCurrency: "USD",
-      wholeSaleCurrency: "USD",
-      shippingCost: 10,
-      quantity: 20,
-      createdOn: "2023-01-01",
-      updatedOn: "2023-01-02",
-      isActive: true,
-      productImage: [{ productImageURL: "/images/test.jpg" }],
-    };
-  
+// Mock dependencies
+vi.mock("react-router-dom", () => ({
+  useNavigate: vi.fn(),
+}));
+vi.mock("../posts/savePost", () => ({
+  savePost: vi.fn(),
+}));
+vi.mock("react-redux", () => ({
+  useSelector: vi.fn(() => ({ user: { userID: "12345" } })),
+}));
 
-    render(
-      <BrowserRouter>
-        <Product products={mockProduct} />
-      </BrowserRouter>
-    );
+const mockedNavigate = vi.fn();
 
-    
-
-    expect(screen.getByText("Test Product")).toBeInTheDocument();
- 
+describe("ProductMaster Component", () => {
+  beforeEach(() => {
+    vi.mocked(mockedNavigate).mockClear();
+    vi.mocked(savePost).mockClear();
   });
 
-  it("renders a message when no products are available", () => {
+  it("renders the form correctly", () => {
     render(
-      <BrowserRouter>
-        <Product products={[]} />
-      </BrowserRouter>
+      <Provider store={store}>
+        <MemoryRouter>
+          <ProductMaster />
+        </MemoryRouter>
+      </Provider>
     );
 
-    expect(screen.getByText("No products available")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Product Name")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Description")).toBeInTheDocument();
+    expect(screen.getByText("Create Product")).toBeInTheDocument();
+  });
+
+  it("shows validation errors on empty submission", async () => {
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <ProductMaster />
+        </MemoryRouter>
+      </Provider>
+    );
+
+    fireEvent.click(screen.getByText("Create Product"));
+
+    await waitFor(() => {
+      expect(screen.getByText("You must enter Product Name")).toBeInTheDocument();
+      expect(screen.getByText("You must enter Description")).toBeInTheDocument();
+    });
+  });
+
+  it("handles image preview correctly", () => {
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <ProductMaster />
+        </MemoryRouter>
+      </Provider>
+    );
+
+    const fileInput = screen.getByLabelText(/image/i);
+    const file = new File(["dummy content"], "example.png", { type: "image/png" });
+
+    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    expect(screen.getByAltText("Product Preview")).toBeInTheDocument();
+  });
+
+  it("submits the form successfully", async () => {
+    vi.mocked(savePost).mockResolvedValue({ id: "1" });
+
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <ProductMaster />
+        </MemoryRouter>
+      </Provider>
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Product Name"), {
+      target: { value: "Test Product" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Description"), {
+      target: { value: "Test Description" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Retail Price"), {
+      target: { value: "100" },
+    });
+    fireEvent.click(screen.getByText("Create Product"));
+
+    await waitFor(() => {
+      expect(savePost).toHaveBeenCalled();
+      expect(mockedNavigate).toHaveBeenCalledWith("/catalogGrid");
+    });
   });
 });
