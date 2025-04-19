@@ -2,7 +2,7 @@ name: CD - Stage 1 - Deploy to Dockerhub
 
 on:
   push:
-    branches: [main, develop, "feature/**"]
+    branches: [main, "feature/**"]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -73,9 +73,12 @@ jobs:
 
       - name: 🐳 Build and tag Frontend Image
         run: |
-          DOCKERFILE=./Dockerfile
-          if [ ! -f "$DOCKERFILE" ]; then
+          # choose Dockerfile based on target environment
+          if [ "${{ needs.prepare.outputs.env_name }}" = "dev" ]; then
             DOCKERFILE=./Dockerfile.dev
+          else
+            # for staging & prod, use the production Dockerfile
+            DOCKERFILE=./Dockerfile.prod
           fi
 
           docker build -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:latest \

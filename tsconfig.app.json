@@ -29,5 +29,5 @@
     "tests/pages/ThankYouPage.test.tsx",
     "tests/pages/Login.test.tsx",
     "tests/components/TrashIcon.test.tsx"
-  ]
+, "tests/pages/Product.test.tsx"  ]
 }

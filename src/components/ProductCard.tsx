@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import ENDPOINTS from "../config/apiConfig";
 
 interface Product {
   productID: string;
@@ -44,11 +45,11 @@ const ProductCard: React.FC<Product> = ({
     navigate(`/productdetail/${productID}`);
   };
 
-  // Corrected imageUrl assignment
+  // Corrected imageUrl assignment using config
   const imageUrl =
     productImage.length > 0
-      ? "http://localhost:3016" + productImage[0].productImageURL
-      : "http://localhost:3001/img/image-missing.jpg";
+      ? ENDPOINTS.PRODUCT.IMAGE(productImage[0].productImageURL)
+      : ENDPOINTS.IMAGES.FALLBACK;
 
   return (
     <div

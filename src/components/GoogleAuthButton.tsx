@@ -4,6 +4,7 @@ import { login, setUserDetails } from "../store/features/authSlice";
 import { useDispatch } from "react-redux";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import ENDPOINTS from "../config/apiConfig";
 
 const GoogleAuthButton: React.FC = () => {
   const dispatch = useDispatch();
@@ -29,7 +30,7 @@ const GoogleAuthButton: React.FC = () => {
 
       // Send only the token as raw text/plain
       const response = await axios.post(
-        "http://localhost:7237/api/User/validategoogleuser",
+        ENDPOINTS.USER.VALIDATE_GOOGLE,
         credentialResponse.credential, // Send as a raw string
         {
           headers: { "Content-Type": "application/json" }, // Ensure raw string format

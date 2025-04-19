@@ -1,6 +1,7 @@
-import {ShoppingCart } from './types';
+import { ShoppingCart } from './types';
+import ENDPOINTS from '../config/apiConfig';
 
-const apiUrl = process.env.REACT_APP_PRODUCT_API_URL || 'http://localhost:3017/api/OrderManagement/CreateShoppingCart';
+const apiUrl = ENDPOINTS.ORDER.SHOPPING_CART.CREATE;
 
 export async function ShoppingCartPost(newPostData: ShoppingCart) {
   try {

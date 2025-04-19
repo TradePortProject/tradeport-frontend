@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import OrderGrid from '../components/OrderGrid';
 import Pagination from '../components/Pagination';
 import SearchBar from '../components/SearchBar';
+import ENDPOINTS from '../config/apiConfig';
 
 const Orders: React.FC = () => {
   const [data, setData] = useState<Order[]>([]);
@@ -21,7 +22,7 @@ const Orders: React.FC = () => {
   const fetchOrders = async () => {
     try {
       const response = await fetch(
-        `http://localhost:3017/api/OrderManagement/GetOrdersAndOrderDetails?page=${pageNumber}&productName=${searchText}`
+        ENDPOINTS.ORDER.ORDERS.GET(`?page=${pageNumber}&productName=${searchText}`)
       );
       if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -40,7 +41,7 @@ const Orders: React.FC = () => {
 
   const handleAction = async (orderID: string, orderDetailID: string, action: boolean) => {
     try {
-      const response = await fetch(`http://localhost:3017/api/OrderManagement/AcceptRejectOrder`, {
+      const response = await fetch(ENDPOINTS.ORDER.ORDERS.ACCEPT_REJECT, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -87,7 +88,7 @@ const Orders: React.FC = () => {
                          <OrderGrid orders={data} handleAction={handleAction} />
                   
                 </div>
-			
+				
             ) : (
                 <div>No products found. Adjust your filters.</div>
             )}
@@ -95,7 +96,7 @@ const Orders: React.FC = () => {
 				<Pagination pageNumber={pageNumber} totalPages={totalPages} onPageChange={handlePageChange} />
 			</div>	
         </div>
-		
+			
 
 
   );

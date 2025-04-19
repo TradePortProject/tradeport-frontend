@@ -1,12 +1,12 @@
 import { Product } from './types';
-const apiUrl = 'http://localhost:3016/api/ProductManagement';
+const apiUrl = `${import.meta.env.VITE_API_KEY}`;
 
 export async function savePost(newPostData: Product, image: File | null) {
   
 
   try {
   const formData = new FormData();
-  console.log("Environment Variable URL:", process.env.REACT_APP_PRODUCT_API_URL);
+  console.log("Environment Variable URL:", apiUrl);
   
   newPostData.shippingCost = 30;
 
