@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux'; // Import useDispatch
 import { addToCart, removeFromCart } from '../store/features/cartSlice.ts'; // Import the action
 
 import { ShoppingCart } from "../posts/types";
-import { orderPost } from "../posts/orderPost";
+
 import { useNavigate } from "react-router-dom";
 import { getShoppingPosts } from "../posts/getShoppingPosts";
 import { useSelector } from 'react-redux'; // Import useSelector for Redux
@@ -73,26 +73,25 @@ export function ShoppingPage() {
   };
 
   return (
-    <div className="flex flex-col items-start gap-4 py-10 lg:py-10 min-h-screen mx-4 lg:mx-10">
-      {/* Header Section */}
-      <div className="flex flex-row justify-center   w-full p-10 mb-4">
+    <div className="flex flex-col items-center gap-4 py-10 lg:py-10 min-h-screen mx-4 lg:mx-10">
 
-        <div className="grid grid-cols-2 gap-4 ">
-          <div
-            className="text-sm sm:text-base text-green-400 font-bold flex items-center justify-center cursor-pointer border-b"
-            
-          > 
-          <img src={ShoppingCartIcon} alt="Shopping Cart" className="h-5 w-5 mr-2" />
-            Shopping Cart
+          <div className="flex flex-col mb-4 border-black bg-slate-100 space-y-3 text-center md:text-left p-10 md:px-24">
+            <div className="max-w-sm text-xl text-center sm:text-2xl font-medium">
+              Check Out
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-2  gap-4">
+              <div className="text-sm sm:text-base  text-green-400 font-bold flex items-center justify-center border-b cursor-pointer"
+              onClick={() => navigate("/cart")}>
+                <img src={ShoppingCartIcon} alt="Shopping Cart" className="h-5 w-5 mr-2" />
+                Shopping Cart
+              </div>
+              <div className="text-sm sm:text-base  text-gray-400  font-bold flex items-center justify-center  cursor-pointer" onClick={() => navigate("/contact")}>
+              <img src={ContactInfo} alt="Contact" className="h-5 w-5 mr-2" />
+                Checkout Summary
+              </div>
+            </div>
           </div>
-          <div className="text-sm sm:text-base  text-gray-400 font-bold flex items-center justify-center cursor-pointer"
-           onClick={() => navigate("/Contact")}
-          >
-            <img src={ContactInfo} alt="Contact" className="h-5 w-5 mr-2" />
-            Checkout Summary
-          </div>
-        </div>
-      </div>
+     
 
       {/* Product List Section */}
       <div className="flex flex-col lg:flex-row justify-center gap-5 w-full">

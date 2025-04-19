@@ -21,10 +21,10 @@ export function ProductMaster() {
   const onSubmit = async (product: Product): Promise<void> => {
     console.log("Submitted details:", product);
     try {
-      product.manufacturerID = userID || '3fa85f64-5717-4562-b3fc-2c963f66afa6';
+      product.manufacturerID = userID || '';
       const body: SavedPost = await savePost(product, image);
       console.log("response:", body);
-      navigate(`/thank-you`);
+      navigate(`/catalogGrid`);
     } catch (error) {
       console.error("Error saving post:", error);
     }
@@ -191,3 +191,5 @@ export function ProductMaster() {
   
   );
 }
+
+

@@ -193,8 +193,8 @@ export function ContactInfoPage() {
 
         
           <div className="flex flex-col mb-4 border-black border-2 space-y-3 text-center md:text-left">
-            <div className="flex items-center justify-center w-full lg:w-[300px] p-2.5 bg-gray-900 rounded border border-lime-500">
-              <div className="text-lg font-medium text-center text-white" onClick={() => posts && onSubmit(posts)}>
+            <div className="flex items-center justify-center w-full lg:w-[300px] p-2.5 bg-gray-900 rounded border border-lime-500 cursor-pointer">
+              <div className="text-lg font-medium text-center text-white cursor-pointer" onClick={() => posts && onSubmit(posts)}>
                 Checkout
               </div>
             </div>
