@@ -92,12 +92,12 @@ const OrderGrid = ({
                     }`}
                   >
 				
-					<div class="space-y-1 p-1 rounded shadow-md">
-					  <p class="text-lg font-bold text-gray-800">Product Name: <span class="font-normal">{detail.productName}</span></p>
-					  <p class="text-lg font-bold text-gray-800">Manufacturer Name: <span class="font-normal">{detail.manufacturerName}</span></p>
-					  <p class="text-lg font-bold text-gray-800">Quantity: <span class="font-normal">{detail.quantity}</span></p>
-					  <p class="text-lg font-bold text-gray-800">Price: <span class="font-normal">{detail.productPrice}</span></p>
-					  <p class="text-lg font-bold text-gray-800">Order Status: <span class="font-normal">{detail.orderItemStatus}</span></p>
+					<div className="space-y-1 p-1 rounded shadow-md">
+					  <p className="text-lg font-bold text-gray-800">Product Name: <span className="font-normal">{detail.productName}</span></p>
+					  <p className="text-lg font-bold text-gray-800">Manufacturer Name: <span className="font-normal">{detail.manufacturerName}</span></p>
+					  <p className="text-lg font-bold text-gray-800">Quantity: <span className="font-normal">{detail.quantity}</span></p>
+					  <p className="text-lg font-bold text-gray-800">Price: <span className="font-normal">{detail.productPrice}</span></p>
+					  <p className="text-lg font-bold text-gray-800">Order Status: <span className="font-normal">{detail.orderItemStatus}</span></p>
 				
 						<div className="flex space-x-2">
 						  <button

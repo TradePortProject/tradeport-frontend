@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import ENDPOINTS from "../config/apiConfig";
 
 interface RegisterFormData {
   loginID: string;
@@ -72,7 +73,7 @@ const RegisterForm: React.FC = () => {
       console.log("Submitting Payload:", payload);
 
       const response = await axios.post(
-        "http://localhost:7237/api/User/registerUser",
+        ENDPOINTS.USER.REGISTER,
         payload,
         { headers: { "Content-Type": "application/json" } },
       );

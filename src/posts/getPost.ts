@@ -1,8 +1,9 @@
-import {ShoppingCart } from './types';
+import { ShoppingCart } from './types';
+import ENDPOINTS from '../config/apiConfig';
 
 export async function getPosts(productID: string): Promise<ShoppingCart[]> {
   
-  const apiUrl = `http://localhost:3016/api/ProductManagement/${productID}`;
+  const apiUrl = ENDPOINTS.PRODUCT.BY_ID(productID);
   const response = await fetch(apiUrl);
   const data = await response.json();
   console.log('Data:', data.product);

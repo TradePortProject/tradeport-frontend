@@ -4,6 +4,7 @@ import { login, setUserDetails } from "../store/features/authSlice";
 import { useDispatch } from "react-redux";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import ENDPOINTS from "../config/apiConfig";
 
 const GoogleAuthButton: React.FC = () => {
   const dispatch = useDispatch();
@@ -28,8 +29,15 @@ const GoogleAuthButton: React.FC = () => {
       dispatch(setUserDetails({ email, name, picture }));
 
       const response = await axios.post(
-        "http://localhost:7237/api/User/validategoogleuser",
+//<<<<<<< hotfix/SCRUM-206-JWT-Token-Package-Issue
+        //"http://localhost:7237/api/User/validategoogleuser",
+        ENDPOINTS.USER.VALIDATE_GOOGLE,
+        credentialResponse.credential, // Send as a raw string
         { token: credentialResponse.credential }, // ✅ Send as JSON object
+//=======
+//        ENDPOINTS.USER.VALIDATE_GOOGLE,
+//        credentialResponse.credential, // Send as a raw string
+// >>>>>>> main
         {
           headers: {
             "Content-Type": "application/json"
