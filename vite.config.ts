@@ -8,6 +8,7 @@ export default defineConfig({
   },
   server: {
     port: 3001,
+    allowedHosts:["tradeport.cloud"]
   },
   test: {
     globals: true,
