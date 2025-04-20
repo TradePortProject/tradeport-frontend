@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { login, setUserDetails } from "../store/features/authSlice";
 import { useDispatch } from "react-redux";
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";
 import ENDPOINTS from "../config/apiConfig";
+import { jwtDecode } from "jwt-decode";
 
 const GoogleAuthButton: React.FC = () => {
   const dispatch = useDispatch();
@@ -30,7 +30,7 @@ const GoogleAuthButton: React.FC = () => {
 
       const response = await axios.post(
         ENDPOINTS.USER.VALIDATE_GOOGLE,
-        { token: credentialResponse.credential }, // Send as JSON object
+        { token: credentialResponse.credential }, // ✅ Send as JSON object
         {
           headers: {
             "Content-Type": "application/json"
