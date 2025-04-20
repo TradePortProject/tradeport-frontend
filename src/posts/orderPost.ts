@@ -1,12 +1,17 @@
 import { ShoppingCart } from "./types";
 import ENDPOINTS from "../config/apiConfig";
+import { RootState } from '../store/store';
 
-// const apiUrl = process.env.REACT_APP_PRODUCT_API_URL || 'http://localhost:3017/api/OrderManagement/CreateOrder';
+
 const apiUrl = ENDPOINTS.ORDER.ORDERS.CREATE;
 
 export async function orderPost(newPostData: ShoppingCart[]) {
   try {
     console.log("API URL:", apiUrl);
+
+    const token = (state: RootState) => state.auth?.token;
+    
+
     const payload = {
       retailerID: newPostData[0].retailerID,
       paymentMode: newPostData[0].paymentMode,
@@ -20,7 +25,10 @@ export async function orderPost(newPostData: ShoppingCart[]) {
 
     const response = await fetch(apiUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // Pass token as AuthBearer
+      },
       body: JSON.stringify(payload),
     });
 

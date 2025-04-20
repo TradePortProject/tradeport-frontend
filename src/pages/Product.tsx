@@ -17,12 +17,16 @@ export function ProductMaster() {
   const [image, setImage] = useState<File | null>(null);
   const navigate = useNavigate();
   const userID = useSelector((state: RootState) => state.auth.user?.userID); // Access userID from the Redux store
-  
+  const token = useSelector((state: RootState) => state.auth.token); // Access token from the Redux store
+  console.log("Token: Product", token);
   const onSubmit = async (product: Product): Promise<void> => {
     console.log("Submitted details:", product);
     try {
       product.manufacturerID = userID || '';
-      const body: SavedPost = await savePost(product, image);
+      if (!token) {
+        throw new Error("Token is required to save the post.");
+      }
+      const body: SavedPost = await savePost(product, image, token);
       console.log("response:", body);
       navigate(`/catalogGrid`);
     } catch (error) {

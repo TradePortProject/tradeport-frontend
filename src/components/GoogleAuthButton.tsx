@@ -35,11 +35,9 @@ const GoogleAuthButton: React.FC = () => {
           headers: {
             "Content-Type": "application/json"
           },
-          validateStatus: (status) => status < 500,
+          validateStatus: (status: number) => status < 500,
         }
       );
-
-
 
       if (response.status === 200) {
         console.log("Backend validation successful:", response.data);
