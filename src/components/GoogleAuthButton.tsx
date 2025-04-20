@@ -29,24 +29,15 @@ const GoogleAuthButton: React.FC = () => {
       dispatch(setUserDetails({ email, name, picture }));
 
       const response = await axios.post(
-//<<<<<<< hotfix/SCRUM-206-JWT-Token-Package-Issue
-        //"http://localhost:7237/api/User/validategoogleuser",
         ENDPOINTS.USER.VALIDATE_GOOGLE,
-        credentialResponse.credential, // Send as a raw string
-        { token: credentialResponse.credential }, // ✅ Send as JSON object
-//=======
-//        ENDPOINTS.USER.VALIDATE_GOOGLE,
-//        credentialResponse.credential, // Send as a raw string
-// >>>>>>> main
+        { token: credentialResponse.credential }, // Send as JSON object
         {
           headers: {
             "Content-Type": "application/json"
           },
-          validateStatus: (status) => status < 500,
+          validateStatus: (status: number) => status < 500,
         }
       );
-
-
 
       if (response.status === 200) {
         console.log("Backend validation successful:", response.data);

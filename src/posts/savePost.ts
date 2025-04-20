@@ -1,10 +1,23 @@
+import ENDPOINTS from '../config/apiConfig';
 import { Product } from './types';
-const apiUrl = `${import.meta.env.VITE_API_KEY}`;
 
-export async function savePost(newPostData: Product, image: File | null) {
+
+
+//const apiUrl = `${import.meta.env.VITE_API_KEY}`;
+
+const apiUrl = ENDPOINTS.PRODUCT.BASE ;
+
+export async function savePost(newPostData: Product, image: File | null,token: string) {
   
 
   try {
+    
+    console.log("Token: in the Savepost", token);
+    
+    if (!token) {
+      throw new Error('Token not found');
+    }
+    
   const formData = new FormData();
   console.log("Environment Variable URL:", apiUrl);
   
@@ -30,6 +43,9 @@ export async function savePost(newPostData: Product, image: File | null) {
 
     const response = await fetch(apiUrl, {
       method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`, // Pass token as AuthBearer
+      },
       body: formData,
     });
 
