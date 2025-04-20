@@ -23,7 +23,10 @@ export function ProductMaster() {
     console.log("Submitted details:", product);
     try {
       product.manufacturerID = userID || '';
-      const body: SavedPost = await savePost(product, image,token);
+      if (!token) {
+        throw new Error("Token is required to save the post.");
+      }
+      const body: SavedPost = await savePost(product, image, token);
       console.log("response:", body);
       navigate(`/catalogGrid`);
     } catch (error) {
