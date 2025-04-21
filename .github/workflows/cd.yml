@@ -18,7 +18,7 @@ on:
           - prod
 
 env:
-  DOCKERHUB_IMAGE_FRONTEND: prabhulalithakrishnan/tradeport-frontend
+  DOCKERHUB_IMAGE_FRONTEND: ${{secrets.DELETE_DOCKERHUB_USERNAME}}/tradeport-frontend
   REMOTE_DIR: /root/tradeport
 
 jobs:
@@ -69,7 +69,7 @@ jobs:
           cat .env | sed 's/\(.*SECRET.*=\).*/\1********/'
 
       - name: 🐳 Log in to Docker Hub
-        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+        run: echo "${{ secrets.DELETE_DOCKERHUB_USERNAME }}" | docker login -u "${{ secrets.DELETE_DOCKERHUB_USERNAME }}" --password-stdin
 
       - name: 🐳 Build and tag Frontend Image
         run: |
