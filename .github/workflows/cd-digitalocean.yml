@@ -1,5 +1,4 @@
-name: Deploy to DigitalOcean
-
+name: CD - Stage 2 - Deploy to DigitalOcean
 on:
   workflow_dispatch:
 
