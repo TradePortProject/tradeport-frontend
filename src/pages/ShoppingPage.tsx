@@ -20,6 +20,7 @@ export function ShoppingPage() {
   const [posts, setPosts] = useState<ShoppingCart[] | null>(null);
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const retailerID = useSelector((state: RootState) => state.auth.user?.userID); // Access userID from the Redux store
+  const token = useSelector((state: RootState) => state.auth.token); 
   console.log('userID:', retailerID);
 
   useEffect(() => {
@@ -29,7 +30,13 @@ export function ShoppingPage() {
         console.error("retailer ID is undefined");
         return;
       }
-      const postsData = await getShoppingPosts(retailerID);
+      if (!token) {
+        console.error("Token is required to fetch shopping posts.");
+        return;
+      }
+
+      const postsData = await getShoppingPosts(retailerID,token);
+      console.log("SHooping Cart postsData:", postsData);
       setPosts(postsData);
       calculateTotal(postsData);
       if (postsData && Array.isArray(postsData)) {

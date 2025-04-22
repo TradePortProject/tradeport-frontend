@@ -5,6 +5,8 @@ import PriceRangeSelect from "./PriceRangeSelect";
 import SearchBar from "./SearchBar";
 import Pagination from "./Pagination";
 import ENDPOINTS from "../config/apiConfig";
+import { RootState } from "../store/store";
+import { useSelector } from "react-redux";
 
 interface Product {
   productID: string;
@@ -72,6 +74,7 @@ const CatalogGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [searchText, setSearchText] = useState<string>("");
+  const token = useSelector((state: RootState) => state.auth.token);
 
   useEffect(() => {
     if (searchText.length >= 3 || searchText.length === 0) {
@@ -99,7 +102,12 @@ const CatalogGrid: React.FC = () => {
       const queryParams = `?pageNumber=${pageNumber}&searchText=${searchText}${categoryQuery}&quantity=${selectedQuantity}&minWholesalePrice=${wholesaleRange.min}&maxWholesalePrice=${wholesaleRange.max}&minRetailPrice=${retailRange.min}&maxRetailPrice=${retailRange.max}`;
       
       const response = await fetch(
-        ENDPOINTS.PRODUCT.FILTERED(queryParams)
+        ENDPOINTS.PRODUCT.FILTERED(queryParams),
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`, // Pass token as AuthBearer
+          },
+        }
       );
       const data = await response.json();
       console.log("Fetched products:", data.product);

@@ -2,12 +2,16 @@ import { ShoppingCart } from "./types";
 import ENDPOINTS from "../config/apiConfig";
 
 export async function getShoppingPosts(
-  retailerID: string,
+  retailerID: string,token: string
 ): Promise<ShoppingCart[]> {
   const apiUrl = ENDPOINTS.ORDER.SHOPPING_CART.GET(retailerID);
 
   // const apiUrl = `http://localhost:3017/api/OrderManagement/GetShoppingCart/${retailerID}`;
-  const response = await fetch(apiUrl);
+  const response = await fetch(apiUrl,{
+  headers: {
+    'Authorization': `Bearer ${token}`, // Pass token as AuthBearer
+    },
+  });
   const data = await response.json();
   console.log("Data:", data.cartDetails);
   assertIsPosts(data.cartDetails);

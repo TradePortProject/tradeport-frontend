@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux'; // Import useSelector for Redux
 import { RootState } from '../store/store';
 import ENDPOINTS from '../config/apiConfig';
 
+
 export function ProductDetail() {
   const {
       handleSubmit,
@@ -20,7 +21,7 @@ export function ProductDetail() {
   const {productID } = useParams<{ productID: string }>();
   const [post, setPost] = useState<ShoppingCart | null>(null);
   const [orderquantity, setOrderQuantity] = useState<number>(1);
- 
+  const token = useSelector((state: RootState) => state.auth.token); 
 
   const userID = useSelector((state: RootState) => state.auth.user?.userID); // Access userID from the Redux store
   console.log('userID:', userID);
@@ -59,7 +60,12 @@ export function ProductDetail() {
         console.error("Product ID is undefined");
         return;
       }
-      const postsData = await getPosts(productID);
+      if (!token) {
+        console.error("Token is required to fetch the post.");
+        return;
+      }
+      
+      const postsData = await getPosts(productID, token);
       const selectedPost = postsData.find((p) => p.productID === productID);
       setPost(selectedPost ? { ...selectedPost, orderQuantity: Number(selectedPost.orderQuantity)} : null);
       if (selectedPost) {
