@@ -1,10 +1,13 @@
 import { ShoppingCart } from './types';
 import ENDPOINTS from '../config/apiConfig';
 
-export async function getPosts(productID: string): Promise<ShoppingCart[]> {
-  
+export async function getPosts(productID: string, token: string): Promise<ShoppingCart[]> {
   const apiUrl = ENDPOINTS.PRODUCT.BY_ID(productID);
-  const response = await fetch(apiUrl);
+  const response = await fetch(apiUrl, {
+    headers: {
+      'Authorization': `Bearer ${token}`, // Pass token as AuthBearer
+    },
+  });
   const data = await response.json();
   console.log('Data:', data.product);
   assertIsPosts(data.product);

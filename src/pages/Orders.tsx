@@ -3,6 +3,8 @@ import OrderGrid from '../components/OrderGrid';
 import Pagination from '../components/Pagination';
 import SearchBar from '../components/SearchBar';
 import ENDPOINTS from '../config/apiConfig';
+import { RootState } from '../store/store';
+import { useSelector } from 'react-redux';
 
 const Orders: React.FC = () => {
   const [data, setData] = useState<Order[]>([]);
@@ -10,6 +12,7 @@ const Orders: React.FC = () => {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [searchText, setSearchText] = useState<string>("");
+  const token = useSelector((state: RootState) => state.auth.token);
 
   const handlePageChange = (page: number) => {
     setPageNumber(page);
@@ -22,7 +25,12 @@ const Orders: React.FC = () => {
   const fetchOrders = async () => {
     try {
       const response = await fetch(
-        ENDPOINTS.ORDER.ORDERS.GET(`?page=${pageNumber}&productName=${searchText}`)
+        ENDPOINTS.ORDER.ORDERS.GET(`?page=${pageNumber}&productName=${searchText}`),
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`, // Pass token as AuthBearer
+          },
+        }
       );
       if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -45,6 +53,7 @@ const Orders: React.FC = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`, // Pass token as AuthBearer
         },
         body: JSON.stringify({
           orderID: orderID,
@@ -55,8 +64,6 @@ const Orders: React.FC = () => {
       if (!response.ok) {
         throw new Error('Failed to update order status');
       }
-
-      //alert(`Order detail ${action ? 'approved' : 'rejected'} successfully!`);
 
       // Optionally, refresh orders after action
       fetchOrders();
