@@ -68,7 +68,7 @@ export function ShoppingPage() {
   const removePost = async (cartID: string) => {
     if (!posts) return;
     try {
-      const removedPosts = await removeFromCartShoppingPosts(cartID);
+      const removedPosts = await removeFromCartShoppingPosts(cartID,token);
       const updatedPosts = posts.filter(post => post.cartID !== cartID);
       setPosts(updatedPosts);
       calculateTotal(updatedPosts);

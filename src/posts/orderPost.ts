@@ -1,16 +1,13 @@
 import { ShoppingCart } from "./types";
 import ENDPOINTS from "../config/apiConfig";
-import { RootState } from '../store/store';
+
 
 
 const apiUrl = ENDPOINTS.ORDER.ORDERS.CREATE;
 
-export async function orderPost(newPostData: ShoppingCart[]) {
+export async function orderPost(newPostData: ShoppingCart[],token: string) {
   try {
-    console.log("API URL:", apiUrl);
-
-    const token = (state: RootState) => state.auth?.token;
-    
+    console.log("API URL:", apiUrl);   
 
     const payload = {
       retailerID: newPostData[0].retailerID,
