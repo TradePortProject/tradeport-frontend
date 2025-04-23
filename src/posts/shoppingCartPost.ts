@@ -3,7 +3,7 @@ import ENDPOINTS from '../config/apiConfig';
 
 const apiUrl = ENDPOINTS.ORDER.SHOPPING_CART.CREATE;
 
-export async function ShoppingCartPost(newPostData: ShoppingCart) {
+export async function ShoppingCartPost(newPostData: ShoppingCart,token: string) {
   try {
     console.log("API URL:", apiUrl);
     const payload = {      
@@ -18,7 +18,10 @@ export async function ShoppingCartPost(newPostData: ShoppingCart) {
 
     const response = await fetch(apiUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`, // Pass token as AuthBearer
+      },
       body: JSON.stringify(payload),
     });
 

@@ -8,6 +8,8 @@ import { RootState } from "../store/store";
 import { ShoppingCart } from "../posts/types";
 import { clearCart } from "../store/features/cartSlice";
 
+
+
 export function ContactInfoPage() {
   const navigate = useNavigate();
   const postsData = useSelector((state: RootState) => state.cart.items);
@@ -20,6 +22,7 @@ export function ContactInfoPage() {
   const retailerEmail = useSelector((state: RootState) => state.auth.user?.email);
   const [shippingAddress, setShippingAddress] = useState(retailerAdd || "");
   const [cardNumber, setCardNumber] = useState("");
+  const token = useSelector((state: RootState) => state.auth.token); 
 
   useEffect(() => {
       // Fetch shopping posts when retailerID changes
@@ -47,7 +50,10 @@ export function ContactInfoPage() {
               shippingAddress,
               paymentInfo: { cardNumber },
             }));
-            const body = await orderPost(updatedPosts);
+            if (!token) {
+              throw new Error("Token is required for this operation.");
+            }
+            const body = await orderPost(updatedPosts, token);
             console.log("response:", body);
             // Clear the cart after successful order
             dispatch(clearCart()); // Uncomment if you have a clearCart action

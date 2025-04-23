@@ -46,7 +46,7 @@ export function ProductDetail() {
       
       console.log("Submitted details:", order);
       try {
-        const body = await ShoppingCartPost(order);
+        const body = await ShoppingCartPost(order,token);
         console.log("response:", body);
         navigate(`/Cart`);
       } catch (error) {
