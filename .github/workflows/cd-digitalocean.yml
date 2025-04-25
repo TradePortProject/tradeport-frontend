@@ -1,113 +1,160 @@
+# ======================================================
+# Deploy to DigitalOcean Workflow
+# ======================================================
+# This workflow handles the infrastructure provisioning
+# and deployment of the Tradeport application to a 
+# DigitalOcean Droplet.
+#
+# Key Features:
+# - Provisions infrastructure using Terraform
+# - Sets up SSH access to the Droplet
+# - Deploys Docker containers to the server
+# - Creates necessary data volumes and networks
+#
+# This workflow is triggered manually to allow for
+# controlled deployment to production infrastructure.
+# ======================================================
+
 name: Deploy to DigitalOcean
 
 on:
-  workflow_dispatch:
+  # Manual trigger only - workflow_dispatch allows running this workflow from the GitHub Actions tab
+  workflow_dispatch:  # Allow manual triggering with no inputs
 
 jobs:
+  # Terraform job: Provisions and configures the infrastructure on DigitalOcean
   terraform:
     runs-on: ubuntu-latest
     env:
-      TF_VAR_digitalocean_token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-      TF_VAR_ssh_fingerprint: ${{ secrets.SSH_FINGERPRINT }}
-      TF_LOG: DEBUG  # Enable Terraform debugging
-      TF_LOG_PATH: terraform-debug.log  # Save debug logs to a file
+      # Set environment variables for Terraform from GitHub secrets
+      TF_VAR_digitalocean_token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}  # DigitalOcean API token
+      TF_VAR_ssh_fingerprint: ${{ secrets.SSH_FINGERPRINT }}               # SSH key fingerprint for droplet access
+      TF_LOG: DEBUG                                                         # Enable detailed Terraform logging
+      TF_LOG_PATH: terraform-debug.log                                      # Path to save Terraform logs
 
     steps:
-      - name: Debug Secrets
+      # Step 1: Output secret values for debugging purposes (consider removing in production)
+      - name: Debug Secrets  # Verify secrets are available (mask in production)
         run: |
           echo "SSH_FINGERPRINT=${{ secrets.SSH_FINGERPRINT }}"
           echo "DO_ACCESS_TOKEN=${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}"
 
-      - name: Checkout Repository
+      # Step 2: Check out the repository code to the runner
+      - name: Checkout Repository  # Get the latest code including Terraform configurations
         uses: actions/checkout@v2
 
-      - name: Install Terraform
+      # Step 3: Set up Terraform CLI
+      - name: Install Terraform  # Set up Terraform environment
         uses: hashicorp/setup-terraform@v2
 
-      - name: Initialize Terraform (Debugging Enabled)
+      # Step 4: Initialize Terraform with debugging enabled
+      - name: Initialize Terraform (Debugging Enabled)  # Initialize Terraform and plugins
         run: |
-          export TF_LOG=DEBUG
-          terraform init -upgrade | tee terraform-debug.log
-        working-directory: terraform
+          export TF_LOG=DEBUG  # Enable detailed logging
+          terraform init -upgrade | tee terraform-debug.log  # Initialize and capture logs
+        working-directory: terraform  # Path to Terraform configuration files
 
-      - name: Plan Terraform (Debugging Enabled)
+      # Step 5: Plan Terraform deployment with debugging enabled
+      - name: Plan Terraform (Debugging Enabled)  # Create execution plan
         id: plan
         run: |
-          export TF_LOG=DEBUG
-          terraform plan -out=tfplan -parallelism=5 \
-            -var="do_token=${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" \
-            -var="ssh_fingerprint=${{ secrets.SSH_FINGERPRINT }}" | tee terraform-debug.log
-        working-directory: terraform
+          export TF_LOG=DEBUG  # Enable detailed logging
+          terraform plan -out=tfplan -parallelism=5 \  # Generate plan with parallel operations
+            -var="do_token=${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" \  # DigitalOcean API token
+            -var="ssh_fingerprint=${{ secrets.SSH_FINGERPRINT }}" | tee terraform-debug.log  # SSH key fingerprint
+        working-directory: terraform  # Path to Terraform configuration files
 
-      - name: Show Plan If Failure Occurs
-        if: steps.plan.outcome == 'failure'
+      # Step 6: Show the Terraform plan if the planning step fails
+      - name: Show Plan If Failure Occurs  # Provide debug information on failure
+        if: steps.plan.outcome == 'failure'  # Only runs if planning step fails
         run: terraform show -no-color tfplan
-        working-directory: terraform
+        working-directory: terraform  # Path to Terraform configuration files
 
-      - name: Apply Terraform (Corrected Command)
+      # Step 7: Apply the Terraform plan to provision the infrastructure
+      - name: Apply Terraform (Corrected Command)  # Create/update infrastructure resources
         run: |
-          export TF_LOG=DEBUG
-          terraform apply -auto-approve "tfplan"
-        working-directory: terraform
+          export TF_LOG=DEBUG  # Enable detailed logging
+          terraform apply -auto-approve "tfplan"  # Apply the plan without interactive confirmation
+        working-directory: terraform  # Path to Terraform configuration files
 
-      - name: Get Droplet IP (Inspect Raw JSON Output)
+      # Step 8: Retrieve the Droplet's IP address in JSON format
+      - name: Get Droplet IP (Inspect Raw JSON Output)  # Get the newly created Droplet IP
         id: get_ip_debug
         run: |
-          terraform output -json droplet_ip
-        working-directory: terraform
+          terraform output -json droplet_ip  # Output the Droplet IP from Terraform state
+        working-directory: terraform  # Path to Terraform configuration files
     outputs:
-      droplet_ip: ${{ steps.get_ip.outputs.DROPLET_IP }}
+      droplet_ip: ${{ steps.get_ip.outputs.DROPLET_IP }}  # Export Droplet IP for use in deploy job
 
+  # Deploy job: Deploys the application to the DigitalOcean Droplet
   deploy:
-    needs: terraform
+    needs: terraform  # Depends on terraform job completing
     runs-on: ubuntu-latest
     env:
-      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-      DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
-      SA_PASSWORD: ${{ secrets.SA_PASSWORD }}
-      DROPLET_IP: ${{ needs.terraform.outputs.droplet_ip || '159.223.94.41' }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}         # SSH key for server access
+      DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }} # Docker Hub credentials
+      DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }} # Docker Hub password
+      SA_PASSWORD: ${{ secrets.SA_PASSWORD }}                 # Database password
+      DROPLET_IP: ${{ needs.terraform.outputs.droplet_ip || '159.223.94.41' }}  # Use output from terraform job or fallback
 
     steps:
-      - name: Install Docker and Start Service
+      # Step 1: Install Docker and ensure the service is running
+      - name: Install Docker and Start Service  # Set up Docker on the runner
         run: |
+          # Update package lists
           sudo apt-get update
+          # Remove any existing Docker installations
           sudo apt-get remove -y --purge containerd containerd.io docker docker-engine docker.io docker-ce
           sudo apt-get autoremove -y
           sudo apt-get clean
+          # Install Docker
           sudo apt-get update
           sudo apt-get install -y docker.io
+          # Make sure Docker service is running
           sudo systemctl start docker && sudo systemctl enable docker
 
-      - name: Configure SSH Access
+      # Step 2: Configure SSH access to the Droplet
+      - name: Configure SSH Access  # Set up SSH connection to the remote server
         run: |
           echo "DROPLET_IP=$DROPLET_IP"
+          # Create SSH directory
           mkdir -p ~/.ssh
+          # Save private key from secrets
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          # Set appropriate permissions
           chmod 600 ~/.ssh/id_rsa
+          # Add host key to known hosts
           ssh-keyscan -H "$DROPLET_IP" >> ~/.ssh/known_hosts
 
-      - name: Deploy Containers to DigitalOcean
+      # Step 3: Deploy application containers to the DigitalOcean Droplet
+      - name: Deploy Containers to DigitalOcean  # Deploy application using SSH
         run: |
           echo "Connecting to Droplet at $DROPLET_IP..."
+          # Execute commands on the remote server via SSH
           ssh -o StrictHostKeyChecking=no root@"$DROPLET_IP" << EOF
             echo "Logging into Docker..."
+            # Authenticate with Docker Hub
             docker login -u "$DOCKER_HUB_USERNAME" -p "$DOCKER_HUB_PASSWORD"
 
             echo "Creating Docker network..."
+            # Create network for container communication (if it doesn't exist)
             docker network create my_network || true
 
             echo "Deploying frontend container..."
+            # Pull the latest frontend image
             docker pull prabhulalithakrishnan/tradeport-frontend:latest
+            # Stop and remove existing container if present
             docker stop mssql || true
             docker rm mssql || true
+            # Run the container with appropriate configuration
             docker run -d -p 1433:1433 \
-              -e SA_PASSWORD="$SA_PASSWORD" \
-              --name mssql \
-              --network=my_network \
-              --mount type=bind,source=/mnt/volume_sgp1_01,target=/mnt/volume_sgp1_01 \
+              -e SA_PASSWORD="$SA_PASSWORD" \  # Set database password
+              --name mssql \                   # Container name
+              --network=my_network \           # Attach to Docker network
+              --mount type=bind,source=/mnt/volume_sgp1_01,target=/mnt/volume_sgp1_01 \  # Mount volume for persistence
               prabhulalithakrishnan/tradeport-frontend:latest
 
             echo "Docker container status:"
+            # Verify container is running
             docker ps -a
           EOF

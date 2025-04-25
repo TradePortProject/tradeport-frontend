@@ -1,10 +1,28 @@
+# ======================================================
+# Continuous Deployment (CD) Workflow - Stage 1
+# ======================================================
+# This workflow builds and deploys the Tradeport frontend
+# application to Docker Hub with the following features:
+#
+# - Environment-specific deployments (dev/staging/prod)
+# - Automatic versioning from package.json
+# - Multi-tag Docker images for different purposes
+# - Verification steps to confirm successful deployment
+# - Health check of the deployed application
+#
+# The workflow runs on pull requests to main and can be
+# manually triggered with environment selection.
+# ======================================================
+
 name: CD - Stage 1 - Deploy to Dockerhub
 
 on:
-  push:
-    branches: [main, "feature/**"]
+  # Commented triggers can be uncommented when ready to automate deployment on push events
+  # push:
+  #   branches: [main, "feature/**"]
   pull_request:
-    branches: [main]
+    branches: [main]  # Run on PRs targeting main branch
+  # Manual trigger with environment selection
   workflow_dispatch:
     inputs:
       environment:
@@ -13,105 +31,134 @@ on:
         default: "dev"
         type: choice
         options:
-          - dev
-          - staging
-          - prod
+          - dev      # Development environment
+          - staging  # Staging/testing environment
+          - prod     # Production environment
 
+# Global environment variables used throughout the workflow
 env:
-  DOCKERHUB_IMAGE_FRONTEND: prabhulalithakrishnan/tradeport-frontend
-  REMOTE_DIR: /root/tradeport
+  DOCKERHUB_IMAGE_FRONTEND: prabhulalithakrishnan/tradeport-frontend  # Docker Hub repository name
+  REMOTE_DIR: /root/tradeport                                         # Target directory on deployment server
 
 jobs:
+  # Job 1: Prepare environment and determine build parameters
   prepare:
     name: ⛏️ Prepare Environment
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.set-outputs.outputs.version }}
-      short_sha: ${{ steps.set-outputs.outputs.short_sha }}
-      env_name: ${{ steps.set-outputs.outputs.env_name }}
+      # Export important variables for use in subsequent jobs
+      version: ${{ steps.set-outputs.outputs.version }}       # Application version from package.json
+      short_sha: ${{ steps.set-outputs.outputs.short_sha }}   # Short Git commit SHA
+      env_name: ${{ steps.set-outputs.outputs.env_name }}     # Target environment (dev/staging/prod)
     steps:
-      - name: ⬇️ Checkout code
+      - name: ⬇️ Checkout code  # Get the latest code from the repository
         uses: actions/checkout@v4
 
-      - name: 🏷️ Determine version and set outputs
+      - name: 🏷️ Determine version and set outputs  # Extract and calculate version information
         id: set-outputs
         run: |
+          # Extract version from package.json or fallback to commit SHA
           VERSION=$(grep '"version"' ./package.json | cut -d'"' -f4 || echo ${GITHUB_SHA::8})
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
+          # Use first 8 characters of commit SHA for short version
           echo "short_sha=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
+          
+          # Determine target environment based on input or branch name:
+          # - Use workflow_dispatch input if provided
+          # - Otherwise use 'prod' for main branch
+          # - Otherwise use 'staging' for develop branch
+          # - Otherwise default to 'dev'
           echo "env_name=${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod') || (github.ref == 'refs/heads/develop' && 'staging') || 'dev' }}" >> $GITHUB_OUTPUT
 
-      - name: 📤 Upload .env file
+      - name: 📤 Upload .env file  # Save environment file for future jobs
         uses: actions/upload-artifact@v4
         with:
-          name: env-file
-          path: .env
-          retention-days: 1
-          if-no-files-found: warn
+          name: env-file  # Artifact name for environment file
+          path: .env      # Path to environment file
+          retention-days: 1  # Keep file for 1 day
+          if-no-files-found: warn  # Only warn if file not found
 
+  # Job 2: Build Docker image with appropriate configuration
   build:
     name: 🏗️ Build Frontend Image
-    needs: prepare
+    needs: prepare  # Depends on prepare job completing
     runs-on: ubuntu-latest
     steps:
-      - name: ⬇️ Checkout code
+      - name: ⬇️ Checkout code  # Get the latest code from the repository
         uses: actions/checkout@v4
 
-      - name: 🌍 Set environment-specific variables
+      - name: 🌍 Set environment-specific variables  # Configure environment-specific settings
         run: |
+          # Set API URL based on target environment
           if [ "${{ needs.prepare.outputs.env_name }}" = "prod" ]; then
+            # Production environment API URL
             echo "VITE_API_URL=${{ secrets.PROD_API_URL || 'https://api.example.com' }}" >> .env
           elif [ "${{ needs.prepare.outputs.env_name }}" = "staging" ]; then
+            # Staging environment API URL
             echo "VITE_API_URL=${{ secrets.STAGING_API_URL || 'https://staging-api.example.com' }}" >> .env
           fi
 
+          # Display environment variables (with sensitive values masked)
           echo "Using environment variables (sensitive values masked):"
           cat .env | sed 's/\(.*SECRET.*=\).*/\1********/'
 
-      - name: 🐳 Log in to Docker Hub
+      - name: 🐳 Log in to Docker Hub  # Authenticate with Docker Hub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      - name: 🐳 Build and tag Frontend Image
+      - name: 🐳 Build and tag Frontend Image  # Build Docker image with multiple tags
         run: |
-          # choose Dockerfile based on target environment
+          # Choose Dockerfile based on target environment
           if [ "${{ needs.prepare.outputs.env_name }}" = "dev" ]; then
-            DOCKERFILE=./Dockerfile.dev
+            DOCKERFILE=./Dockerfile.dev  # Development-specific Dockerfile
           else
-            # for staging & prod, use the production Dockerfile
-            DOCKERFILE=./Dockerfile.prod
+            # For staging & prod, use the production Dockerfile
+            DOCKERFILE=./Dockerfile.prod  # Production-optimized Dockerfile
           fi
 
+          # Build the Docker image with multiple tags:
+          # - latest: Always points to the most recent build
+          # - version: App version from package.json
+          # - short_sha: Git commit identifier
+          # - env_name: Target environment (dev/staging/prod)
           docker build -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:latest \
                       -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.version }} \
                       -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.short_sha }} \
                       -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.env_name }} \
                       -f $DOCKERFILE .
 
-      - name: 🐳 Push Frontend Image to Docker Hub
+      - name: 🐳 Push Frontend Image to Docker Hub  # Upload all tagged images to Docker Hub
         run: |
+          # Push all image tags to Docker Hub
           docker push ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:latest
           docker push ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.version }}
           docker push ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.short_sha }}
           docker push ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.env_name }}
 
+  # Job 3: Verify image was successfully pushed to Docker Hub
   verify:
     name: 🔍 Verify Docker Hub Push
-    needs: build
+    needs: build  # Depends on build job completing
     runs-on: ubuntu-latest
     steps:
-      - name: 🔍 Verify Docker Hub Push
+      - name: 🔍 Verify Docker Hub Push  # Ensure the image was successfully uploaded
         run: |
           echo "Verifying image push to Docker Hub..."
+          # Try to pull the image we just pushed
           docker pull ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:latest && \
             echo "✅ Successfully verified image push to Docker Hub" || \
-            (echo "❌ Failed to verify image on Docker Hub" && exit 1)
+            (echo "❌ Failed to verify image on Docker Hub" && exit 1)  # Fail if pull fails
 
+  # Job 4: Basic health check to verify deployment
   health-check:
     name: ❤️‍🩹 Health Check
-    needs: verify
+    needs: verify  # Depends on verify job completing
     runs-on: ubuntu-latest
     steps:
-      - name: 🔍 Health check
+      - name: 🔍 Health check  # Verify the application is accessible after deployment
         run: |
-          sleep 20
-          curl -m 10 -sSf http://${{ secrets.DROPLET_IP }}:3001/health || curl -m 10 -sSf http://${{ secrets.DROPLET_IP }}:3001 || echo "Frontend may still be starting up, please verify manually"
+          sleep 20  # Wait for application to start up
+          # Try health endpoint first, then fallback to root URL
+          curl -m 10 -sSf http://${{ secrets.DROPLET_IP }}:3001/health || \
+          curl -m 10 -sSf http://${{ secrets.DROPLET_IP }}:3001 || \
+          echo "Frontend may still be starting up, please verify manually"  # Non-blocking warning
