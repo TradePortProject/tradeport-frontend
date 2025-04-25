@@ -16,7 +16,7 @@ name: "CI - Stage 4 - Selenium Tests"
 # ======================================================
 
 on:
-  push:
+  # push:
     # branches: [main, "feature/**"]  # Uncomment to run on push to these branches
   pull_request:
     branches: [main]  # Run on PRs targeting main branch

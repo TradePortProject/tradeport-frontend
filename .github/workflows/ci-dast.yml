@@ -18,7 +18,7 @@ name: "CI - Stage 3 - DAST (OWASP ZAP Scan)"
 # ======================================================
 
 on:
-  push:
+  # push:
     # branches: [main, githubcicd]  # Uncomment to run on push to these branches
     # branches: [main, "feature/**"]
 

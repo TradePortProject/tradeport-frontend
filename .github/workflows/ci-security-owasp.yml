@@ -18,7 +18,7 @@ name: "CI - Stage 2 - Security Scan - SAST & SCA"
 # ======================================================
 
 on:
-  push:
+  # push:
     # branches: [main, "feature/**"]  # Uncomment to run on push to these branches
   pull_request:
     branches: [main]  # Run on PRs targeting main branch
