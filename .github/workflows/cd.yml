@@ -1,8 +1,8 @@
 name: CD - Stage 1 - Deploy to Dockerhub
 
 on:
-  push:
-    branches: [main, "feature/**"]
+  # push:
+  #   branches: [main, "feature/**"]
   pull_request:
     branches: [main]
   workflow_dispatch:

@@ -3,7 +3,7 @@ name: "CI - Stage 3 - DAST (OWASP ZAP Scan)"
 on:
   push:
     # branches: [main, githubcicd]
-    branches: [main, "feature/**"]
+    # branches: [main, "feature/**"]
 
   pull_request:
     branches: [main]

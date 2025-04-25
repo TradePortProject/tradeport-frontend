@@ -2,7 +2,7 @@ name: "CI - Stage 2 - Security Scan - SAST & SCA"
 
 on:
   push:
-    branches: [main, "feature/**"]
+    # branches: [main, "feature/**"]
   pull_request:
     branches: [main]
   workflow_dispatch:

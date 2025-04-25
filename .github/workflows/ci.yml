@@ -1,13 +1,15 @@
 name: "CI - Stage 1 - Build and Test (Parallel)"
 
 on:
-  push:
-    branches:
-      - main
-      - "feature/**"
+  # push:
+  #   branches:
+  #     - main
+  #     - "feature/**"
+  # pull_request:
+  #   branches:
+  #     - main
   pull_request:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 concurrency:

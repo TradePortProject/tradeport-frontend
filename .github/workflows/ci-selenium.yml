@@ -2,7 +2,7 @@ name: "CI - Stage 4 - Selenium Tests"
 
 on:
   push:
-    branches: [main, "feature/**"]
+    # branches: [main, "feature/**"]
   pull_request:
     branches: [main]
   workflow_dispatch:
