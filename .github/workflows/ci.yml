@@ -1,6 +1,21 @@
 name: "CI - Stage 1 - Build and Test (Parallel)"
 
+# ======================================================
+# Continuous Integration Workflow - Stage 1
+# ======================================================
+# This workflow performs the initial build and testing phase
+# for the Tradeport Frontend application. It runs on pull
+# requests to the main branch and can be manually triggered.
+#
+# Key Operations:
+# - Lints code to ensure code quality
+# - Runs unit tests and generates coverage reports
+# - Builds the frontend application in production mode
+# - Runs in parallel for faster feedback
+# ======================================================
+
 on:
+  # Uncomment below to enable automatic builds on push
   # push:
   #   branches:
   #     - main
@@ -9,85 +24,86 @@ on:
   #   branches:
   #     - main
   pull_request:
-    branches: [main]
-  workflow_dispatch:
+    branches: [main]  # Run on PRs targeting main branch
+  workflow_dispatch:  # Allow manual triggering
 
+# Prevent concurrent workflow runs for the same branch/PR
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: true  # Cancel in-progress runs when a new workflow is triggered
 
 jobs:
   setup:
     name: 📐 Setup Environment
     runs-on: ubuntu-latest
     outputs:
-      node-modules-cache-hit: ${{ steps.cache-nodemodules.outputs.cache-hit }}
+      node-modules-cache-hit: ${{ steps.cache-nodemodules.outputs.cache-hit }}  # Export cache hit status for child jobs
     steps:
-      - name: Checkout Repository
+      - name: Checkout Repository  # Get the latest code from the repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js  # Set up the Node.js environment
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
+          node-version: "20"  # Use Node.js 20
+          cache: "npm"        # Enable npm dependency caching
 
-      - name: Cache node_modules
+      - name: Cache node_modules  # Cache dependencies to speed up builds
         id: cache-nodemodules
         uses: actions/cache@v3
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}  # Create cache key based on package-lock.json
 
-      - name: Install Dependencies
+      - name: Install Dependencies  # Install only if cache was not restored
         if: steps.cache-nodemodules.outputs.cache-hit != 'true'
-        run: npm ci --prefer-offline
+        run: npm ci --prefer-offline  # Clean install of dependencies, using offline cache when possible
 
   lint:
     name: 🧪 Lint Code
     runs-on: ubuntu-latest
-    needs: setup
+    needs: setup  # Depends on setup job completing
     steps:
-      - uses: actions/checkout@v4
-      - run: npm run lint || true
+      - uses: actions/checkout@v4  # Get the latest code
+      - run: npm run lint || true  # Run ESLint, continue on error (non-blocking)
 
   unit-test:
     name: 🧪 Run Unit Tests
     runs-on: ubuntu-latest
-    needs: setup
+    needs: setup  # Depends on setup job completing
     steps:
-      - uses: actions/checkout@v4
-      - run: npm run test || true
-      - run: npm run test:coverage || true
-      - uses: actions/upload-artifact@v4
+      - uses: actions/checkout@v4  # Get the latest code
+      - run: npm run test || true  # Run unit tests, continue on error (non-blocking)
+      - run: npm run test:coverage || true  # Generate test coverage report, continue on error
+      - uses: actions/upload-artifact@v4  # Save coverage reports as artifacts
         with:
           name: coverage-report
           path: coverage/
-          retention-days: 7
+          retention-days: 7  # Keep reports for 7 days
 
   build:
     name: 🏗️ Build Frontend
     runs-on: ubuntu-latest
-    needs: setup
+    needs: setup  # Depends on setup job completing
     steps:
-      - name: 📥 Checkout Repository
+      - name: 📥 Checkout Repository  # Get the latest code
         uses: actions/checkout@v4
 
-      - name: 🧰 Setup Node.js
+      - name: 🧰 Setup Node.js  # Configure Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
+          node-version: "20"  # Use Node.js 20
+          cache: "npm"        # Enable npm dependency caching
 
-      - name: 📦 Install Dependencies
+      - name: 📦 Install Dependencies  # Install project dependencies
         run: npm ci
 
-      - name: 🏗️ Run Production Build
+      - name: 🏗️ Run Production Build  # Build the application in production mode
         run: npm run build:prod
 
-      - name: 📤 Upload Build Artifacts
+      - name: 📤 Upload Build Artifacts  # Store built files for other workflows
         uses: actions/upload-artifact@v4
         with:
-          name: build-files
-          path: dist/
-          retention-days: 1
+          name: build-files  # Artifact name for the build output
+          path: dist/        # Location of built files
+          retention-days: 1  # Keep build files for 1 day
