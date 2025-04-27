@@ -31,7 +31,7 @@
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.54.2",
     "react-redux": "^9.2.0",
-    "react-router-dom": "^7.3.0",
+    "react-router-dom": "^7.5.2",
     "redux": "^5.0.1",
     "redux-mock-store": "^1.5.5",
     "tradeportexpress": "file:"
