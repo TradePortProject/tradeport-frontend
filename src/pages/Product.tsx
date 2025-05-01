@@ -80,6 +80,14 @@ export function ProductMaster() {
                 placeholder="Description"
                 {...register("description", {
                   required: "You must enter Description",
+                  maxLength: {
+                    value: 200,
+                    message: "Description cannot exceed 200 characters",
+                  },
+                  pattern: {
+                    value: /^[a-zA-Z0-9\s.,'-]*$/,
+                    message: "Description contains illegal characters",
+                  },
                 })}
               ></textarea>
             </div>

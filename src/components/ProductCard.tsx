@@ -1,6 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import ENDPOINTS from "../config/apiConfig";
+import { useSelector } from 'react-redux'; // Import useSelector for Redux
+import { RootState } from '../store/store';
 
 interface Product {
   productID: string;
@@ -40,9 +42,15 @@ const ProductCard: React.FC<Product> = ({
   productImage,
 }) => {
   const navigate = useNavigate();
-
+  const token = useSelector((state: RootState) => state.auth.token);
   const handleCardClick = () => {
-    navigate(`/productdetail/${productID}`);
+    if (!token) {
+      navigate(`/login`);
+      return;
+    }
+    // Navigate to the product detail page with the productID
+    navigate(`/ProductDetail/${productID}`);
+
   };
 
   // Corrected imageUrl assignment using config
