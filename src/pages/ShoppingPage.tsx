@@ -32,6 +32,7 @@ export function ShoppingPage() {
       }
       if (!token) {
         console.error("Token is required to fetch shopping posts.");
+        navigate("/login"); // Navigate to login if token is blank
         return;
       }
 
@@ -44,7 +45,7 @@ export function ShoppingPage() {
       }
     };
     fetchPost();
-  }, [dispatch, retailerID]);
+  }, [dispatch, retailerID, token, navigate]);
 
   // Calculate total price of items in the cart
   const calculateTotal = (posts: ShoppingCart[]) => {
@@ -115,7 +116,7 @@ export function ShoppingPage() {
           <div className="grid grid-cols-5 lg:grid-cols-[3fr_1fr_1fr_1fr_1fr] gap-2 lg:gap-4 w-full py-6 border-b border-gray-200">
             {posts && posts.length > 0 && posts.map((post) => (
               <>
-                <div className="flex items-center text-base font-normal text-gray-900 pr-4 lg:pr-12" key={post.cartID}>
+                <div className="flex items-center text-base font-normal text-gray-900 pr-4 lg:pr-12 truncate" key={post.cartID}>
                   {post.productName}
                 </div>
                 <div className="text-base font-normal text-gray-900 text-center">{post.orderQuantity}</div>

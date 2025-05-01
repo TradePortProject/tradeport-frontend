@@ -7,8 +7,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { ShoppingCart } from "../posts/types";
 import { clearCart } from "../store/features/cartSlice";
+import { useForm, SubmitHandler } from "react-hook-form"; // Import useForm and SubmitHandler for validation
 
-
+// Define a type for the form data
+interface ContactFormData {
+  shippingAddress: string;
+  pinCode: string;
+}
 
 export function ContactInfoPage() {
   const navigate = useNavigate();
@@ -23,6 +28,10 @@ export function ContactInfoPage() {
   const [shippingAddress, setShippingAddress] = useState(retailerAdd || "");
   const [cardNumber, setCardNumber] = useState("");
   const token = useSelector((state: RootState) => state.auth.token); 
+  const [isLoading, setIsLoading] = useState(false); // Add loader state
+
+  // Pass the type to useForm
+  const { register, handleSubmit, formState: { errors } } = useForm<ContactFormData>();
 
   useEffect(() => {
       // Fetch shopping posts when retailerID changes
@@ -41,31 +50,34 @@ export function ContactInfoPage() {
     setCardNumber(event.target.value);
   };
 
-   // Handle checkout submission
-    const onSubmit = async (posts: ShoppingCart[]): Promise<void> => {
+  // Update the onSubmit function to use the typed form data
+  const onSubmit: SubmitHandler<ContactFormData> = async (data) => {
+    if (!posts) return;
     console.log("Submitted details:", posts);
-      try {
-            const updatedPosts = posts.map((post) => ({
-              ...post,
-              shippingAddress,
-              paymentInfo: { cardNumber },
-            }));
-            if (!token) {
-              throw new Error("Token is required for this operation.");
-            }
-            const body = await orderPost(updatedPosts, token);
-            console.log("response:", body);
-            // Clear the cart after successful order
-            dispatch(clearCart()); // Uncomment if you have a clearCart action
-            navigate(`/catalogGrid`);
-      } catch (error) {
-        console.error("Error saving post:", error);
+    try {
+      setIsLoading(true); // Show loader
+      const updatedPosts = posts.map((post) => ({
+        ...post,
+        shippingAddress: data.shippingAddress,
+        paymentInfo: { cardNumber },
+      }));
+      if (!token) {
+        throw new Error("Token is required for this operation.");
       }
-    };
-  
+      const body = await orderPost(updatedPosts, token);
+      console.log("response:", body);
+      // Clear the cart after successful order
+      dispatch(clearCart());
+      navigate(`/catalogGrid`);
+    } catch (error) {
+      console.error("Error saving post:", error);
+    } finally {
+      setIsLoading(false); // Hide loader
+    }
+  };
 
   return (
-    <form className="space-y-4">
+    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
        
       <div className="flex items-center border-10 justify-center min-h-screen bg-slate-100 px-4 sm:px-6 lg:px-8">
       
@@ -156,10 +168,14 @@ export function ContactInfoPage() {
                 type="text"
                 id="Address"
                 placeholder={retailerAdd}
+                {...register("shippingAddress", { required: "Address is required" })}
                 value={shippingAddress}
                 onChange={handleAddressChange}
                 className="rounded-lg border-2 border-gray-300 p-2 px-4 text-center placeholder:text-xs md:placeholder:text-sm"
               />
+              {errors.shippingAddress && (
+                <p className="text-red-500 text-xs">{"Address is required"}</p>
+              )}
               <p className="text-xs sm:text-sm font-bold">
                 PinCode
               </p>
@@ -167,8 +183,12 @@ export function ContactInfoPage() {
                 type="text"
                 id="PinCode"
                 placeholder={"PinCode"}
+                {...register("pinCode", { required: "PinCode is required" })}
                 className="rounded-lg border-2 border-gray-300 p-2 px-4 text-center placeholder:text-xs md:placeholder:text-sm"
               />
+              {errors.pinCode && (
+                <p className="text-red-500 text-xs">{"PinCode is required"}</p>
+              )}
             </div>
           </div>
           <div className="flex flex-col mb-4 border-black border-2 space-y-3 text-center md:text-left p-10 md:px-24">
@@ -199,11 +219,21 @@ export function ContactInfoPage() {
 
         
           <div className="flex flex-col mb-4 border-black border-2 space-y-3 text-center md:text-left">
-            <div className="flex items-center justify-center w-full lg:w-[300px] p-2.5 bg-gray-900 rounded border border-lime-500 cursor-pointer">
-              <div className="text-lg font-medium text-center text-white cursor-pointer" onClick={() => posts && onSubmit(posts)}>
-                Checkout
-              </div>
-            </div>
+            <button
+              type="submit"
+              className="flex items-center justify-center w-full lg:w-[300px] p-2.5 bg-gray-900 rounded border border-lime-500 cursor-pointer"
+              disabled={isLoading} // Disable button while loading
+            >
+              {isLoading ? (
+                <div className="text-lg font-medium text-center text-white cursor-pointer">
+                  Loading...
+                </div>
+              ) : (
+                <div className="text-lg font-medium text-center text-white cursor-pointer">
+                  Checkout
+                </div>
+              )}
+            </button>
           </div>
         </div>
     

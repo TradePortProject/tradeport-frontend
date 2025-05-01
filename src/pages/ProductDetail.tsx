@@ -9,6 +9,8 @@ import { ShoppingCartPost } from '../posts/shoppingCartPost';
 import { useSelector } from 'react-redux'; // Import useSelector for Redux
 import { RootState } from '../store/store';
 import ENDPOINTS from '../config/apiConfig';
+import PlusIcon from '../assets/icons/Plusicon.svg';
+import NegIcon from '../assets/icons/Negativeicon.svg';
 
 
 export function ProductDetail() {
@@ -112,48 +114,48 @@ export function ProductDetail() {
               {post.productName} 
             </div>
             <div className="flex flex-col mb-4 space-y-3 text-center md:text-left" id='productDetails'>
-              <p className="text-lg sm:text-xl font-bold">WholeSale ${post.wholesalePrice}</p>
-              <p className="text-sm sm:text-base font-bold">Retail ${post.retailPrice}</p>
-              <p className="text-xs sm:text-sm font-light text-gray-400">
+            <p className="text-xs sm:text-sm font-light text-gray-400 max-w-xs sm:max-w-sm mx-auto md:mx-0">
                 {post.description}
-              </p>                            
+              </p>  
+              <p className="text-lg sm:text-xl font-bold">
+                ${post.wholesalePrice}.00 
+                <span className="text-gray-400 line-through text-xs sm:text-base ml-2">
+                  ${post.retailPrice}.00
+                </span>
+              </p>
+                                        
             </div>
             <div className="flex flex-col mb-4 space-y-3 text-center md:text-left">
               <div className="flex items-center justify-center space-x-3">
                 <div data-svg-wrapper style={{position: 'relative'}}>
                 <button type="button" onClick={() => handleQuantityChange(-1)} className="p-1">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M4.03662 10H15.7033" stroke="#121212" stroke-width="0.9375" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
+                <img src={NegIcon}    alt="Quantity" className="h-5 w-5 mr-2" />
                 </button>
                 </div>
-                <div className="flex items-center justify-center w-10 h-10 text-lg sm:text-xl font-bold text-gray-700 bg-gray-100 rounded-lg">           
+                <div className="flex items-center justify-center w-10 h-10 text-sm sm:text-xl  bg-gray-100 rounded-lg">           
                 {orderquantity}</div>
                 <div data-svg-wrapper style={{position: 'relative'}}>
                 <button type="button" onClick={() => handleQuantityChange(1)} className="p-1">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M10.4686 4.16669C10.4686 3.9078 10.2587 3.69794 9.99984 3.69794C9.74096 3.69794 9.53109 3.9078 9.53109 4.16669V9.53127H4.1665C3.90762 9.53127 3.69775 9.74114 3.69775 10C3.69775 10.2589 3.90762 10.4688 4.1665 10.4688H9.53109V15.8334C9.53109 16.0922 9.74096 16.3021 9.99984 16.3021C10.2587 16.3021 10.4686 16.0922 10.4686 15.8334V10.4688H15.8332C16.0921 10.4688 16.3019 10.2589 16.3019 10C16.3019 9.74114 16.0921 9.53127 15.8332 9.53127H10.4686V4.16669Z" fill="#121212"/>
-                  </svg>
+                <img src={PlusIcon}   alt="Quantity" className="h-5 w-5 mr-2" />
+                  
                 </button>
               </div>
             </div>
           </div>
             <ValidationError fieldError={errors.orderQuantity} />
             <div className="group" id="purchaseButton">
-              <button className="w-full transition-all duration-150 bg-blue-700 text-white rounded-lg hover:shadow-lg">
-                <div className="px-6 sm:px-8 py-3 sm:py-4 duration-150 bg-blue-700 rounded-lg">
-                  Purchase Now
-                </div>
-              </button>
+              
             </div>
             <div className="flex items-center space-x-3 group" id="stockDetails">
               <div className="text-xs sm:text-sm font-bold text-gray-400">{post.quantity > 0 ? 'In Stock' : 'Out of Stock'}</div>
             </div>
             <div className="flex flex-col space-y-4 md:space-y-0 md:space-x-4 md:flex-row" id="supplierDetails">
-              <button className="flex items-center justify-center py-2 sm:py-3 px-4 sm:px-5 space-x-3 border-2 border-gray-300 rounded-lg shadow-sm hover:bg-opacity-30 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-150">
-                <img src="images/weight.png" alt="" className="w-6 sm:w-8" />
-                <span className="text-xs sm:text-sm">Supplier Name </span>
+            <button className="w-full transition-all duration-150 bg-blue-700 text-white rounded-lg hover:shadow-lg">
+                <div className="px-6 sm:px-8 py-3 sm:py-4 duration-150 bg-blue-700 rounded-lg">
+                  Purchase Now
+                </div>
               </button>
+              
             
             </div>
           </div>
