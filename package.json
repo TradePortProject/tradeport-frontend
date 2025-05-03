@@ -18,7 +18,7 @@
     "docker:prod": "docker compose -f docker-compose.prod.yml up -d --build"
   },
   "dependencies": {
-    "@headlessui/react": "^2.2.0",
+    "@headlessui/react": "^2.2.1",
     "@heroicons/react": "^2.2.0",
     "@react-oauth/google": "^0.12.1",
     "@reduxjs/toolkit": "^2.6.1",
