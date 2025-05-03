@@ -79,7 +79,7 @@ jobs:
       - name: 🧪 Confirm App is Running  # Verify the app is accessible
         run: curl -I http://localhost:4173 || exit 1  # Check HTTP response
 
-      - name: ☣️ Run OWASP ZAP Scan  # Run security scan against the running app
+      - name: ☣️ Run OWASP ZAP Scan
         run: |
           docker run --network host \
             --user root \
@@ -88,7 +88,8 @@ jobs:
             -t http://localhost:4173 \
             -g gen.conf \
             -r zap_baseline_report.html \
-            --exitcode 0  # ✅ Don't fail the workflow on warnings
+            -I  # ✅ Ignore warnings so they don't fail the scan
+
 
       - name: 📤 Upload ZAP Report  # Save scan results as artifact
         uses: actions/upload-artifact@v4
