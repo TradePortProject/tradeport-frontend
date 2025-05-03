@@ -68,7 +68,7 @@ export function ContactInfoPage() {
       console.log("response:", body);
       // Clear the cart after successful order
       dispatch(clearCart());
-      navigate(`/catalogGrid`);
+      navigate(`/orders`); // Navigate to Order Summary page
     } catch (error) {
       console.error("Error saving post:", error);
     } finally {
