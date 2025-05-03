@@ -18,8 +18,8 @@ name: "CI - Stage 2 - Security Scan - SAST & SCA"
 # ======================================================
 
 on:
-  # push:
-    # branches: [main, "feature/**"]  # Uncomment to run on push to these branches
+  push:
+    branches: [main, "feature/**"]  # Uncomment to run on push to these branches
   pull_request:
     branches: [main]  # Run on PRs targeting main branch
   workflow_dispatch:  # Allow manual triggering
