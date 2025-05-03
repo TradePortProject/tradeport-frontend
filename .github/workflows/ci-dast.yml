@@ -71,24 +71,24 @@ jobs:
       - name: ⚙️ Build Frontend  # Build the application in production mode
         run: npm run build:prod
 
-      - name: 🚀 Serve App Locally (Vite Preview)  # Start a local server to host the app
+      - name: 🚀 Serve App Locally (Vite Preview)
         run: |
-          nohup npm run preview -- --port 4173 &  # Run in background on port 4173
-          sleep 10  # Wait for server to start
+          nohup npm run preview -- --port 4173 &
+          sleep 10
 
       - name: 🧪 Confirm App is Running  # Verify the app is accessible
         run: curl -I http://localhost:4173 || exit 1  # Check HTTP response
 
       - name: ☣️ Run OWASP ZAP Scan  # Run security scan against the running app
         run: |
-          # Run ZAP scan in baseline mode (passive scanning)
           docker run --network host \
             --user root \
             -v "${{ github.workspace }}:/zap/wrk/:rw" \
             -t ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
-            -t http://localhost:4173 \  # Target the locally running app
-            -g gen.conf \               # Generate configuration file
-            -r zap_baseline_report.html || true  # Generate HTML report, continue on error
+            -t http://localhost:4173 \
+            -g gen.conf \
+            -r zap_baseline_report.html \
+            --exitcode 0  # ✅ Don't fail the workflow on warnings
 
       - name: 📤 Upload ZAP Report  # Save scan results as artifact
         uses: actions/upload-artifact@v4
