@@ -11,6 +11,7 @@ import { RootState } from '../store/store';
 import ENDPOINTS from '../config/apiConfig';
 import PlusIcon from '../assets/icons/Plusicon.svg';
 import NegIcon from '../assets/icons/Negativeicon.svg';
+import Error from '../pages/Error';
 
 
 export function ProductDetail() {
@@ -78,7 +79,7 @@ export function ProductDetail() {
   }, [productID, setValue]);
 
   if (!post) {
-    return <div>No product details available.</div>;
+    return <Error/>;
   }
 
   const handleQuantityChange = (change: number) => {

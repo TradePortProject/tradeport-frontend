@@ -35,6 +35,7 @@ export const ENDPOINTS = {
       GET: (params: string) =>
         `${API_URLS.ORDER_API}/api/OrderManagement/GetOrdersAndOrderDetails${params}`,
       ACCEPT_REJECT: `${API_URLS.ORDER_API}/api/OrderManagement/AcceptRejectOrder`,
+      UPDATE_ORDER: `${API_URLS.ORDER_API}/api/OrderManagement/UpdateOrder`,
     },
   },
 

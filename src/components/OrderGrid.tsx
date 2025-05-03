@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { RootState } from '../store/store';
+import { useSelector } from 'react-redux';
 
 const OrderGrid = ({
   orders,
@@ -7,6 +9,7 @@ const OrderGrid = ({
   orders: any[];
   handleAction: (orderID: string, orderDetailID: string, action: boolean) => void;
 }) => {
+  const userRole = useSelector((state: RootState) => state.auth.user?.role); // Access userID from the Redux store
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [orderDetailsStates, setOrderDetailsStates] = useState(
     orders.reduce((acc: any, order: any) => {
@@ -98,8 +101,9 @@ const OrderGrid = ({
 					  <p className="text-lg font-bold text-gray-800">Quantity: <span className="font-normal">{detail.quantity}</span></p>
 					  <p className="text-lg font-bold text-gray-800">Price: <span className="font-normal">{detail.productPrice}</span></p>
 					  <p className="text-lg font-bold text-gray-800">Order Status: <span className="font-normal">{detail.orderItemStatus}</span></p>
-				
+					  {userRole == 'manufacturer'  && (
 						<div className="flex space-x-2">
+							
 						  <button
 							onClick={() =>
 							  handleLocalAction(order.orderID, detail.orderDetailID, true)
@@ -133,7 +137,9 @@ const OrderGrid = ({
 						  >
 							Reject
 						  </button>
+						
 						</div>
+					  )}
 					</div>
 
                   </div>

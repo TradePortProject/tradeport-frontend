@@ -37,7 +37,12 @@ const Orders: React.FC = () => {
       }
       const result = await response.json();
 
-      setData(result.orders);
+      setData(
+        result.orders.map((order: any) => ({
+          ...order,
+          orderStatus: order.orderStatus, // Extract orderStatus
+        }))
+      );
       setTotalPages(result.totalPages || 1);
     } catch (error) {
       console.error('Error fetching orders:', error);
@@ -49,16 +54,32 @@ const Orders: React.FC = () => {
 
   const handleAction = async (orderID: string, orderDetailID: string, action: boolean) => {
     try {
-      const response = await fetch(ENDPOINTS.ORDER.ORDERS.ACCEPT_REJECT, {
+      const order = data.find((o) => o.orderID === orderID); // Find the order by ID
+      const orderStatus = order?.orderStatus; // Use orderStatus from the fetched data
+
+      const endpoint =
+        orderStatus === "Accepted" || orderStatus === "Shipped"
+          ? ENDPOINTS.ORDER.ORDERS.UPDATE_ORDER
+          : ENDPOINTS.ORDER.ORDERS.ACCEPT_REJECT;
+
+      const requestBody =
+        orderStatus === "Accepted" || orderStatus === "Shipped"
+          ? {
+              orderID: orderID,
+              orderStatus: "Shipped", // Update orderStatus to "04"
+            }
+          : {
+              orderID: orderID,
+              orderItems: [{ orderDetailID: orderDetailID, isAccepted: action }],
+            };
+
+      const response = await fetch(endpoint, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`, // Pass token as AuthBearer
         },
-        body: JSON.stringify({
-          orderID: orderID,
-          orderItems: [{ orderDetailID: orderDetailID, isAccepted: action }],
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
