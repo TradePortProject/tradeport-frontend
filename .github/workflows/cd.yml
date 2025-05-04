@@ -18,10 +18,11 @@ name: CD - Stage 1 - Deploy to Dockerhub
 
 on:
   # Commented triggers can be uncommented when ready to automate deployment on push events
-  # push:
+  push:
+    branches: [main]
   #   branches: [main, "feature/**"]
-  pull_request:
-    branches: [main]  # Run on PRs targeting main branch
+  # pull_request:
+    # branches: [main]  # Run on PRs targeting main branch
   # Manual trigger with environment selection
   workflow_dispatch:
     inputs:
