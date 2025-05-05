@@ -101,11 +101,11 @@ export function ProductMaster() {
                 })}
               >
                 <option value="">Select Category</option>
-                <option value="101">Furniture</option>
-                <option value="102">Fashion</option>
-                <option value="103">Home&Garden</option>
-                <option value="104">Health&Beauty</option>
-                <option value="105">Computer&Office</option>
+                <option value="1">Fashion</option>
+				<option value="2">Furniture</option>				
+                <option value="3">Home&Garden</option>
+                <option value="4">Health&Beauty</option>
+                <option value="5">Computer&Office</option>
               </select>
             </div>
             <ValidationError fieldError={errors.category} />
