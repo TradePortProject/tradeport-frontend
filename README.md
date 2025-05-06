@@ -1,8 +1,6 @@
 <!--START_SECTION:github-actions-badges-->
 [![CI](https://github.com/TradePortProject/tradeport-frontend/actions/workflows/ci.yml/badge.svg)](https://github.com/TradePortProject/tradeport-frontend/actions/workflows/ci.yml)
-[![Security](https://github.com/TradePortProject/tradeport-frontend/actions/workflows/ci-security-owasp.yml/badge.svg)](https://github.com/TradePortProject/tradeport-frontend/actions/workflows/ci-security-owasp.yml)
-[![DAST](https://github.com/TradePortProject/tradeport-frontend/actions/workflows/ci-dast.yml/badge.svg)](https://github.com/TradePortProject/tradeport-frontend/actions/workflows/ci-dast.yml)
-<!--[![E2E Tests](https://github.com/TradePortProject/tradeport-frontend/actions/workflows/ci-selenium.yml/badge.svg)](https://github.com/TradePortProject/tradeport-frontend/actions/workflows/ci-selenium.yml)-->
+[![CD Pipeline - Deploy to Dockerhub](https://github.com/TradePortProject/tradeport-frontend/actions/workflows/cd.yml/badge.svg?branch=main)](https://github.com/TradePortProject/tradeport-frontend/actions/workflows/cd.yml)
 <!--END_SECTION:github-actions-badges-->
 
 # TradePort Frontend
