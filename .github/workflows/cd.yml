@@ -18,7 +18,7 @@ name: "CI Pipeline - Deploy Tradeport Frontend to Dockerhub"
 
 on:
   workflow_run:
-    workflows: ["CI Pipeline - TradePort Frontend"]
+    workflows: ["CI Frontend - Build, Test & Security Scan"]
     types:
       - completed
   workflow_dispatch:
