@@ -27,13 +27,16 @@ interface Product {
   productImage: { productImageURL: string }[]; // Updated to handle array of image URLs
 }
 
+
 const categories = [
   { id: 0, name: "All Categories" },
-  { id: 1, name: "Furniture" },
-  { id: 2, name: "Fashion" },
+  { id: 1, name: "Fashion" },
+  { id: 2, name: "Furniture" },
   { id: 3, name: "Home & Garden" },
-  { id: 4, name: "Computer & Office" },
+  { id: 4, name: "Health & Beauty" },
+  { id: 5, name: "Computer & Office" },
 ];
+
 
 const quantities = [
   { id: 0, name: "All Quantities" },
