@@ -2,7 +2,7 @@
 [![CI](https://github.com/TradePortProject/tradeport-frontend/actions/workflows/ci.yml/badge.svg)](https://github.com/TradePortProject/tradeport-frontend/actions/workflows/ci.yml)<br>
 [![CD Pipeline - Deploy to Dockerhub](https://github.com/TradePortProject/tradeport-frontend/actions/workflows/cd.yml/badge.svg?branch=main)](https://github.com/TradePortProject/tradeport-frontend/actions/workflows/cd.yml)
 <!--END_SECTION:github-actions-badges-->
-
+<br>
 # TradePort Frontend
 
 The **TradePort Frontend** is a web application developed using **React**, **TypeScript**, and **Tailwind CSS**. It serves as the user interface for the TradePort platform, providing seamless and sophisticated user experiences.
