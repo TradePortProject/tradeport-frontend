@@ -10,20 +10,17 @@
 # - Verification steps to confirm successful deployment
 # - Health check of the deployed application
 #
-# The workflow runs after CI Stage 3 completes successfully
-# or can be manually triggered with environment selection.
+# The workflow runs automatically after CI pipeline completes,
+# and can also be manually triggered with environment selection.
 # ======================================================
 
 name: "CD Pipeline - Deploy to Dockerhub"
 
 on:
-  # Trigger CD only after DAST stage passes
   workflow_run:
-    workflows: ["CI - Stage 3 - DAST (OWASP ZAP Scan)"]
+    workflows: ["CI Pipeline - TradePort Frontend"]
     types:
       - completed
-
-  # Manual trigger with environment selection
   workflow_dispatch:
     inputs:
       environment:
@@ -35,16 +32,14 @@ on:
           - dev
           - prod
 
-# Global environment variables used throughout the workflow
 env:
-  DOCKERHUB_IMAGE_FRONTEND: prabhulalalithakrishnan/tradeport-frontend  # Docker Hub repository name
-  REMOTE_DIR: /root/tradeport                                         # Target directory on deployment server
+  DOCKERHUB_IMAGE_FRONTEND: prabhulalithakrishnan/tradeport-frontend
+  REMOTE_DIR: /root/tradeport
 
 jobs:
-  # Job 1: Prepare environment and determine build parameters
   prepare:
     name: ⛏️ Prepare Environment
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.set-outputs.outputs.version }}
@@ -60,7 +55,7 @@ jobs:
           VERSION=$(grep '"version"' ./package.json | cut -d'"' -f4 || echo ${GITHUB_SHA::8})
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "short_sha=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
-          echo "env_name=${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'prod') || 'dev' }}" >> $GITHUB_OUTPUT
+          echo "env_name=${{ github.event.inputs.environment || 'prod' }}" >> $GITHUB_OUTPUT
 
       - name: 📤 Upload .env file
         uses: actions/upload-artifact@v4
@@ -70,9 +65,9 @@ jobs:
           retention-days: 1
           if-no-files-found: warn
 
-  # Job 2: Build Docker image with appropriate configuration
   build:
     name: 🏗️ Build Frontend Image
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs: prepare
     runs-on: ubuntu-latest
     steps:
@@ -82,10 +77,11 @@ jobs:
       - name: 🌍 Set environment-specific variables
         run: |
           if [ "${{ needs.prepare.outputs.env_name }}" = "prod" ]; then
-            echo "VITE_API_URL=${{ secrets.PROD_API_URL || 'https://api.example.com' }}" >> .env
+            echo "VITE_API_URL=${{ secrets.PROD_API_URL }}" >> .env
+          else
+            echo "VITE_API_URL=https://api-dev.tradeport.com" >> .env
           fi
-
-          echo "Using environment variables (sensitive values masked):"
+          echo "Using environment variables:"
           cat .env | sed 's/\(.*SECRET.*=\).*/\1********/'
 
       - name: 🐳 Log in to Docker Hub
@@ -93,17 +89,12 @@ jobs:
 
       - name: 🐳 Build and tag Frontend Image
         run: |
-          if [ "${{ needs.prepare.outputs.env_name }}" = "dev" ]; then
-            DOCKERFILE=./Dockerfile.dev
-          else
-            DOCKERFILE=./Dockerfile.prod
-          fi
-
+          DOCKERFILE=./Dockerfile.prod
           docker build -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:latest \
-                      -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.version }} \
-                      -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.short_sha }} \
-                      -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.env_name }} \
-                      -f $DOCKERFILE .
+                       -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.version }} \
+                       -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.short_sha }} \
+                       -t ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.env_name }} \
+                       -f $DOCKERFILE .
 
       - name: 🐳 Push Frontend Image to Docker Hub
         run: |
@@ -112,9 +103,9 @@ jobs:
           docker push ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.short_sha }}
           docker push ${{ env.DOCKERHUB_IMAGE_FRONTEND }}:${{ needs.prepare.outputs.env_name }}
 
-  # Job 3: Verify image was successfully pushed to Docker Hub
   verify:
     name: 🔍 Verify Docker Hub Push
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -125,9 +116,9 @@ jobs:
             echo "✅ Successfully verified image push to Docker Hub" || \
             (echo "❌ Failed to verify image on Docker Hub" && exit 1)
 
-  # Job 4: Basic health check to verify deployment
   health-check:
     name: ❤️‍🩹 Health Check
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs: verify
     runs-on: ubuntu-latest
     steps:
