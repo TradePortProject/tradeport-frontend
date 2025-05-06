@@ -1,4 +1,4 @@
-name: "CI Pipeline - TradePort Frontend"
+name: "CI Frontend - Build, Test & Security Scan"
 
 on:
   push:
