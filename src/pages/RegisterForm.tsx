@@ -22,8 +22,8 @@ const RegisterForm: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
 
   // Add debug logging to see what's coming from Redux
-  console.log("User from Redux:", user);
-  console.log("Role from Redux:", user?.role);
+  // console.log("User from Redux:", user);
+  // console.log("Role from Redux:", user?.role);
 
   // Brute force mapping function
   const getRoleNumber = (role: string | number | undefined | null): number => {
@@ -70,7 +70,7 @@ const RegisterForm: React.FC = () => {
         strPassword: btoa(data.strPassword), // Encode password in Base64
       };
 
-      console.log("Submitting Payload:", payload);
+      // console.log("Submitting Payload:", payload);
 
       const response = await axios.post(
         ENDPOINTS.USER.REGISTER,
