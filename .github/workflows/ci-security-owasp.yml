@@ -5,11 +5,11 @@ name: "CI - Stage 2 - Security Scan - SAST & SCA"
 # Triggered only after Stage 1 (Lint, Unit Test, Build) succeeds
 # ======================================================
 
-on:
-  workflow_run:
-    workflows: ["CI - Stage 1 - Build and Test (Parallel)"]
-    types:
-      - completed
+# on:
+  # workflow_run:
+  #   workflows: ["CI - Stage 1 - Build and Test (Parallel)"]
+  #   types:
+  #     - completed
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

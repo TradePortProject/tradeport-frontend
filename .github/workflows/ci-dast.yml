@@ -19,10 +19,10 @@ name: "CI - Stage 3 - DAST (OWASP ZAP Scan)"
 
 on:
   push:
-    branches: [main, "feature/**"]
+    # branches: [main, "feature/**"]
 
-  pull_request:
-    branches: [main]  # Run on PRs targeting main branch
+  # pull_request:
+  #   branches: [main]  # Run on PRs targeting main branch
 
   workflow_dispatch:  # Allow manual triggering
 

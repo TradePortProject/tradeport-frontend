@@ -1,107 +1,162 @@
-name: "CI - Stage 1 - Build and Test (Parallel)"
-
-# ======================================================
-# Continuous Integration Workflow - Stage 1
-# ======================================================
-# This workflow performs the initial build and testing phase
-# for the Tradeport Frontend application. It runs on pull
-# requests to the main branch and can be manually triggered.
-#
-# Key Operations:
-# - Lints code to ensure code quality
-# - Runs unit tests and generates coverage reports
-# - Builds the frontend application in production mode
-# - Runs in parallel for faster feedback
-# ======================================================
-
+name: "CI Pipeline - TradePort Frontend"
 
 on:
-  # Uncomment below to enable automatic builds on push
   push:
     branches:
       - main
       - "feature/**"
   pull_request:
-    branches: [main]  # Run on PRs targeting main branch
-  workflow_dispatch:  # Allow manual triggering
+    branches:
+      - main
+  workflow_dispatch:
 
-# Prevent concurrent workflow runs for the same branch/PR
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true  # Cancel in-progress runs when a new workflow is triggered
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
 
 jobs:
   setup:
     name: 📐 Setup Environment
     runs-on: ubuntu-latest
     outputs:
-      node-modules-cache-hit: ${{ steps.cache-nodemodules.outputs.cache-hit }}  # Export cache hit status for child jobs
+      cache-hit: ${{ steps.cache-nodemodules.outputs.cache-hit }}
     steps:
-      - name: Checkout Repository  # Get the latest code from the repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js  # Set up the Node.js environment
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "20"  # Use Node.js 20
-          cache: "npm"        # Enable npm dependency caching
-
-      - name: Cache node_modules  # Cache dependencies to speed up builds
-        id: cache-nodemodules
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+      - id: cache-nodemodules
         uses: actions/cache@v3
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}  # Create cache key based on package-lock.json
-
-      - name: Install Dependencies  # Install only if cache was not restored
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+      - name: 📦 Install Dependencies
         if: steps.cache-nodemodules.outputs.cache-hit != 'true'
-        run: npm ci --prefer-offline  # Clean install of dependencies, using offline cache when possible
+        run: npm ci
 
   lint:
     name: 🧪 Lint Code
     runs-on: ubuntu-latest
-    needs: setup  # Depends on setup job completing
+    needs: setup
     steps:
-      - uses: actions/checkout@v4  # Get the latest code
-      - run: npm run lint || true  # Run ESLint, continue on error (non-blocking)
+      - uses: actions/checkout@v4
+      - run: npm run lint || true
 
   unit-test:
     name: 🧪 Run Unit Tests
     runs-on: ubuntu-latest
-    needs: setup  # Depends on setup job completing
+    needs: setup
     steps:
-      - uses: actions/checkout@v4  # Get the latest code
-      - run: npm run test || true  # Run unit tests, continue on error (non-blocking)
-      - run: npm run test:coverage || true  # Generate test coverage report, continue on error
-      - uses: actions/upload-artifact@v4  # Save coverage reports as artifacts
+      - uses: actions/checkout@v4
+      - run: npm run test || true
+      - run: npm run test:coverage || true
+      - uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: coverage/
-          retention-days: 7  # Keep reports for 7 days
+          retention-days: 7
 
   build:
     name: 🏗️ Build Frontend
     runs-on: ubuntu-latest
-    needs: setup  # Depends on setup job completing
+    needs: setup
     steps:
-      - name: 📥 Checkout Repository  # Get the latest code
-        uses: actions/checkout@v4
-
-      - name: 🧰 Setup Node.js  # Configure Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "20"  # Use Node.js 20
-          cache: "npm"        # Enable npm dependency caching
-
-      - name: 📦 Install Dependencies  # Install project dependencies
-        run: npm ci
-
-      - name: 🏗️ Run Production Build  # Build the application in production mode
-        run: npm run build:prod
-
-      - name: 📤 Upload Build Artifacts  # Store built files for other workflows
-        uses: actions/upload-artifact@v4
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+      - run: npm ci
+      - run: npm run build:prod
+      - uses: actions/upload-artifact@v4
         with:
-          name: build-files  # Artifact name for the build output
-          path: dist/        # Location of built files
-          retention-days: 1  # Keep build files for 1 day
+          name: build-files
+          path: dist/
+          retention-days: 1
+
+  npm-audit:
+    name: 🔐 SCA - npm Audit
+    runs-on: ubuntu-latest
+    needs: [lint, unit-test, build]
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci --prefer-offline --no-audit
+      - run: npm audit --json > npm-audit.json || true
+      - run: |
+          if grep -q '"severity":"high"' npm-audit.json; then
+            echo "⚠️ High severity vulnerabilities found"
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: npm-audit.json
+          retention-days: 7
+
+  owasp-sca:
+    name: 🔐 SCA - OWASP Dependency Check
+    runs-on: ubuntu-latest
+    needs: [lint, unit-test, build]
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          wget https://github.com/jeremylong/DependencyCheck/releases/download/v7.2.0/dependency-check-7.2.0-release.zip
+          unzip dependency-check-7.2.0-release.zip
+          dependency-check/bin/dependency-check.sh --project "TradePort" --scan . --format XML --out odc-report.xml | tee ODC-report || true
+      - run: |
+          if grep -q "CRITICAL" ./ODC-report; then
+            echo "🚨 Critical vulnerabilities found"
+            grep "CRITICAL" ./ODC-report
+            exit 1
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: owasp-report
+          path: |
+            ODC-report
+            odc-report.xml
+          retention-days: 7
+
+  codeql-sast:
+    name: ☢️ SAST - CodeQL
+    runs-on: ubuntu-latest
+    needs: [lint, unit-test, build]
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+      - uses: github/codeql-action/autobuild@v3
+      - uses: github/codeql-action/analyze@v3
+
+  dast-zap:
+    name: ☣️ DAST - OWASP ZAP Scan
+    runs-on: ubuntu-latest
+    needs: [npm-audit, owasp-sca, codeql-sast]
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: npm run build:prod
+      - run: |
+          nohup npm run preview -- --port 4173 &
+          sleep 10
+      - run: curl -I http://localhost:4173 || exit 1
+      - run: |
+          docker run --network host \
+            --user root \
+            -v "${{ github.workspace }}:/zap/wrk/:rw" \
+            -t ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
+            -t http://localhost:4173 \
+            -g gen.conf \
+            -r zap_baseline_report.html || echo "⚠️ ZAP scan failed but continuing"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: zap_baseline_report.html
