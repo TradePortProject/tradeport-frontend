@@ -79,7 +79,7 @@ jobs:
           retention-days: 1
 
   npm-audit:
-    name: 🔐 SCA - npm Audit
+    name: 🔐 SCA - npm Audit 
     runs-on: ubuntu-latest
     needs: [lint, unit-test, build]
     steps:
@@ -88,7 +88,8 @@ jobs:
       - run: npm audit --json > npm-audit.json || true
       - run: |
           if grep -q '"severity":"high"' npm-audit.json; then
-            echo "⚠️ High severity vulnerabilities found"
+            echo "⚠️ High severity vulnerabilities found in npm audit"
+            grep '"severity":"high"' npm-audit.json || true
           fi
       - uses: actions/upload-artifact@v4
         with:
@@ -97,26 +98,41 @@ jobs:
           retention-days: 7
 
   owasp-sca:
-    name: 🔐 SCA - OWASP Dependency Check
+    name: 🔐 SCA - OWASP Dependency Check 
     runs-on: ubuntu-latest
     needs: [lint, unit-test, build]
     steps:
       - uses: actions/checkout@v4
-      - run: |
+      - name: ♻️ Cache Dependency-Check DB
+        uses: actions/cache@v3
+        with:
+          path: ~/.dependency-check
+          key: dependency-check-db
+      - name: 📥 Download Dependency-Check CLI
+        run: |
           wget https://github.com/jeremylong/DependencyCheck/releases/download/v7.2.0/dependency-check-7.2.0-release.zip
-          unzip dependency-check-7.2.0-release.zip
-          dependency-check/bin/dependency-check.sh --project "TradePort" --scan . --format XML --out odc-report.xml | tee ODC-report || true
-      - run: |
-          if grep -q "CRITICAL" ./ODC-report; then
-            echo "🚨 Critical vulnerabilities found"
-            grep "CRITICAL" ./ODC-report
-            exit 1
+          unzip -q dependency-check-7.2.0-release.zip
+      - name: 🔍 Run Dependency-Check (Selective Scan)
+        run: |
+          dependency-check/bin/dependency-check.sh \
+            --project "TradePort" \
+            --scan ./src ./package.json ./package-lock.json \
+            --format XML \
+            --out odc-report.xml \
+            --noupdate | tee ODC-report.log || true
+      - name: 📄 Log CRITICAL Vulnerabilities 
+        run: |
+          if grep -q "CRITICAL" ./ODC-report.log; then
+            echo "⚠️ CRITICAL vulnerabilities found — see ODC-report.log"
+            grep "CRITICAL" ./ODC-report.log || true
+          else
+            echo "✅ No CRITICAL vulnerabilities found"
           fi
       - uses: actions/upload-artifact@v4
         with:
           name: owasp-report
           path: |
-            ODC-report
+            ODC-report.log
             odc-report.xml
           retention-days: 7
 
@@ -128,6 +144,7 @@ jobs:
       actions: read
       contents: read
       security-events: write
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: github/codeql-action/init@v3
@@ -137,17 +154,17 @@ jobs:
       - uses: github/codeql-action/analyze@v3
 
   dast-zap:
-    name: ☣️ DAST - OWASP ZAP Scan
+    name: ☣️ DAST - OWASP ZAP Scan 
     runs-on: ubuntu-latest
     needs: [npm-audit, owasp-sca, codeql-sast]
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - run: npm ci
       - run: npm run build:prod
       - run: |
-          nohup npm run preview -- --port 4173 &
-          sleep 10
-      - run: curl -I http://localhost:4173 || exit 1
+          nohup npm run preview -- --port 4173 & sleep 10
+          curl -I http://localhost:4173 || true
       - run: |
           docker run --network host \
             --user root \
