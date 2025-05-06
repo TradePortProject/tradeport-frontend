@@ -39,7 +39,9 @@ env:
 jobs:
   prepare:
     name: ⛏️ Prepare Environment
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.set-outputs.outputs.version }}
@@ -55,7 +57,7 @@ jobs:
           VERSION=$(grep '"version"' ./package.json | cut -d'"' -f4 || echo ${GITHUB_SHA::8})
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "short_sha=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
-          echo "env_name=${{ github.event.inputs.environment || 'prod' }}" >> $GITHUB_OUTPUT
+          echo "env_name=prod" >> $GITHUB_OUTPUT
 
       - name: 📤 Upload .env file
         uses: actions/upload-artifact@v4
@@ -67,7 +69,7 @@ jobs:
 
   build:
     name: 🏗️ Build Frontend Image
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: success()
     needs: prepare
     runs-on: ubuntu-latest
     steps:
@@ -76,11 +78,7 @@ jobs:
 
       - name: 🌍 Set environment-specific variables
         run: |
-          if [ "${{ needs.prepare.outputs.env_name }}" = "prod" ]; then
-            echo "VITE_API_URL=${{ secrets.PROD_API_URL }}" >> .env
-          else
-            echo "VITE_API_URL=https://api-dev.tradeport.com" >> .env
-          fi
+          echo "VITE_API_URL=${{ secrets.PROD_API_URL }}" >> .env
           echo "Using environment variables:"
           cat .env | sed 's/\(.*SECRET.*=\).*/\1********/'
 
@@ -105,7 +103,7 @@ jobs:
 
   verify:
     name: 🔍 Verify Docker Hub Push
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: success()
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -118,7 +116,7 @@ jobs:
 
   health-check:
     name: ❤️‍🩹 Health Check
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: success()
     needs: verify
     runs-on: ubuntu-latest
     steps:
