@@ -14,7 +14,7 @@
 # and can also be manually triggered with environment selection.
 # ======================================================
 
-name: "CD Pipeline - Deploy Tradeport Frontend to Dockerhub"
+name: "CI Pipeline - Deploy Tradeport Frontend to Dockerhub"
 
 on:
   workflow_run:
