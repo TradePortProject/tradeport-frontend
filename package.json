@@ -21,7 +21,7 @@
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
     "@react-oauth/google": "^0.12.1",
-    "@reduxjs/toolkit": "^2.6.1",
+    "@reduxjs/toolkit": "^2.7.0",
     "axios": "^1.8.4",
     "cors": "^2.8.5",
     "express": "^4.21.2",
