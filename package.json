@@ -29,7 +29,7 @@
     "multer": "^1.4.5-lts.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-hook-form": "^7.56.0",
+    "react-hook-form": "^7.56.1",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.5.2",
     "redux": "^5.0.1",
