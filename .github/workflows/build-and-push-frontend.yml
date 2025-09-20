@@ -1,0 +1,101 @@
+name: Build and Push Frontend to ECR
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'services/frontend/**'
+      - '.github/workflows/build-and-push-frontend.yml'
+  workflow_dispatch:
+    inputs:
+      force_cleanup:
+        description: 'Force ECR cleanup even if no changes'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push Frontend image to ECR
+        run: |
+          IMAGE_TAG=${GITHUB_SHA}
+          ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY=${{ secrets.ECR_REPO_FRONTEND }}
+
+          echo "Building Frontend image..."
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile .
+
+          echo "Pushing Frontend image..."
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+          echo "Pushed: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: Clean up old ECR images (keep only last 2)
+        if: success() && (github.event.inputs.force_cleanup == 'true' || github.event_name == 'push')
+        run: |
+          ECR_REPOSITORY=${{ secrets.ECR_REPO_FRONTEND }}
+          
+          echo "Cleaning up old images in $ECR_REPOSITORY..."
+          
+          # Count total images first
+          TOTAL_IMAGES=$(aws ecr describe-images \
+            --repository-name $ECR_REPOSITORY \
+            --query 'length(imageDetails)' \
+            --output text)
+          
+          echo "Total images in repository: $TOTAL_IMAGES"
+          
+          # Only cleanup if we have more than 2 images
+          if [ "$TOTAL_IMAGES" -gt 2 ]; then
+            echo "Repository has $TOTAL_IMAGES images, cleaning up old ones..."
+            
+            # Get all image digests sorted by date (newest first), skip first 2 (keep them)
+            IMAGES_TO_DELETE=$(aws ecr describe-images \
+              --repository-name $ECR_REPOSITORY \
+              --query 'sort_by(imageDetails,& imagePushedAt)[:-2].[imageDigest]' \
+              --output text)
+            
+            if [ ! -z "$IMAGES_TO_DELETE" ] && [ "$IMAGES_TO_DELETE" != "None" ]; then
+              echo "Deleting old images..."
+              echo "$IMAGES_TO_DELETE" | while read -r digest; do
+                if [ ! -z "$digest" ]; then
+                  aws ecr batch-delete-image \
+                    --repository-name $ECR_REPOSITORY \
+                    --image-ids imageDigest=$digest
+                  echo "Deleted image: ${digest:0:12}..."
+                fi
+              done
+              echo "Cleanup completed!"
+            else
+              echo "No images to delete"
+            fi
+          else
+            echo "Only $TOTAL_IMAGES images found, no cleanup needed"
+          fi
+
+      - name: Show remaining images
+        run: |
+          ECR_REPOSITORY=${{ secrets.ECR_REPO_FRONTEND }}
+          echo "Remaining images in $ECR_REPOSITORY:"
+          aws ecr describe-images \
+            --repository-name $ECR_REPOSITORY \
+            --query 'imageDetails[*].[imageTags[0],imageSizeInBytes,imagePushedAt]' \
+            --output table
