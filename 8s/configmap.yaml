@@ -1,0 +1,32 @@
+# tradeport-frontend/k8s/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tradeport-frontend-config
+  namespace: ui-namespace
+  labels:
+    app: tradeport-frontend
+    component: frontend
+    service: ui
+data:
+  # Application Configuration
+  app_port: "3000"
+  
+  # API Base URL (through ALB)
+  api_base_url: "https://your-alb-url.amazonaws.com/api"
+  
+  # Backend Service URLs (internal cluster communication)
+  # All backend services are now in backend-namespace
+  identity_service_url: "http://tradeport-identity-service.backend-namespace.svc.cluster.local"
+  product_service_url: "http://tradeport-product-service.backend-namespace.svc.cluster.local"
+  order_service_url: "http://tradeport-order-service.backend-namespace.svc.cluster.local"
+  notification_service_url: "http://tradeport-notification-service.backend-namespace.svc.cluster.local"
+  dbwriter_service_url: "http://tradeport-dbwriter-service.backend-namespace.svc.cluster.local"
+  
+  # Frontend Specific Configuration
+  react_app_title: "TradePort Application"
+  react_app_version: "1.0.0"
+  
+  # Environment specific settings
+  log_level: "info"
+  max_request_timeout: "30000"
