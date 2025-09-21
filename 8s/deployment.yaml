@@ -1,0 +1,111 @@
+# tradeport-frontend/k8s/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tradeport-frontend
+  namespace: ui-namespace
+  labels:
+    app: tradeport-frontend
+    component: frontend
+    service: ui
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tradeport-frontend
+  template:
+    metadata:
+      labels:
+        app: tradeport-frontend
+        component: frontend
+        service: ui
+        version: v1
+    spec:
+      # No specific service account needed for basic frontend
+      # serviceAccountName: tradeport-frontend-sa 
+      containers:
+      - name: frontend
+        image: 593793038797.dkr.ecr.ap-southeast-1.amazonaws.com/tradeport-frontend:latest
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: tradeport-frontend-config
+              key: app_port
+        - name: REACT_APP_API_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: tradeport-frontend-config
+              key: api_base_url
+        - name: REACT_APP_IDENTITY_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: tradeport-frontend-config
+              key: identity_service_url
+        - name: REACT_APP_PRODUCT_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: tradeport-frontend-config
+              key: product_service_url
+        - name: REACT_APP_ORDER_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: tradeport-frontend-config
+              key: order_service_url
+        - name: REACT_APP_NOTIFICATION_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: tradeport-frontend-config
+              key: notification_service_url
+        - name: REACT_APP_TITLE
+          valueFrom:
+            configMapKeyRef:
+              name: tradeport-frontend-config
+              key: react_app_title
+        - name: REACT_APP_VERSION
+          valueFrom:
+            configMapKeyRef:
+              name: tradeport-frontend-config
+              key: react_app_version
+        # Fargate-optimized resource requests and limits
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        # Security context for non-root execution
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false
+      # Pod security context
+      securityContext:
+        fsGroup: 1000
+      # Restart policy
+      restartPolicy: Always
