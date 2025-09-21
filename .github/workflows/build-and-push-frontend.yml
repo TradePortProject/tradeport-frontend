@@ -57,7 +57,7 @@ jobs:
 
           echo "✅ Pushed: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           
-          Option B: If you want both tags, uncomment below:
+          #Option B: If you want both tags, uncomment below:
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
           echo "✅ Also pushed: $ECR_REGISTRY/$ECR_REPOSITORY:latest"
